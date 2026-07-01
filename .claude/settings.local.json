@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:www.ccc-wa.org)"
+      "WebFetch(domain:www.ccc-wa.org)",
+      "WebSearch"
     ]
   }
 }
