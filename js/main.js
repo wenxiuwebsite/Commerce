@@ -494,3 +494,64 @@ if (contactForm) {
     e.target.reset();
   });
 }
+
+/* ============================================================
+   CMS DATA RENDERER — reads window.CCCWA_DATA from content/data.js
+   ============================================================ */
+(function renderCMSContent() {
+  if (typeof window.CCCWA_DATA === 'undefined') return;
+  const d = window.CCCWA_DATA;
+  const lang = currentLang;
+  const t = lang === 'zh-cn';
+
+  // ---- NEWS PAGE (.news-grid) ----
+  const newsGrid = document.querySelector('.news-grid');
+  if (newsGrid && d.news && d.news.length) {
+    newsGrid.innerHTML = d.news.map((n, i) => {
+      const title   = t ? n.title_zh   : n.title_en;
+      const excerpt = t ? n.excerpt_zh : n.excerpt_en;
+      const date    = t ? n.date_zh    : n.date_en;
+      const cat     = t ? n.category_zh : n.category_en;
+      const featured = i === 0;
+      const imgHtml = n.image
+        ? `<img src="${n.image}" alt="${title}" class="${featured ? 'news-img' : 'news-img-thumb'}">`
+        : '';
+      const readMore = n.article_page
+        ? `<a href="${n.article_page}" class="read-more">${t ? '阅读更多' : 'Read More'}</a>`
+        : '';
+      return `<div class="news-card${featured ? ' featured' : ''}">
+        ${imgHtml}
+        <div class="news-content"${!n.image ? ' style="padding-top:22px"' : ''}>
+          <span class="news-category">${cat}</span>
+          <h3>${title}</h3>
+          <p>${excerpt}</p>
+          <div class="news-meta"><span>${date}</span>${readMore}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ---- EVENTS PAGE (.events-list) ----
+  const eventsList = document.querySelector('.events-list');
+  if (eventsList && d.events && d.events.length) {
+    const pin = `<svg class="icon-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+    eventsList.innerHTML = d.events.map(ev => {
+      const title    = t ? ev.title_zh    : ev.title_en;
+      const location = t ? ev.location_zh : ev.location_en;
+      const desc     = t ? ev.desc_zh     : ev.desc_en;
+      const reg      = t ? '报名' : 'Register';
+      return `<div class="event-item">
+        <div class="event-date">
+          <span class="event-month">${ev.month}</span>
+          <span class="event-day">${ev.day}</span>
+        </div>
+        <div class="event-info">
+          <h4>${title}</h4>
+          <p class="event-meta">${pin}<span>${location}</span><span class="event-time">${ev.time}</span></p>
+          <p>${desc}</p>
+        </div>
+        <a href="${ev.register_url || 'contact.html'}" class="btn btn-sm">${reg}</a>
+      </div>`;
+    }).join('');
+  }
+})();

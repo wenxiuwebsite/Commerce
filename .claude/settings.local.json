@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.ccc-wa.org)",
-      "WebSearch"
+      "WebSearch",
+      "PowerShell(New-Item *)"
     ]
   }
 }

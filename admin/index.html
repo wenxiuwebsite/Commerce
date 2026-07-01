@@ -1,12 +1,905 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CCC-WA Content Manager</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCCWA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #023020; --accent-h: #011a12; --accent-lt: rgba(2,48,32,0.08);
+      --bg: #f4f6f8; --card: #ffffff; --border: #e2e8f0;
+      --text: #1a2332; --muted: #8a97a8; --sub: #5a6a7a;
+      --danger: #dc2626; --success: #16a34a;
+      --radius: 10px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    body { font-family: 'Inter', 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+    /* ---- LOGIN ---- */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--accent-h) 0%, var(--accent) 100%);
+    }
+    .login-box {
+      background: white; border-radius: 16px; padding: 48px 44px; width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .login-logo { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+    .login-sub { font-size: 12px; color: var(--muted); margin-bottom: 36px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .login-label { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 8px; }
+    .login-input {
+      width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: var(--accent); }
+    .login-btn {
+      width: 100%; margin-top: 20px; padding: 13px; background: var(--accent); color: white;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .login-btn:hover { background: var(--accent-h); }
+    .login-err { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ---- LAYOUT ---- */
+    #app { display: none; min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px; background: var(--accent); color: white; display: flex;
+      flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10;
+    }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .sidebar-brand-name { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; }
+    .sidebar-brand-sub { font-size: 10px; opacity: 0.55; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .sidebar-nav { flex: 1; padding: 16px 10px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
+      opacity: 0.7; transition: all 0.15s; margin-bottom: 2px; user-select: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+    .nav-item.active { background: rgba(255,255,255,0.15); opacity: 1; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-foot { padding: 16px 10px; border-top: 1px solid rgba(255,255,255,0.12); }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+      cursor: pointer; font-size: 13px; font-weight: 500; opacity: 0.6; transition: all 0.15s;
+      background: none; border: none; color: white; width: 100%;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+
+    /* Main content */
+    .main { margin-left: 220px; flex: 1; }
+    .topbar {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 0 32px; height: 56px; display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 5;
+    }
+    .topbar-title { font-size: 16px; font-weight: 700; flex: 1; }
+    .btn-primary {
+      background: var(--accent); color: white; border: none; padding: 8px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent-h); }
+    .btn-outline {
+      background: none; border: 1.5px solid var(--border); color: var(--text); padding: 8px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger {
+      background: none; border: none; color: var(--danger); font-size: 12px;
+      font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s;
+    }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-edit {
+      background: none; border: none; color: var(--accent); font-size: 12px;
+      font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s;
+    }
+    .btn-edit:hover { background: var(--accent-lt); }
+
+    .panel-body { padding: 32px; }
+
+    /* Cards / table */
+    .content-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
+         letter-spacing: 0.06em; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg); }
+    .tag {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; background: var(--accent-lt); color: var(--accent);
+    }
+    .tag-event { background: #eff6ff; color: #2563eb; }
+    .tag-community { background: #f0fdf4; color: #16a34a; }
+    .thumb { width: 44px; height: 32px; object-fit: cover; border-radius: 4px; background: var(--bg); }
+    .no-img { width: 44px; height: 32px; border-radius: 4px; background: var(--bg); display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .event-badge {
+      display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 42px; height: 42px; border-radius: 8px; background: var(--accent-lt); color: var(--accent);
+    }
+    .event-badge-m { font-size: 9px; font-weight: 700; text-transform: uppercase; }
+    .event-badge-d { font-size: 16px; font-weight: 800; line-height: 1; }
+    .cell-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .cell-sub { font-size: 12px; color: var(--muted); }
+
+    /* Publish panel */
+    .publish-steps { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+    .step {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 24px; display: flex; align-items: flex-start; gap: 16px;
+    }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white;
+      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .step-desc { font-size: 13px; color: var(--sub); line-height: 1.6; }
+    code { background: var(--bg); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
+    .export-btn {
+      margin-top: 28px; background: var(--accent); color: white; border: none;
+      padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: background 0.15s; display: flex; align-items: center; gap: 10px;
+    }
+    .export-btn:hover { background: var(--accent-h); }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100;
+      display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto;
+    }
+    .modal-box {
+      background: white; border-radius: 14px; width: 680px; max-width: 100%;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    }
+    .modal-head {
+      padding: 20px 28px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-head h3 { font-size: 16px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1; padding: 0 4px; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 24px 28px; }
+    .modal-foot {
+      padding: 16px 28px; border-top: 1px solid var(--border);
+      display: flex; gap: 12px; justify-content: flex-end;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .form-input, .form-select, .form-textarea {
+      padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s;
+      background: white; color: var(--text);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-section { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--accent-lt); }
+    .form-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .check-row { display: flex; align-items: center; gap: 8px; }
+    .check-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .check-row label { font-size: 13px; font-weight: 500; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #1a2332; color: white;
+      padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 999; transform: translateY(80px);
+      transition: transform 0.3s; pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); }
+
+    /* Dashboard */
+    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    .dash-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 22px 24px; display: flex; align-items: center; gap: 16px;
+    }
+    .dash-icon { font-size: 28px; }
+    .dash-num { font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; }
+    .dash-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  </style>
 </head>
 <body>
-  <!-- Decap CMS loads the full admin UI from CDN -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">CCCWA</div>
+    <div class="login-sub">Content Management System</div>
+    <label class="login-label" for="pw">Password</label>
+    <input class="login-input" type="password" id="pw" placeholder="Enter admin password" autofocus>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-name">CCCWA Admin</div>
+        <div class="sidebar-brand-sub">Content Manager</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-panel="dashboard" onclick="showPanel('dashboard', this)">
+          <span class="nav-icon">⊞</span> Dashboard
+        </div>
+        <div class="nav-item" data-panel="news" onclick="showPanel('news', this)">
+          <span class="nav-icon">📰</span> News Articles
+        </div>
+        <div class="nav-item" data-panel="events" onclick="showPanel('events', this)">
+          <span class="nav-icon">📅</span> Events
+        </div>
+        <div class="nav-item" data-panel="publish" onclick="showPanel('publish', this)">
+          <span class="nav-icon">🚀</span> Publish
+        </div>
+      </nav>
+      <div class="sidebar-foot">
+        <button class="logout-btn" onclick="doLogout()">
+          <span class="nav-icon">⟵</span> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div id="panel-dashboard">
+        <div class="topbar"><span class="topbar-title">Dashboard</span></div>
+        <div class="panel-body">
+          <div class="dash-grid">
+            <div class="dash-card">
+              <span class="dash-icon">📰</span>
+              <div>
+                <div class="dash-num" id="stat-news">0</div>
+                <div class="dash-lbl">News Articles</div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <span class="dash-icon">📅</span>
+              <div>
+                <div class="dash-num" id="stat-events">0</div>
+                <div class="dash-lbl">Upcoming Events</div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <span class="dash-icon">✏️</span>
+              <div>
+                <div class="dash-num" id="stat-unsaved" style="color:var(--muted)">—</div>
+                <div class="dash-lbl">Unsaved Changes</div>
+              </div>
+            </div>
+          </div>
+          <div class="content-card">
+            <table>
+              <thead><tr><th>Recent Articles</th><th>Category</th><th>Date</th></tr></thead>
+              <tbody id="dash-news-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEWS -->
+      <div id="panel-news" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title">News Articles</span>
+          <button class="btn-primary" onclick="openNewsModal()">+ New Article</button>
+        </div>
+        <div class="panel-body">
+          <div class="content-card">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:44px"></th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Article Page</th>
+                  <th style="width:120px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="news-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVENTS -->
+      <div id="panel-events" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title">Upcoming Events</span>
+          <button class="btn-primary" onclick="openEventModal()">+ New Event</button>
+        </div>
+        <div class="panel-body">
+          <div class="content-card">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:60px">Date</th>
+                  <th>Event</th>
+                  <th>Location</th>
+                  <th>Time</th>
+                  <th style="width:120px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="events-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUBLISH -->
+      <div id="panel-publish" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title">Publish Changes</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--sub);line-height:1.7;max-width:560px;">
+            After making changes in the News and Events panels, export a <code>data.js</code> file and place it in the <code>content/</code> folder of your site. The site will automatically use it to display your updated content.
+          </p>
+          <div class="publish-steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div>
+                <div class="step-title">Export your content</div>
+                <div class="step-desc">Click the button below to download <code>data.js</code>. This file contains all your news and events.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div>
+                <div class="step-title">Replace the content file</div>
+                <div class="step-desc">Place the downloaded <code>data.js</code> into the <code>content/</code> folder of your website, replacing the existing file.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div>
+                <div class="step-title">Deploy to Netlify</div>
+                <div class="step-desc">If hosting on Netlify, upload or push the updated <code>content/data.js</code> to your repository. Netlify will automatically publish the changes. For local testing, just refresh the page in your browser.</div>
+              </div>
+            </div>
+          </div>
+          <button class="export-btn" onclick="exportData()">
+            <span>⬇</span> Download data.js
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div>
+</div><!-- /app -->
+
+<!-- NEWS MODAL -->
+<div class="modal-backdrop" id="news-modal" style="display:none" onclick="if(event.target===this)closeNewsModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="news-modal-title">Add News Article</h3>
+      <button class="modal-close" onclick="closeNewsModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="n-id">
+      <div class="form-section">English Content</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Title (English)</label>
+          <input class="form-input" id="n-title-en" placeholder="Article title in English">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="n-category">
+            <option>Announcement</option>
+            <option>Community</option>
+            <option>Event</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Excerpt (English)</label>
+          <textarea class="form-textarea" id="n-excerpt-en" placeholder="Short description for the news card..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Chinese Content (中文内容)</div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Title (中文)</label>
+          <input class="form-input" id="n-title-zh" placeholder="文章标题">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Excerpt (中文摘要)</label>
+          <textarea class="form-textarea" id="n-excerpt-zh" placeholder="简短描述..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Details</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date (English)</label>
+          <input class="form-input" id="n-date-en" placeholder="e.g. August 24, 2020">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date (中文)</label>
+          <input class="form-input" id="n-date-zh" placeholder="e.g. 2020年8月24日">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Image (relative path)</label>
+          <input class="form-input" id="n-image" placeholder="e.g. images/news-1.png">
+          <span class="form-hint">Leave blank if no image</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Article Page (filename)</label>
+          <input class="form-input" id="n-article-page" placeholder="e.g. article-my-article.html">
+          <span class="form-hint">Leave blank if no separate page yet</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeNewsModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveNews()">Save Article</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="modal-backdrop" id="event-modal" style="display:none" onclick="if(event.target===this)closeEventModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="event-modal-title">Add Event</h3>
+      <button class="modal-close" onclick="closeEventModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="e-id">
+      <div class="form-section">Event Date</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Month Label</label>
+          <input class="form-input" id="e-month" placeholder="e.g. JUL" maxlength="3" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Day Number</label>
+          <input class="form-input" id="e-day" placeholder="e.g. 12" type="text">
+        </div>
+      </div>
+
+      <div class="form-section">English Content</div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Title (English)</label>
+          <input class="form-input" id="e-title-en" placeholder="Event name in English">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Location (English)</label>
+          <input class="form-input" id="e-location-en" placeholder="Venue name, City">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time</label>
+          <input class="form-input" id="e-time" placeholder="e.g. 6:00 PM – 10:00 PM">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Description (English)</label>
+          <textarea class="form-textarea" id="e-desc-en" placeholder="Event description..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Chinese Content (中文内容)</div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Title (中文)</label>
+          <input class="form-input" id="e-title-zh" placeholder="活动名称">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Location (中文地点)</label>
+          <input class="form-input" id="e-location-zh" placeholder="场馆名称，城市">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Description (中文简介)</label>
+          <textarea class="form-textarea" id="e-desc-zh" placeholder="活动介绍..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Registration</div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label">Register URL</label>
+          <input class="form-input" id="e-register-url" placeholder="e.g. contact.html or https://...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeEventModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   DATA
+================================================================ */
+const PASS = 'cccwa2024'; // Change this password before going live
+const STORAGE_KEY = 'cccwa_cms_data';
+const DIRTY_KEY = 'cccwa_cms_dirty';
+
+// Default data — mirrors content/data.js
+const DEFAULT_DATA = {
+  news: [
+    { id:'immigration-assets', category_en:'Announcement', category_zh:'公告',
+      title_en:'CCCWA COVID-19 Weekly Star — Immigration Asset Disposal',
+      title_zh:'CCCWA抗击疫情·每周一星 — 移民资产处置问题',
+      date_en:'August 24, 2020', date_zh:'2020年8月24日',
+      excerpt_en:'Attorney Cai discusses immigration asset management challenges for Chinese families settling in the US, including remote notarization, inheritance, real estate disposal, and cross-border fund transfers during the pandemic.',
+      excerpt_zh:'蔡律师讨论华裔家庭在海外安家落户过程中的资产管理挑战，包括远程公证、继承、房产处置和跨境汇款。',
+      image:'images/news-1.png', article_page:'article-immigration-assets.html' },
+    { id:'covid-community', category_en:'Community', category_zh:'社区',
+      title_en:'CCCWA Foundation Unites Community Against COVID-19',
+      title_zh:'CCCWA一心抗疫，凝聚社区力量',
+      date_en:'August 20, 2020', date_zh:'2020年8月20日',
+      excerpt_en:'CCCWA Foundation coordinated with local businesses and volunteers across Greater Seattle to support communities affected by COVID-19.',
+      excerpt_zh:'CCCWA资助与西雅图地区各个企业和志愿者协调配合，支持受COVID-19影响的社区。',
+      image:'images/news-2.png', article_page:'article-covid-community.html' },
+    { id:'new-year-2018', category_en:'Event', category_zh:'活动',
+      title_en:'2018 Chinese New Year Gala Highlights',
+      title_zh:'2018年春节晚会活动回顾',
+      date_en:'2018', date_zh:'2018年',
+      excerpt_en:'Hundreds of members and guests gathered to celebrate the Chinese New Year with performances, a gala banquet, and award presentations.',
+      excerpt_zh:'数百位会员和宾客欢聚一堂，共贺春节，举行文艺表演、晚会大餐和颁奖典礼。',
+      image:'images/news-butterfly.jpg', article_page:'article-new-year-2018.html' },
+    { id:'dou-lao-fang', category_en:'Community', category_zh:'社区',
+      title_en:'Dou Lao Fang Restaurant: One Pot, One World',
+      title_zh:'抗击疫情·爱心餐厅系列：豆捞坊——一锅一世界',
+      date_en:'2020', date_zh:'2020年',
+      excerpt_en:'Feature on Dou Lao Fang restaurant joining CCCWA\'s COVID charity meal campaign — supporting the community one meal at a time.',
+      excerpt_zh:'豆捞坊餐厅加入CCCWA爱心午餐活动，用一锅汤底送出爱心，支援社区。',
+      image:'images/news-3.jpg', article_page:'article-dou-lao-fang.html' },
+    { id:'meal-drive', category_en:'Announcement', category_zh:'公告',
+      title_en:'CCCWA COVID Charity Meal Drive — Latest Update',
+      title_zh:'CCCWA抗击疫情爱心午餐募捐活动最新动态',
+      date_en:'2020', date_zh:'2020年',
+      excerpt_en:'Latest update on CCCWA\'s charity meal fundraising effort, supporting local restaurants and vulnerable residents affected by COVID-19.',
+      excerpt_zh:'最新动态：CCCWA爱心募捐活动，支持受疫情影响的当地餐厅和弱势居民。',
+      image:'images/news-4.jpg', article_page:'article-meal-drive.html' },
+    { id:'hou-bin', category_en:'Event', category_zh:'活动',
+      title_en:'Paralympic Ambassador Hou Bin Keynote: Promoting the Olympic Spirit',
+      title_zh:'北京冬奥会形象大使侯斌先生主题演讲：弘扬奥运精神',
+      date_en:'July 2018', date_zh:'2018年7月',
+      excerpt_en:'CCCWA hosted Paralympic ambassador Hou Bin for a keynote speech on the Olympic spirit and international cooperation.',
+      excerpt_zh:'CCCWA主办残奥会形象大使侯斌先生主题演讲，分享奥运精神与国际合作理念。',
+      image:'', article_page:'article-hou-bin.html' },
+    { id:'trade-forum-2017', category_en:'Community', category_zh:'社区',
+      title_en:'China Province & Washington State Trade and Investment Cooperation Forum',
+      title_zh:'中国省与华盛顿州贸易投资合作论坛',
+      date_en:'July 26, 2017', date_zh:'2017年7月26日',
+      excerpt_en:'CCCWA hosted a major forum connecting Chinese provincial delegations with Washington State business and government representatives.',
+      excerpt_zh:'CCCWA主办中美贸易投资合作论坛，搭建中国省级代表团与华盛顿州政商界之间的交流平台。',
+      image:'images/news-5.png', article_page:'article-trade-forum-2017.html' },
+    { id:'hk-anniversary', category_en:'Announcement', category_zh:'公告',
+      title_en:'CCCWA Celebrates 20th Anniversary of Hong Kong SAR',
+      title_zh:'华盛顿州中国总商会庆祝香港特别行政区成立20周年',
+      date_en:'July 2017', date_zh:'2017年7月',
+      excerpt_en:'CCCWA held a celebration marking the 20th anniversary of the establishment of the Hong Kong Special Administrative Region.',
+      excerpt_zh:'CCCWA举办庆典活动，热烈庆祝香港特别行政区回归祖国20周年。',
+      image:'', article_page:'article-hk-anniversary.html' }
+  ],
+  events: [
+    { id:'e1', month:'JUL', day:'12',
+      title_en:'Annual Business Gala & Awards Dinner', title_zh:'年度商业晚会及颁奖典礼',
+      location_en:'Westin Seattle Hotel, Seattle', location_zh:'西雅图威斯汀酒店',
+      time:'6:00 PM – 10:00 PM',
+      desc_en:'Join us for our flagship annual dinner celebrating CCCWA members and recognizing outstanding contributions to the Washington business community.',
+      desc_zh:'诚邀您出席年度旗舰晚会，共同表彰CCCWA会员中的杰出贡献。',
+      register_url:'contact.html' },
+    { id:'e2', month:'JUL', day:'24',
+      title_en:'US-China Trade Forum 2026', title_zh:'2026年中美贸易论坛',
+      location_en:'Washington State Convention Center', location_zh:'华盛顿州展览中心',
+      time:'9:00 AM – 5:00 PM',
+      desc_en:'A full-day forum featuring keynote speakers, panel discussions, and networking opportunities focused on bilateral trade opportunities.',
+      desc_zh:'全天论坛，包括主题演讲、圆桌讨论和交流合作机会。',
+      register_url:'contact.html' },
+    { id:'e3', month:'AUG', day:'9',
+      title_en:'Member Networking Mixer', title_zh:'会员交流活动',
+      location_en:'Bellevue, WA', location_zh:'华盛顿州贝尔维尤',
+      time:'6:30 PM – 9:00 PM',
+      desc_en:'A casual networking event for CCCWA members and prospective members. Light refreshments provided. RSVP required.',
+      desc_zh:'为CCCWA会员及潜在会员举办的轻松交流活动，提供轻餐，需提前报名。',
+      register_url:'contact.html' }
+  ]
+};
+
+let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let dirty = false;
+let editingNewsId = null;
+let editingEventId = null;
+
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) { try { data = JSON.parse(saved); } catch(e) {} }
+  dirty = localStorage.getItem(DIRTY_KEY) === 'true';
+}
+
+function persistData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  dirty = true;
+  localStorage.setItem(DIRTY_KEY, 'true');
+  updateDirtyIndicator();
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+/* ================================================================
+   AUTH
+================================================================ */
+function doLogin() {
+  const pw = document.getElementById('pw').value;
+  if (pw === PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadData();
+    renderAll();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw').focus();
+  }
+}
+document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw').value = '';
+}
+
+/* ================================================================
+   NAVIGATION
+================================================================ */
+function showPanel(name, el) {
+  document.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
+  document.getElementById('panel-' + name).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (name === 'news') renderNewsTable();
+  if (name === 'events') renderEventsTable();
+  if (name === 'dashboard') renderDashboard();
+}
+
+/* ================================================================
+   RENDER
+================================================================ */
+function renderAll() { renderDashboard(); renderNewsTable(); renderEventsTable(); updateDirtyIndicator(); }
+
+function updateDirtyIndicator() {
+  const el = document.getElementById('stat-unsaved');
+  el.textContent = dirty ? 'Yes — export to publish' : 'None';
+  el.style.color = dirty ? 'var(--danger)' : 'var(--muted)';
+  el.style.fontSize = dirty ? '13px' : '28px';
+}
+
+function catTag(cat) {
+  const cls = cat === 'Event' ? 'tag-event' : cat === 'Community' ? 'tag-community' : '';
+  return `<span class="tag ${cls}">${cat}</span>`;
+}
+
+function renderDashboard() {
+  document.getElementById('stat-news').textContent = data.news.length;
+  document.getElementById('stat-events').textContent = data.events.length;
+  const tbody = document.getElementById('dash-news-rows');
+  tbody.innerHTML = data.news.slice(0,5).map(n => `
+    <tr>
+      <td><div class="cell-title">${esc(n.title_en)}</div><div class="cell-sub">${esc(n.title_zh)}</div></td>
+      <td>${catTag(n.category_en)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(n.date_en)}</td>
+    </tr>`).join('');
+  updateDirtyIndicator();
+}
+
+function renderNewsTable() {
+  const tbody = document.getElementById('news-rows');
+  if (!data.news.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No articles yet. Click + New Article to add one.</td></tr>'; return; }
+  tbody.innerHTML = data.news.map((n,i) => `
+    <tr>
+      <td>${n.image ? `<img src="../${esc(n.image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">📄</div>`}</td>
+      <td>
+        <div class="cell-title">${esc(n.title_en)}</div>
+        <div class="cell-sub">${esc(n.title_zh)}</div>
+      </td>
+      <td>${catTag(n.category_en)}</td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date_en)}</td>
+      <td style="font-size:12px;color:var(--muted)">${n.article_page ? esc(n.article_page) : '—'}</td>
+      <td>
+        <button class="btn-edit" onclick="openNewsModal(${i})">Edit</button>
+        <button class="btn-danger" onclick="deleteNews(${i})">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderEventsTable() {
+  const tbody = document.getElementById('events-rows');
+  if (!data.events.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No events yet. Click + New Event to add one.</td></tr>'; return; }
+  tbody.innerHTML = data.events.map((e,i) => `
+    <tr>
+      <td><div class="event-badge"><span class="event-badge-m">${esc(e.month)}</span><span class="event-badge-d">${esc(e.day)}</span></div></td>
+      <td>
+        <div class="cell-title">${esc(e.title_en)}</div>
+        <div class="cell-sub">${esc(e.title_zh)}</div>
+      </td>
+      <td style="font-size:12px;color:var(--muted)">${esc(e.location_en)}</td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${esc(e.time)}</td>
+      <td>
+        <button class="btn-edit" onclick="openEventModal(${i})">Edit</button>
+        <button class="btn-danger" onclick="deleteEvent(${i})">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ================================================================
+   NEWS CRUD
+================================================================ */
+function openNewsModal(idx) {
+  editingNewsId = (idx !== undefined) ? idx : null;
+  document.getElementById('news-modal-title').textContent = idx !== undefined ? 'Edit Article' : 'Add News Article';
+  const n = idx !== undefined ? data.news[idx] : {};
+  document.getElementById('n-id').value = n.id || uid();
+  document.getElementById('n-title-en').value = n.title_en || '';
+  document.getElementById('n-title-zh').value = n.title_zh || '';
+  document.getElementById('n-category').value = n.category_en || 'Announcement';
+  document.getElementById('n-excerpt-en').value = n.excerpt_en || '';
+  document.getElementById('n-excerpt-zh').value = n.excerpt_zh || '';
+  document.getElementById('n-date-en').value = n.date_en || '';
+  document.getElementById('n-date-zh').value = n.date_zh || '';
+  document.getElementById('n-image').value = n.image || '';
+  document.getElementById('n-article-page').value = n.article_page || '';
+  document.getElementById('news-modal').style.display = 'flex';
+}
+
+function closeNewsModal() { document.getElementById('news-modal').style.display = 'none'; }
+
+function saveNews() {
+  const cat = document.getElementById('n-category').value;
+  const catZh = { 'Announcement':'公告', 'Community':'社区', 'Event':'活动' }[cat] || cat;
+  const item = {
+    id: document.getElementById('n-id').value || uid(),
+    category_en: cat, category_zh: catZh,
+    title_en: document.getElementById('n-title-en').value.trim(),
+    title_zh: document.getElementById('n-title-zh').value.trim(),
+    date_en: document.getElementById('n-date-en').value.trim(),
+    date_zh: document.getElementById('n-date-zh').value.trim(),
+    excerpt_en: document.getElementById('n-excerpt-en').value.trim(),
+    excerpt_zh: document.getElementById('n-excerpt-zh').value.trim(),
+    image: document.getElementById('n-image').value.trim(),
+    article_page: document.getElementById('n-article-page').value.trim()
+  };
+  if (!item.title_en) { alert('Please enter an English title.'); return; }
+  if (editingNewsId !== null) data.news[editingNewsId] = item;
+  else data.news.unshift(item);
+  persistData();
+  renderNewsTable();
+  renderDashboard();
+  closeNewsModal();
+  toast('Article saved');
+}
+
+function deleteNews(idx) {
+  if (!confirm('Delete this article?')) return;
+  data.news.splice(idx, 1);
+  persistData();
+  renderNewsTable();
+  renderDashboard();
+  toast('Article deleted');
+}
+
+/* ================================================================
+   EVENTS CRUD
+================================================================ */
+function openEventModal(idx) {
+  editingEventId = (idx !== undefined) ? idx : null;
+  document.getElementById('event-modal-title').textContent = idx !== undefined ? 'Edit Event' : 'Add Event';
+  const e = idx !== undefined ? data.events[idx] : {};
+  document.getElementById('e-id').value = e.id || uid();
+  document.getElementById('e-month').value = e.month || '';
+  document.getElementById('e-day').value = e.day || '';
+  document.getElementById('e-title-en').value = e.title_en || '';
+  document.getElementById('e-title-zh').value = e.title_zh || '';
+  document.getElementById('e-location-en').value = e.location_en || '';
+  document.getElementById('e-location-zh').value = e.location_zh || '';
+  document.getElementById('e-time').value = e.time || '';
+  document.getElementById('e-desc-en').value = e.desc_en || '';
+  document.getElementById('e-desc-zh').value = e.desc_zh || '';
+  document.getElementById('e-register-url').value = e.register_url || 'contact.html';
+  document.getElementById('event-modal').style.display = 'flex';
+}
+
+function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
+
+function saveEvent() {
+  const item = {
+    id: document.getElementById('e-id').value || uid(),
+    month: document.getElementById('e-month').value.trim().toUpperCase(),
+    day: document.getElementById('e-day').value.trim(),
+    title_en: document.getElementById('e-title-en').value.trim(),
+    title_zh: document.getElementById('e-title-zh').value.trim(),
+    location_en: document.getElementById('e-location-en').value.trim(),
+    location_zh: document.getElementById('e-location-zh').value.trim(),
+    time: document.getElementById('e-time').value.trim(),
+    desc_en: document.getElementById('e-desc-en').value.trim(),
+    desc_zh: document.getElementById('e-desc-zh').value.trim(),
+    register_url: document.getElementById('e-register-url').value.trim() || 'contact.html'
+  };
+  if (!item.title_en) { alert('Please enter an event title.'); return; }
+  if (editingEventId !== null) data.events[editingEventId] = item;
+  else data.events.push(item);
+  persistData();
+  renderEventsTable();
+  renderDashboard();
+  closeEventModal();
+  toast('Event saved');
+}
+
+function deleteEvent(idx) {
+  if (!confirm('Delete this event?')) return;
+  data.events.splice(idx, 1);
+  persistData();
+  renderEventsTable();
+  renderDashboard();
+  toast('Event deleted');
+}
+
+/* ================================================================
+   EXPORT
+================================================================ */
+function exportData() {
+  const js = `/* CCCWA Site Content — generated by Admin CMS on ${new Date().toLocaleString()}. Edit via admin/index.html */\nwindow.CCCWA_DATA = ${JSON.stringify(data, null, 2)};\n`;
+  const blob = new Blob([js], { type: 'application/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'data.js'; a.click();
+  URL.revokeObjectURL(url);
+  dirty = false;
+  localStorage.setItem(DIRTY_KEY, 'false');
+  updateDirtyIndicator();
+  toast('data.js downloaded — place it in the content/ folder');
+}
+
+/* ================================================================
+   TOAST
+================================================================ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
 </body>
 </html>
