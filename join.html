@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Us — CCCWA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="join">
+<div id="nav-ph"></div>
+
+<div class="page-hero">
+  <div class="page-hero-content">
+    <h1 data-i18n="join.hero_title">Join CCCWA</h1>
+    <p data-i18n="join.hero_sub">Become part of Washington State's premier Chinese business network</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="join-grid">
+      <div class="join-info">
+        <h3 data-i18n="join.why_title">Why Join CCCWA?</h3>
+        <p data-i18n="join.why_p1">Membership in the Chinese Chamber of Commerce in Washington State connects you with a growing network of entrepreneurs, investors, and business leaders bridging the US and China.</p>
+        <p data-i18n="join.why_p2">As a member you receive access to exclusive events, bilingual business resources, legal and consulting referrals, and opportunities for cross-border trade partnerships.</p>
+
+        <div class="membership-tiers">
+          <div class="tier-card">
+            <div class="tier-dot"></div>
+            <div>
+              <strong data-i18n="join.tier1_name">Corporate Membership</strong>
+              <span data-i18n="join.tier1_desc">For registered businesses — full access to all CCCWA programs, events, and directory listing</span>
+            </div>
+          </div>
+          <div class="tier-card">
+            <div class="tier-dot"></div>
+            <div>
+              <strong data-i18n="join.tier2_name">Individual Membership</strong>
+              <span data-i18n="join.tier2_desc">For entrepreneurs and professionals — networking access and event invitations</span>
+            </div>
+          </div>
+          <div class="tier-card">
+            <div class="tier-dot"></div>
+            <div>
+              <strong data-i18n="join.tier3_name">Associate Membership</strong>
+              <span data-i18n="join.tier3_desc">For community supporters — newsletter, select events, and community updates</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="contact-form">
+          <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:6px;color:var(--text-primary);" data-i18n="join.form_title">Membership Inquiry</h3>
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;" data-i18n="join.form_sub">Fill out the form below and our team will be in touch.</p>
+
+          <form id="joinForm">
+            <div class="form-group">
+              <label data-i18n="join.f_name">Full Name *</label>
+              <input type="text" name="name" required placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label data-i18n="join.f_org">Organization / Company</label>
+              <input type="text" name="org" placeholder="Your company or organization">
+            </div>
+            <div class="form-group">
+              <label data-i18n="join.f_email">Email Address *</label>
+              <input type="email" name="email" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label data-i18n="join.f_phone">Phone Number</label>
+              <input type="tel" name="phone" placeholder="(206) 555-0000">
+            </div>
+            <div class="form-group">
+              <label data-i18n="join.f_type">Membership Type</label>
+              <select name="type">
+                <option value="corporate" data-i18n="join.tier1_name">Corporate Membership</option>
+                <option value="individual" data-i18n="join.tier2_name">Individual Membership</option>
+                <option value="associate" data-i18n="join.tier3_name">Associate Membership</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label data-i18n="join.f_message">Tell us about your business</label>
+              <textarea name="message" rows="4" placeholder="Brief description..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;" data-i18n="join.f_submit">Submit Application</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:64px;text-align:center;padding:40px;background:var(--bg-secondary);border-radius:12px;border:1px solid var(--border);">
+      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;color:var(--text-primary);" data-i18n="join.contact_alt">Prefer to reach us directly?</h3>
+      <p style="color:var(--text-secondary);margin-bottom:4px;">Email: <a href="mailto:info@ccc-wa.org" style="color:var(--accent);">info@ccc-wa.org</a></p>
+      <p style="color:var(--text-secondary);">Phone: (425) 829-5658</p>
+    </div>
+  </div>
+</section>
+
+<div id="footer-ph"></div>
+<script src="js/layout.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('joinForm');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const lang = localStorage.getItem('lang') || 'en';
+        const msg = lang === 'zh-cn'
+          ? '感谢您的申请！我们将尽快与您联系。'
+          : 'Thank you for your application! We will contact you shortly.';
+        alert(msg);
+        form.reset();
+      });
+    }
+  });
+</script>
+<script src="js/main.js"></script>
+</body>
+</html>
