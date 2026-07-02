@@ -516,7 +516,10 @@ if (contactForm) {
       const imgHtml = n.image
         ? `<img src="${n.image}" alt="${title}" class="${featured ? 'news-img' : 'news-img-thumb'}">`
         : '';
-      const articleUrl = n.article_page || `article-view.html?id=${n.id}`;
+      const hasBlocks = n.content_blocks && n.content_blocks.length > 0;
+      const articleUrl = hasBlocks
+        ? `article-view.html?id=${n.id}`
+        : (n.article_page || `article-view.html?id=${n.id}`);
       const readMore = `<a href="${articleUrl}" class="read-more">${t ? '阅读更多' : 'Read More'}</a>`;
       return `<div class="news-card${featured ? ' featured' : ''}">
         ${imgHtml}
