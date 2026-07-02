@@ -507,9 +507,22 @@ if (contactForm) {
   // ---- NEWS PAGE (.news-grid) ----
   const newsGrid = document.querySelector('.news-grid');
   if (newsGrid && d.news && d.news.length) {
-    newsGrid.innerHTML = d.news.map((n, i) => {
-      const title   = t ? n.title_zh   : n.title_en;
-      const excerpt = t ? n.excerpt_zh : n.excerpt_en;
+    function stripTags(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html || '';
+      return tmp.textContent || tmp.innerText || '';
+    }
+    // Sort newest first — parse date_en, fall back to array order for unparseable dates
+    const sorted = [...d.news].sort((a, b) => {
+      const da = new Date(a.date_en), db = new Date(b.date_en);
+      if (isNaN(da) && isNaN(db)) return 0;
+      if (isNaN(da)) return 1;
+      if (isNaN(db)) return -1;
+      return db - da;
+    });
+    newsGrid.innerHTML = sorted.map((n, i) => {
+      const title   = stripTags(t ? n.title_zh   : n.title_en);
+      const excerpt = stripTags(t ? n.excerpt_zh : n.excerpt_en);
       const date    = t ? n.date_zh    : n.date_en;
       const cat     = t ? n.category_zh : n.category_en;
       const featured = i === 0;
