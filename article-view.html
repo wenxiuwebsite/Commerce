@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article — CCCWA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="content/data.js"></script>
+  <style>
+    .article-wrap { max-width: 800px; margin: 0 auto; padding: 48px 24px 80px; }
+    .article-back {
+      display: inline-flex; align-items: center; gap: 6px; color: var(--accent);
+      font-size: 13px; font-weight: 600; text-decoration: none; margin-bottom: 36px;
+    }
+    .article-back:hover { text-decoration: underline; }
+    .article-category {
+      display: inline-block; padding: 3px 12px; border-radius: 20px;
+      background: var(--accent-lt); color: var(--accent);
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 14px;
+    }
+    .article-title {
+      font-size: clamp(22px, 4vw, 34px); font-weight: 800; line-height: 1.2;
+      margin-bottom: 12px; color: var(--text);
+    }
+    .article-meta { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+    .article-hero-img {
+      width: 100%; max-height: 440px; object-fit: cover; border-radius: 12px; margin-bottom: 36px;
+    }
+    .article-block-text { font-size: 16px; line-height: 1.85; color: var(--text-secondary); margin-bottom: 28px; }
+    .article-block-text p { margin-bottom: 18px; }
+    .article-block-text p:last-child { margin-bottom: 0; }
+    .article-block-img { margin: 32px 0; text-align: center; }
+    .article-block-img img { max-width: 100%; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .article-block-img figcaption { font-size: 13px; color: var(--text-muted); margin-top: 10px; font-style: italic; }
+    .article-not-found { text-align: center; padding: 80px 24px; color: var(--text-muted); }
+    .article-not-found h2 { font-size: 24px; margin-bottom: 12px; }
+  </style>
+</head>
+<body data-page="news">
+<div id="nav-ph"></div>
+
+<div class="article-wrap">
+  <a href="news.html" class="article-back" id="article-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    <span id="back-label">Back to News</span>
+  </a>
+  <div id="article-root"></div>
+</div>
+
+<div id="footer-ph"></div>
+<script src="js/layout.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function () {
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderText(text) {
+    if (!text) return '';
+    return text.split(/\n\n+/).map(p => {
+      p = p.trim();
+      return p ? '<p>' + escHtml(p).replace(/\n/g, '<br>') + '</p>' : '';
+    }).join('');
+  }
+
+  function renderArticle() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const root = document.getElementById('article-root');
+
+    const lang = localStorage.getItem('lang') || 'en';
+    const isZh = lang === 'zh-cn';
+
+    document.getElementById('back-label').textContent = isZh ? '返回新闻' : 'Back to News';
+
+    if (!id || !window.CCCWA_DATA) {
+      root.innerHTML = '<div class="article-not-found"><h2>Article not found</h2></div>';
+      return;
+    }
+
+    const article = window.CCCWA_DATA.news.find(n => n.id === id);
+    if (!article) {
+      root.innerHTML = '<div class="article-not-found"><h2>Article not found</h2><p>This article may have been removed or the URL is incorrect.</p></div>';
+      return;
+    }
+
+    const title    = isZh ? (article.title_zh    || article.title_en)    : article.title_en;
+    const category = isZh ? (article.category_zh || article.category_en) : article.category_en;
+    const date     = isZh ? (article.date_zh     || article.date_en)     : article.date_en;
+    const excerpt  = isZh ? (article.excerpt_zh  || article.excerpt_en)  : article.excerpt_en;
+
+    document.title = title + ' — CCCWA';
+
+    let html = `
+      <div class="article-category">${escHtml(category)}</div>
+      <h1 class="article-title">${escHtml(title)}</h1>
+      <div class="article-meta">${escHtml(date)}</div>`;
+
+    if (article.image) {
+      html += `<img class="article-hero-img" src="${escHtml(article.image)}" alt="${escHtml(title)}">`;
+    }
+
+    const blocks = article.content_blocks || [];
+    if (blocks.length) {
+      blocks.forEach(b => {
+        if (b.type === 'text') {
+          const text = isZh ? (b.zh || b.en) : b.en;
+          if (text) html += `<div class="article-block-text">${renderText(text)}</div>`;
+        } else if (b.type === 'image' && b.src) {
+          const caption = isZh ? (b.caption_zh || b.caption_en) : b.caption_en;
+          html += `<figure class="article-block-img">
+            <img src="${escHtml(b.src)}" alt="${escHtml(b.alt || '')}">
+            ${caption ? `<figcaption>${escHtml(caption)}</figcaption>` : ''}
+          </figure>`;
+        }
+      });
+    } else if (excerpt) {
+      html += `<div class="article-block-text"><p>${escHtml(excerpt)}</p></div>`;
+    }
+
+    root.innerHTML = html;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderArticle);
+  } else {
+    renderArticle();
+  }
+
+  // Re-render when language changes (main.js updates html[lang])
+  new MutationObserver(renderArticle).observe(document.documentElement, {
+    attributes: true, attributeFilter: ['lang']
+  });
+})();
+</script>
+</body>
+</html>

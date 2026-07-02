@@ -254,6 +254,79 @@
     }
     .form-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
+    /* Eye toggle */
+    .pw-wrap { position: relative; }
+    .eye-btn {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      padding: 4px; display: flex; align-items: center;
+    }
+    .eye-btn:hover { color: var(--accent); }
+    .login-input.has-eye { padding-right: 42px; }
+
+    /* Featured image upload */
+    .img-upload-row { display: flex; gap: 8px; align-items: center; }
+    .img-file-btn {
+      flex-shrink: 0; background: var(--accent-lt); border: 1.5px solid var(--accent);
+      color: var(--accent); padding: 7px 12px; border-radius: 7px; font-size: 12px;
+      font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; transition: all var(--t);
+    }
+    .img-file-btn:hover { background: var(--accent); color: white; }
+    .img-preview-thumb {
+      width: 60px; height: 44px; object-fit: cover; border-radius: 6px;
+      border: 1.5px solid var(--border); flex-shrink: 0; display: none;
+    }
+
+    /* Content blocks editor */
+    .blocks-list { border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .block-header {
+      display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+      background: var(--bg); cursor: pointer; border-bottom: 1px solid var(--border);
+    }
+    .block-item:last-child .block-header { border-bottom: none; }
+    .block-item.open .block-header { border-bottom: 1px solid var(--border); }
+    .block-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px; flex-shrink: 0;
+    }
+    .block-badge-text { background: var(--accent-lt); color: var(--accent); }
+    .block-badge-img { background: rgba(37,99,235,0.12); color: #2563eb; }
+    .block-preview-text {
+      flex: 1; font-size: 12px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .block-spacer { flex: 1; }
+    .block-move-wrap { display: flex; flex-direction: column; flex-shrink: 0; }
+    .block-move-btn {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 9px; line-height: 1; padding: 2px 5px;
+    }
+    .block-move-btn:hover { color: var(--accent); }
+    .block-x-btn {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 18px; line-height: 1; padding: 0 5px; flex-shrink: 0;
+    }
+    .block-x-btn:hover { color: var(--danger); }
+    .block-body {
+      display: none; padding: 14px 12px;
+      background: var(--card); border-bottom: 1px solid var(--border);
+    }
+    .block-item.open .block-body { display: block; }
+    .block-item:last-child .block-body { border-bottom: none; }
+    .blocks-add-row {
+      display: flex; gap: 8px; padding: 10px 12px;
+      background: var(--card); border-top: 1.5px solid var(--border);
+    }
+    .blocks-empty {
+      padding: 20px; text-align: center; font-size: 12px; color: var(--muted); background: var(--card);
+    }
+    .block-add-btn {
+      background: none; border: 1.5px solid var(--border); color: var(--sub);
+      padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all var(--t);
+    }
+    .block-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--card);
@@ -276,7 +349,13 @@
       <button class="login-lang-btn" id="login-zh" onclick="setLang('zh')">中文</button>
     </div>
     <label class="login-label" for="pw" data-i18n="login.label">Password</label>
-    <input class="login-input" type="password" id="pw" autofocus>
+    <div class="pw-wrap">
+      <input class="login-input has-eye" type="password" id="pw" autofocus>
+      <button type="button" class="eye-btn" onclick="toggleEye()">
+        <svg id="eye-icon-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        <svg id="eye-icon-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
     <button class="login-btn" onclick="doLogin()" data-i18n="login.btn">Sign In</button>
     <div class="login-err" id="login-err" data-i18n="login.err">Incorrect password. Try again.</div>
   </div>
@@ -527,16 +606,23 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.image">Image Path</label>
-          <input class="form-input" id="n-image" placeholder="e.g. images/news-1.png">
-          <span class="form-hint" data-i18n="modal.news.image.hint">Leave blank if no image</span>
+          <label class="form-label">Featured Image</label>
+          <div class="img-upload-row">
+            <input class="form-input" id="n-image" placeholder="images/news-1.png" style="flex:1">
+            <button type="button" class="img-file-btn" onclick="document.getElementById('n-img-file').click()">Upload</button>
+            <input type="file" id="n-img-file" accept="image/*" style="display:none" onchange="handleFeaturedImg(this)">
+            <img id="n-img-preview" class="img-preview-thumb" alt="">
+          </div>
+          <span class="form-hint">Upload a file or enter a path. Leave blank if no image.</span>
         </div>
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.page">Article Page</label>
-          <input class="form-input" id="n-article-page" placeholder="e.g. article-my-article.html">
-          <span class="form-hint" data-i18n="modal.news.page.hint">Leave blank if no separate page</span>
+          <input class="form-input" id="n-article-page" placeholder="article-view.html?id=slug">
+          <span class="form-hint">Auto-filled when using content blocks below.</span>
         </div>
       </div>
+      <div class="form-section">Article Content Blocks</div>
+      <div id="blocks-list"></div>
     </div>
     <div class="modal-foot">
       <button class="btn-outline" onclick="closeNewsModal()" data-i18n="btn.cancel">Cancel</button>
@@ -999,16 +1085,28 @@ function openNewsModal(idx) {
   editingNewsId = idx !== undefined ? idx : null;
   document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : T('modal.news.add');
   const n = idx !== undefined ? data.news[idx] : {};
-  document.getElementById('n-id').value          = n.id || uid();
-  document.getElementById('n-title-en').value    = n.title_en || '';
-  document.getElementById('n-title-zh').value    = n.title_zh || '';
-  document.getElementById('n-category').value    = n.category_en || 'Announcement';
-  document.getElementById('n-excerpt-en').value  = n.excerpt_en || '';
-  document.getElementById('n-excerpt-zh').value  = n.excerpt_zh || '';
-  document.getElementById('n-date-en').value     = n.date_en || '';
-  document.getElementById('n-date-zh').value     = n.date_zh || '';
-  document.getElementById('n-image').value       = n.image || '';
+  document.getElementById('n-id').value           = n.id || uid();
+  document.getElementById('n-title-en').value     = n.title_en || '';
+  document.getElementById('n-title-zh').value     = n.title_zh || '';
+  document.getElementById('n-category').value     = n.category_en || 'Announcement';
+  document.getElementById('n-excerpt-en').value   = n.excerpt_en || '';
+  document.getElementById('n-excerpt-zh').value   = n.excerpt_zh || '';
+  document.getElementById('n-date-en').value      = n.date_en || '';
+  document.getElementById('n-date-zh').value      = n.date_zh || '';
+  document.getElementById('n-image').value        = n.image || '';
   document.getElementById('n-article-page').value = n.article_page || '';
+  // Featured image preview
+  const prev = document.getElementById('n-img-preview');
+  if (n.image) {
+    prev.src = n.image.startsWith('data:') ? n.image : '../' + n.image;
+    prev.style.display = 'block';
+    prev.onerror = () => { prev.style.display = 'none'; };
+  } else {
+    prev.src = ''; prev.style.display = 'none';
+  }
+  // Content blocks
+  currentBlocks = JSON.parse(JSON.stringify(n.content_blocks || []));
+  renderBlocks();
   applyTranslations();
   document.getElementById('news-modal').style.display = 'flex';
 }
@@ -1018,8 +1116,10 @@ function closeNewsModal() { document.getElementById('news-modal').style.display 
 function saveNews() {
   const cat = document.getElementById('n-category').value;
   const catZh = { 'Announcement':'公告','Community':'社区','Event':'活动' }[cat] || cat;
+  const id = document.getElementById('n-id').value || uid();
+  const artPage = document.getElementById('n-article-page').value.trim();
   const item = {
-    id:           document.getElementById('n-id').value || uid(),
+    id,
     category_en:  cat, category_zh: catZh,
     title_en:     document.getElementById('n-title-en').value.trim(),
     title_zh:     document.getElementById('n-title-zh').value.trim(),
@@ -1028,8 +1128,11 @@ function saveNews() {
     excerpt_en:   document.getElementById('n-excerpt-en').value.trim(),
     excerpt_zh:   document.getElementById('n-excerpt-zh').value.trim(),
     image:        document.getElementById('n-image').value.trim(),
-    article_page: document.getElementById('n-article-page').value.trim()
+    article_page: artPage || (currentBlocks.length ? `article-view.html?id=${id}` : '')
   };
+  if (currentBlocks.length) {
+    item.content_blocks = JSON.parse(JSON.stringify(currentBlocks));
+  }
   if (!item.title_en) { alert(T('alert.title')); return; }
   if (editingNewsId !== null) data.news[editingNewsId] = item;
   else data.news.unshift(item);
@@ -1119,6 +1222,167 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ================================================================
+   EYE TOGGLE
+================================================================ */
+function toggleEye() {
+  const pw = document.getElementById('pw');
+  const open = document.getElementById('eye-icon-open');
+  const closed = document.getElementById('eye-icon-closed');
+  if (pw.type === 'password') {
+    if (!confirm(lang === 'zh' ? '确定要显示密码吗？' : 'Are you sure you want to show your password?')) return;
+    pw.type = 'text';
+    open.style.display = 'block';
+    closed.style.display = 'none';
+  } else {
+    pw.type = 'password';
+    open.style.display = 'none';
+    closed.style.display = 'block';
+  }
+}
+
+/* ================================================================
+   FEATURED IMAGE UPLOAD
+================================================================ */
+function handleFeaturedImg(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('n-image').value = e.target.result;
+    const prev = document.getElementById('n-img-preview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+/* ================================================================
+   CONTENT BLOCKS
+================================================================ */
+let currentBlocks = [];
+
+function renderBlocks() {
+  const list = document.getElementById('blocks-list');
+  if (!list) return;
+  if (!currentBlocks.length) {
+    list.innerHTML = `<div class="blocks-list">
+      <div class="blocks-empty">No content blocks yet. Add text or image blocks to build the article body.</div>
+      <div class="blocks-add-row">
+        <button type="button" class="block-add-btn" onclick="addBlock('text')">+ Text Block</button>
+        <button type="button" class="block-add-btn" onclick="addBlock('image')">+ Image Block</button>
+      </div></div>`;
+    return;
+  }
+  const items = currentBlocks.map((b, i) => {
+    const badge = b.type === 'text'
+      ? `<span class="block-badge block-badge-text">Text</span>`
+      : `<span class="block-badge block-badge-img">Image</span>`;
+    const preview = b.type === 'text'
+      ? `<span class="block-preview-text">${esc(b.en || '').slice(0, 60) || '(empty)'}</span>`
+      : (b.src ? `<img src="${esc(b.src)}" style="width:36px;height:26px;object-fit:cover;border-radius:3px;flex-shrink:0">` : `<span class="block-preview-text">(no image)</span>`);
+    let body = '';
+    if (b.type === 'text') {
+      body = `
+        <div style="margin-bottom:10px">
+          <div class="form-label" style="margin-bottom:5px">English</div>
+          <textarea class="form-textarea" style="min-height:90px" oninput="updateBlockField(${i},'en',this.value)">${esc(b.en||'')}</textarea>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:5px">Chinese</div>
+          <textarea class="form-textarea" style="min-height:90px" oninput="updateBlockField(${i},'zh',this.value)">${esc(b.zh||'')}</textarea>
+        </div>`;
+    } else {
+      body = `
+        <div style="margin-bottom:12px">
+          ${b.src ? `<img src="${esc(b.src)}" alt="" style="max-width:100%;max-height:160px;object-fit:contain;border-radius:8px;display:block;margin-bottom:10px">` : ''}
+          <button type="button" class="img-file-btn" onclick="document.getElementById('bimg-${i}').click()">Upload Image</button>
+          <input type="file" id="bimg-${i}" accept="image/*" style="display:none" onchange="handleBlockImg(this,${i})">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <div class="form-label" style="margin-bottom:5px">Alt Text</div>
+            <input class="form-input" value="${esc(b.alt||'')}" oninput="updateBlockField(${i},'alt',this.value)" placeholder="Image description">
+          </div>
+          <div>
+            <div class="form-label" style="margin-bottom:5px">Caption (English)</div>
+            <input class="form-input" value="${esc(b.caption_en||'')}" oninput="updateBlockField(${i},'caption_en',this.value)" placeholder="Optional">
+          </div>
+          <div>
+            <div class="form-label" style="margin-bottom:5px">Caption (Chinese)</div>
+            <input class="form-input" value="${esc(b.caption_zh||'')}" oninput="updateBlockField(${i},'caption_zh',this.value)" placeholder="可选">
+          </div>
+        </div>`;
+    }
+    return `
+      <div class="block-item" id="bitem-${i}">
+        <div class="block-header" onclick="toggleBlockEdit(${i})">
+          ${badge}${preview}
+          <span class="block-spacer"></span>
+          <span class="block-move-wrap" onclick="event.stopPropagation()">
+            <button type="button" class="block-move-btn" title="Move up" onclick="moveBlock(${i},-1)">▲</button>
+            <button type="button" class="block-move-btn" title="Move down" onclick="moveBlock(${i},1)">▼</button>
+          </span>
+          <button type="button" class="block-x-btn" title="Remove" onclick="event.stopPropagation();removeBlock(${i})">×</button>
+        </div>
+        <div class="block-body">${body}</div>
+      </div>`;
+  }).join('');
+  list.innerHTML = `<div class="blocks-list">${items}
+    <div class="blocks-add-row">
+      <button type="button" class="block-add-btn" onclick="addBlock('text')">+ Text Block</button>
+      <button type="button" class="block-add-btn" onclick="addBlock('image')">+ Image Block</button>
+    </div></div>`;
+}
+
+function toggleBlockEdit(i) {
+  const item = document.getElementById('bitem-' + i);
+  if (item) item.classList.toggle('open');
+}
+
+function updateBlockField(i, field, val) {
+  if (currentBlocks[i]) currentBlocks[i][field] = val;
+}
+
+function addBlock(type) {
+  const block = type === 'text'
+    ? { type: 'text', en: '', zh: '' }
+    : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '' };
+  currentBlocks.push(block);
+  renderBlocks();
+  setTimeout(() => {
+    const item = document.getElementById('bitem-' + (currentBlocks.length - 1));
+    if (item) item.classList.add('open');
+  }, 0);
+}
+
+function removeBlock(i) {
+  currentBlocks.splice(i, 1);
+  renderBlocks();
+}
+
+function moveBlock(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= currentBlocks.length) return;
+  [currentBlocks[i], currentBlocks[j]] = [currentBlocks[j], currentBlocks[i]];
+  renderBlocks();
+}
+
+function handleBlockImg(input, i) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentBlocks[i].src = e.target.result;
+    renderBlocks();
+    setTimeout(() => {
+      const item = document.getElementById('bitem-' + i);
+      if (item) item.classList.add('open');
+    }, 0);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
 }
 
 // Init
