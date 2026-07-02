@@ -3,7 +3,11 @@
     "allow": [
       "WebFetch(domain:www.ccc-wa.org)",
       "WebSearch",
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "WebFetch(domain:web.archive.org)",
+      "WebFetch(domain:ccc-wa.org)",
+      "WebFetch(domain:archive.org)",
+      "WebFetch(domain:webcache.googleusercontent.com)"
     ]
   }
 }
