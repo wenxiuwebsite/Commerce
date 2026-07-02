@@ -117,6 +117,13 @@
       transition: background var(--t); font-family: inherit;
     }
     .btn-primary:hover { background: var(--accent-h); }
+    .btn-secondary {
+      background: var(--bg-secondary); color: var(--text); border: 1.5px solid var(--border);
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all var(--t); font-family: inherit;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-secondary:disabled { opacity: 0.55; cursor: default; }
     .btn-outline {
       background: none; border: 1.5px solid var(--border); color: var(--text); padding: 8px 18px;
       border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -609,6 +616,7 @@
         <div class="topbar">
           <span class="topbar-title" data-i18n="nav.news">News Articles</span>
           <div class="topbar-controls">
+            <button id="sync-btn" class="btn-secondary" onclick="syncFromGitHub()" style="margin-right:8px">⟳ Sync</button>
             <button class="btn-primary" onclick="openNewsModal()" data-i18n="news.add">+ New Article</button>
             <div class="lang-toggle">
               <button class="lang-opt active" id="news-en" onclick="setLang('en')">EN</button>
@@ -1286,6 +1294,7 @@ function doLogin() {
     document.getElementById('app').style.display = 'block';
     loadData();
     renderAll();
+    syncFromGitHub(true); // pull latest team data in background
   } else {
     document.getElementById('login-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -1672,6 +1681,62 @@ async function publishToSite() {
     toast('Publish failed — check settings');
   } finally {
     btn.disabled = false;
+  }
+}
+
+/* ================================================================
+   TEAM SYNC — fetch published content/data.js from GitHub and use
+   it as source of truth so all team members see the same content
+================================================================ */
+async function syncFromGitHub(silent) {
+  const token  = localStorage.getItem('cccwa_gh_token');
+  const repo   = localStorage.getItem('cccwa_gh_repo')   || 'wenxiuwebsite/Commerce';
+  const branch = localStorage.getItem('cccwa_gh_branch') || 'main';
+
+  if (!token) {
+    if (!silent) toast('No GitHub token — add one in Publish settings first');
+    return;
+  }
+
+  const syncBtn = document.getElementById('sync-btn');
+  if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = '⟳ Syncing…'; }
+  if (!silent) toast('Syncing from GitHub…');
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${repo}/contents/content/data.js?ref=${branch}`,
+      { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
+
+    const json = await res.json();
+    const raw  = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
+
+    const anchor = raw.indexOf('window.CCCWA_DATA');
+    const start  = raw.indexOf('{', anchor);
+    if (anchor === -1 || start === -1) throw new Error('Unrecognised data.js format');
+
+    let depth = 0, i = start;
+    for (; i < raw.length; i++) {
+      if (raw[i] === '{') depth++;
+      else if (raw[i] === '}' && --depth === 0) break;
+    }
+
+    const parsed = JSON.parse(raw.substring(start, i + 1));
+    data = parsed;
+    if (!data.categories) data.categories = DEFAULT_DATA.categories;
+    if (!data.news)   data.news   = [];
+    if (!data.events) data.events = [];
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    dirty = false;
+    localStorage.setItem(DIRTY_KEY, 'false');
+    renderAll();
+    toast('Synced ✓ — showing latest team content');
+  } catch(e) {
+    if (!silent) toast('Sync failed: ' + e.message);
+  } finally {
+    if (syncBtn) { syncBtn.disabled = false; syncBtn.textContent = '⟳ Sync'; }
   }
 }
 
