@@ -299,6 +299,7 @@
     .prev-meta { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
     .prev-hero { width: 100%; max-height: 440px; object-fit: cover; border-radius: 12px; margin-bottom: 36px; display: block; }
     .prev-text { font-size: 16px; line-height: 1.85; color: var(--sub); margin-bottom: 28px; }
+    .prev-text img { max-width: 100%; height: auto; border-radius: 8px; }
     .prev-text p { margin-bottom: 16px; }
     .prev-text p:last-child { margin-bottom: 0; }
     .prev-text h2 { font-size: 22px; font-weight: 800; margin: 28px 0 12px; color: var(--text); }
@@ -1293,7 +1294,7 @@ function renderNewsTable() {
   const docIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
   tbody.innerHTML = data.news.map((n, i) => `
     <tr>
-      <td>${n.image ? `<img src="../${esc(n.image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
+      <td>${n.image ? `<img src="${n.image.startsWith('data:') ? esc(n.image) : '../' + esc(n.image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
       <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
       <td>${catTag(n.category_en, n.category_zh)}</td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date_en)}</td>
@@ -1666,7 +1667,7 @@ function renderBlocks() {
       ? `<span class="block-badge block-badge-text">Text</span>`
       : `<span class="block-badge block-badge-img">Image</span>`;
     const preview = b.type === 'text'
-      ? `<span class="block-preview-text">${esc(b.en || '').slice(0, 60) || '(empty)'}</span>`
+      ? `<span class="block-preview-text">${esc(stripHtml(b.en || '')).slice(0, 60) || '(empty)'}</span>`
       : (b.src ? `<img src="${esc(b.src)}" style="width:36px;height:26px;object-fit:cover;border-radius:3px;flex-shrink:0">` : `<span class="block-preview-text">(no image)</span>`);
     let body = '';
     const richToolbar = `<div class="rich-toolbar">
