@@ -254,6 +254,58 @@
     }
     .form-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
+    /* Segmented ctrl buttons (align / size) */
+    .ctrl-group { display: inline-flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .ctrl-btn {
+      background: none; border: none; border-right: 1px solid var(--border); cursor: pointer;
+      padding: 5px 11px; font-size: 12px; font-weight: 600; color: var(--muted);
+      font-family: inherit; display: flex; align-items: center; gap: 4px; transition: all var(--t);
+    }
+    .ctrl-btn:last-child { border-right: none; }
+    .ctrl-btn.active { background: var(--accent); color: white; }
+    .ctrl-btn:hover:not(.active) { background: var(--bg); color: var(--text); }
+
+    /* Publish panel */
+    .pub-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px; max-width: 520px; box-shadow: var(--shadow);
+      transition: background var(--t), border-color var(--t);
+    }
+    .pub-status {
+      display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+      border-radius: 8px; margin-bottom: 20px; font-size: 13px; font-weight: 500;
+    }
+    .pub-status-idle { background: var(--bg); color: var(--muted); }
+    .pub-status-ok { background: rgba(22,163,74,0.1); color: #16a34a; }
+    .pub-status-err { background: rgba(220,38,38,0.08); color: var(--danger); }
+    .pub-status-busy { background: rgba(37,99,235,0.08); color: #2563eb; }
+    .pub-main-btn {
+      width: 100%; padding: 15px; background: var(--accent); color: white;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background var(--t); font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .pub-main-btn:hover:not(:disabled) { background: var(--accent-h); }
+    .pub-main-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .pub-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .pub-settings-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 12px; }
+    .pub-token-row { display: flex; gap: 8px; margin-bottom: 6px; }
+    .pub-field {
+      flex: 1; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: 13px; font-family: inherit; outline: none; background: var(--bg); color: var(--text);
+      transition: border-color var(--t);
+    }
+    .pub-field:focus { border-color: var(--accent); }
+    .pub-save-btn {
+      background: var(--accent-lt); border: 1.5px solid var(--accent); color: var(--accent);
+      padding: 8px 14px; border-radius: 7px; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit; white-space: nowrap; transition: all var(--t);
+    }
+    .pub-save-btn:hover { background: var(--accent); color: white; }
+    .pub-hint { font-size: 11px; color: var(--muted); line-height: 1.55; }
+    .pub-fallback { font-size: 12px; color: var(--muted); margin-top: 18px; text-align: center; }
+    .pub-fallback button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 12px; font-family: inherit; padding: 0; text-decoration: underline; }
+
     /* Eye toggle */
     .pw-wrap { position: relative; }
     .eye-btn {
@@ -524,25 +576,38 @@
           </div>
         </div>
         <div class="panel-body">
-          <p style="color:var(--sub);line-height:1.7;max-width:560px;" data-i18n="publish.desc">After making changes in the News and Events panels, export a data.js file and place it in the content/ folder of your site.</p>
-          <div class="publish-steps">
-            <div class="step">
-              <div class="step-num">1</div>
-              <div><div class="step-title" data-i18n="publish.step1.title">Export your content</div><div class="step-desc" data-i18n="publish.step1.desc">Click the button below to download <code>data.js</code>. This file contains all your news and events.</div></div>
+          <div class="pub-card">
+            <div id="pub-status" class="pub-status pub-status-idle">Ready to publish</div>
+            <button class="pub-main-btn" id="pub-main-btn" onclick="publishToSite()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              Publish to Website
+            </button>
+            <div class="pub-fallback">
+              <button onclick="exportData()">Download data.js manually</button>
             </div>
-            <div class="step">
-              <div class="step-num">2</div>
-              <div><div class="step-title" data-i18n="publish.step2.title">Replace the content file</div><div class="step-desc" data-i18n="publish.step2.desc">Place the downloaded <code>data.js</code> into the <code>content/</code> folder of your website, replacing the existing file.</div></div>
+
+            <hr class="pub-divider">
+            <div class="pub-settings-label">GitHub Settings</div>
+            <div id="pub-conn-status" style="font-size:12px;margin-bottom:12px;color:var(--muted)"></div>
+            <div style="margin-bottom:10px">
+              <div class="form-label" style="margin-bottom:5px">Personal Access Token</div>
+              <div class="pub-token-row">
+                <input type="password" class="pub-field" id="gh-token-input" placeholder="ghp_...">
+                <button class="pub-save-btn" onclick="saveGhSettings()">Save</button>
+              </div>
+              <div class="pub-hint">Go to github.com → Settings → Developer settings → Personal access tokens (classic) → needs <strong>repo</strong> scope. Stored only in this browser.</div>
             </div>
-            <div class="step">
-              <div class="step-num">3</div>
-              <div><div class="step-title" data-i18n="publish.step3.title">Deploy to Netlify</div><div class="step-desc" data-i18n="publish.step3.desc">If hosting on Netlify, push the updated <code>content/data.js</code> to your repository. Netlify will automatically publish the changes.</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+              <div>
+                <div class="form-label" style="margin-bottom:5px">Repository</div>
+                <input class="pub-field" id="gh-repo-input" value="wenxiuwebsite/Commerce">
+              </div>
+              <div>
+                <div class="form-label" style="margin-bottom:5px">Branch</div>
+                <input class="pub-field" id="gh-branch-input" value="main">
+              </div>
             </div>
           </div>
-          <button class="export-btn" onclick="exportData()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span data-i18n="publish.btn">Download data.js</span>
-          </button>
         </div>
       </div>
 
@@ -994,6 +1059,7 @@ function showPanel(name, el) {
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
   if (name === 'dashboard') renderDashboard();
+  if (name === 'publish') updatePubSettings();
   applyTranslations();
 }
 
@@ -1200,11 +1266,14 @@ function deleteEvent(idx) {
 }
 
 /* ================================================================
-   EXPORT
+   EXPORT & PUBLISH
 ================================================================ */
+function generateDataJs() {
+  return `/* CCCWA Site Content — generated ${new Date().toLocaleString()}. Edit via admin/index.html */\nwindow.CCCWA_DATA = ${JSON.stringify(data, null, 2)};\n`;
+}
+
 function exportData() {
-  const js = `/* CCCWA Site Content — generated ${new Date().toLocaleString()}. Edit via admin/index.html */\nwindow.CCCWA_DATA = ${JSON.stringify(data, null, 2)};\n`;
-  const blob = new Blob([js], { type: 'application/javascript' });
+  const blob = new Blob([generateDataJs()], { type: 'application/javascript' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'data.js'; a.click();
@@ -1213,6 +1282,98 @@ function exportData() {
   localStorage.setItem(DIRTY_KEY, 'false');
   updateDirtyIndicator();
   toast(T('toast.exported'));
+}
+
+function setPubStatus(state, msg) {
+  const el = document.getElementById('pub-status');
+  if (!el) return;
+  const cls = { idle:'pub-status-idle', ok:'pub-status-ok', err:'pub-status-err', busy:'pub-status-busy' };
+  el.className = 'pub-status ' + (cls[state] || cls.idle);
+  el.textContent = msg;
+}
+
+function saveGhSettings() {
+  const token  = document.getElementById('gh-token-input').value.trim();
+  const repo   = document.getElementById('gh-repo-input').value.trim();
+  const branch = document.getElementById('gh-branch-input').value.trim();
+  if (token)  localStorage.setItem('cccwa_gh_token',  token);
+  if (repo)   localStorage.setItem('cccwa_gh_repo',   repo);
+  if (branch) localStorage.setItem('cccwa_gh_branch', branch);
+  document.getElementById('gh-token-input').value = '';
+  updatePubSettings();
+  toast('Settings saved');
+}
+
+function updatePubSettings() {
+  const hasToken = !!localStorage.getItem('cccwa_gh_token');
+  const repo     = localStorage.getItem('cccwa_gh_repo')   || 'wenxiuwebsite/Commerce';
+  const branch   = localStorage.getItem('cccwa_gh_branch') || 'main';
+  const repoEl   = document.getElementById('gh-repo-input');
+  const branchEl = document.getElementById('gh-branch-input');
+  const connEl   = document.getElementById('pub-conn-status');
+  if (repoEl)   repoEl.value   = repo;
+  if (branchEl) branchEl.value = branch;
+  if (connEl) {
+    connEl.textContent = hasToken
+      ? `Token saved — connected to ${repo} (${branch})`
+      : 'No token saved. Enter one below to enable one-click publishing.';
+    connEl.style.color = hasToken ? 'var(--accent)' : 'var(--muted)';
+  }
+  const lastPub = localStorage.getItem('cccwa_last_pub');
+  if (lastPub) {
+    const d = new Date(lastPub);
+    setPubStatus('ok', `Last published ${d.toLocaleString()}`);
+  } else {
+    setPubStatus('idle', 'Ready to publish');
+  }
+}
+
+async function publishToSite() {
+  const token  = localStorage.getItem('cccwa_gh_token');
+  const repo   = localStorage.getItem('cccwa_gh_repo')   || 'wenxiuwebsite/Commerce';
+  const branch = localStorage.getItem('cccwa_gh_branch') || 'main';
+  if (!token) {
+    setPubStatus('err', 'No GitHub token found — add one in settings below.');
+    return;
+  }
+  const btn = document.getElementById('pub-main-btn');
+  btn.disabled = true;
+  setPubStatus('busy', 'Publishing...');
+  const path = 'content/data.js';
+  const content = generateDataJs();
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+  try {
+    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, { headers });
+    const current = await getRes.json();
+    if (!getRes.ok) throw new Error(current.message || `HTTP ${getRes.status}`);
+    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      method: 'PUT', headers,
+      body: JSON.stringify({
+        message: `Update site content — ${new Date().toLocaleString()}`,
+        content: encoded,
+        sha: current.sha,
+        branch
+      })
+    });
+    const result = await putRes.json();
+    if (!putRes.ok) throw new Error(result.message || `HTTP ${putRes.status}`);
+    dirty = false;
+    localStorage.setItem(DIRTY_KEY, 'false');
+    localStorage.setItem('cccwa_last_pub', new Date().toISOString());
+    updateDirtyIndicator();
+    setPubStatus('ok', `Published successfully — Netlify is deploying now`);
+    toast('Published! Site is deploying...');
+  } catch (e) {
+    setPubStatus('err', 'Error: ' + e.message);
+    toast('Publish failed — check settings');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 /* ================================================================
@@ -1295,11 +1456,39 @@ function renderBlocks() {
           <textarea class="form-textarea" style="min-height:90px" oninput="updateBlockField(${i},'zh',this.value)">${esc(b.zh||'')}</textarea>
         </div>`;
     } else {
+      const al = b.align || 'center';
+      const sz = b.size  || '100';
       body = `
-        <div style="margin-bottom:12px">
-          ${b.src ? `<img src="${esc(b.src)}" alt="" style="max-width:100%;max-height:160px;object-fit:contain;border-radius:8px;display:block;margin-bottom:10px">` : ''}
+        <div style="margin-bottom:14px">
+          ${b.src ? `<img src="${esc(b.src)}" alt="" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;display:block;margin-bottom:10px">` : ''}
           <button type="button" class="img-file-btn" onclick="document.getElementById('bimg-${i}').click()">Upload Image</button>
           <input type="file" id="bimg-${i}" accept="image/*" style="display:none" onchange="handleBlockImg(this,${i})">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <div class="form-label" style="margin-bottom:6px">Position in Article</div>
+            <div class="ctrl-group">
+              <button type="button" class="ctrl-btn ${al==='left'?'active':''}" onclick="setBlockProp(${i},'align','left')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>Left
+              </button>
+              <button type="button" class="ctrl-btn ${al==='center'?'active':''}" onclick="setBlockProp(${i},'align','center')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>Center
+              </button>
+              <button type="button" class="ctrl-btn ${al==='right'?'active':''}" onclick="setBlockProp(${i},'align','right')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>Right
+              </button>
+            </div>
+          </div>
+          <div>
+            <div class="form-label" style="margin-bottom:6px">Size</div>
+            <div class="ctrl-group">
+              <button type="button" class="ctrl-btn ${sz==='30'?'active':''}" onclick="setBlockProp(${i},'size','30')">S</button>
+              <button type="button" class="ctrl-btn ${sz==='50'?'active':''}" onclick="setBlockProp(${i},'size','50')">M</button>
+              <button type="button" class="ctrl-btn ${sz==='75'?'active':''}" onclick="setBlockProp(${i},'size','75')">L</button>
+              <button type="button" class="ctrl-btn ${sz==='100'?'active':''}" onclick="setBlockProp(${i},'size','100')">Full</button>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">S=30% &nbsp;M=50% &nbsp;L=75%</div>
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div>
@@ -1307,11 +1496,11 @@ function renderBlocks() {
             <input class="form-input" value="${esc(b.alt||'')}" oninput="updateBlockField(${i},'alt',this.value)" placeholder="Image description">
           </div>
           <div>
-            <div class="form-label" style="margin-bottom:5px">Caption (English)</div>
+            <div class="form-label" style="margin-bottom:5px">Caption (EN)</div>
             <input class="form-input" value="${esc(b.caption_en||'')}" oninput="updateBlockField(${i},'caption_en',this.value)" placeholder="Optional">
           </div>
           <div>
-            <div class="form-label" style="margin-bottom:5px">Caption (Chinese)</div>
+            <div class="form-label" style="margin-bottom:5px">Caption (ZH)</div>
             <input class="form-input" value="${esc(b.caption_zh||'')}" oninput="updateBlockField(${i},'caption_zh',this.value)" placeholder="可选">
           </div>
         </div>`;
@@ -1344,6 +1533,15 @@ function toggleBlockEdit(i) {
 
 function updateBlockField(i, field, val) {
   if (currentBlocks[i]) currentBlocks[i][field] = val;
+}
+
+function setBlockProp(i, field, val) {
+  if (currentBlocks[i]) currentBlocks[i][field] = val;
+  renderBlocks();
+  setTimeout(() => {
+    const item = document.getElementById('bitem-' + i);
+    if (item) item.classList.add('open');
+  }, 0);
 }
 
 function addBlock(type) {

@@ -7,7 +7,8 @@
       "WebFetch(domain:web.archive.org)",
       "WebFetch(domain:ccc-wa.org)",
       "WebFetch(domain:archive.org)",
-      "WebFetch(domain:webcache.googleusercontent.com)"
+      "WebFetch(domain:webcache.googleusercontent.com)",
+      "PowerShell(git *)"
     ]
   }
 }
