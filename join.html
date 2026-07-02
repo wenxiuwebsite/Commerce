@@ -55,8 +55,14 @@
         <div class="contact-form">
           <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:6px;color:var(--text-primary);" data-i18n="join.form_title">Membership Inquiry</h3>
           <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;" data-i18n="join.form_sub">Fill out the form below and our team will be in touch.</p>
+          <div id="join-success" style="display:none;padding:28px;text-align:center;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border)">
+            <div style="font-size:2rem;margin-bottom:10px">✓</div>
+            <p style="font-weight:700;color:var(--text-primary)" data-i18n="join.success_title">Application Submitted!</p>
+            <p style="font-size:13px;color:var(--text-secondary)" data-i18n="join.success_sub">Thank you — our team will be in touch shortly.</p>
+          </div>
 
-          <form id="joinForm">
+          <form id="joinForm" name="membership-inquiry" method="POST" data-netlify="true">
+            <input type="hidden" name="form-name" value="membership-inquiry">
             <div class="form-group">
               <label data-i18n="join.f_name">Full Name *</label>
               <input type="text" name="name" required placeholder="Your name">
@@ -104,17 +110,29 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('joinForm');
-    if (form) {
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const lang = localStorage.getItem('lang') || 'en';
-        const msg = lang === 'zh-cn'
-          ? '感谢您的申请！我们将尽快与您联系。'
-          : 'Thank you for your application! We will contact you shortly.';
-        alert(msg);
-        form.reset();
-      });
-    }
+    const btn  = form ? form.querySelector('button[type="submit"]') : null;
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const lang = localStorage.getItem('lang') || 'en';
+      const isZh = lang === 'zh-cn';
+      const origText = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = isZh ? '提交中...' : 'Submitting…'; }
+      try {
+        const res = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(new FormData(form))
+        });
+        if (!res.ok && res.status !== 303) throw new Error('Network error');
+        const successEl = document.getElementById('join-success');
+        if (successEl) successEl.style.display = 'block';
+        form.style.display = 'none';
+      } catch(err) {
+        alert(isZh ? '提交失败，请稍后再试。' : 'Submission failed — please try again.');
+        if (btn) { btn.disabled = false; btn.textContent = origText; }
+      }
+    });
   });
 </script>
 <script src="js/main.js"></script>
