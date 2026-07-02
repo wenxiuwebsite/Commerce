@@ -102,11 +102,13 @@
     const date     = isZh ? (article.date_zh     || article.date_en)     : article.date_en;
     const excerpt  = isZh ? (article.excerpt_zh  || article.excerpt_en)  : article.excerpt_en;
 
-    document.title = title + ' — CCCWA';
+    const titlePlain = (function(h){ const d=document.createElement('div'); d.innerHTML=h; return d.textContent||''; })(title);
+    document.title = titlePlain + ' — CCCWA';
 
+    const isHtmlTitle = /<[a-z][\s\S]*>/i.test(title);
     let html = `
       <div class="article-category">${escHtml(category)}</div>
-      <h1 class="article-title">${escHtml(title)}</h1>
+      <h1 class="article-title">${isHtmlTitle ? title : escHtml(title)}</h1>
       <div class="article-meta">${escHtml(date)}</div>`;
 
     if (article.image) {
@@ -141,7 +143,8 @@
         }
       });
     } else if (excerpt) {
-      html += `<div class="article-block-text"><p>${escHtml(excerpt)}</p></div>`;
+      const isHtmlExcerpt = /<[a-z][\s\S]*>/i.test(excerpt);
+      html += `<div class="article-block-text">${isHtmlExcerpt ? excerpt : '<p>' + escHtml(excerpt) + '</p>'}</div>`;
     }
 
     root.innerHTML = html + '<div style="clear:both"></div>';

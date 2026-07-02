@@ -329,6 +329,9 @@
       font-size: 14px; line-height: 1.7; color: var(--text); background: var(--card);
     }
     .rich-editor:empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; }
+    .rich-editor-title { min-height: auto; height: 40px; padding: 8px 12px; white-space: nowrap; overflow: hidden; font-size: 15px; font-weight: 600; }
+    .cat-add-btn { padding: 0 14px; height: 38px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .cat-add-btn:hover { opacity: 0.88; }
     .rich-editor p { margin-bottom: 8px; }
     .rich-editor h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
     .rich-editor h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
@@ -709,40 +712,100 @@
     <div class="modal-body">
       <input type="hidden" id="n-id">
       <div class="form-section" data-i18n="modal.sec.en">English Content</div>
-      <div class="form-row">
+      <div class="form-row full">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.title.en">Title (English)</label>
-          <input class="form-input" id="n-title-en">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.category">Category</label>
-          <select class="form-select" id="n-category">
-            <option value="Announcement" data-i18n-opt="cat.announcement">Announcement</option>
-            <option value="Community" data-i18n-opt="cat.community">Community</option>
-            <option value="Event" data-i18n-opt="cat.event">Event</option>
-          </select>
+          <div class="rich-editor-wrap">
+            <div class="rich-toolbar">
+              <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="execFmt('bold')"><b>B</b></button>
+              <button type="button" class="rich-btn" title="Italic" onmousedown="event.preventDefault()" onclick="execFmt('italic')"><i>I</i></button>
+              <button type="button" class="rich-btn" title="Underline" onmousedown="event.preventDefault()" onclick="execFmt('underline')"><u>U</u></button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Clear" onmousedown="event.preventDefault()" onclick="execFmt('removeFormat')">Clear</button>
+            </div>
+            <div class="rich-editor rich-editor-title" contenteditable="true" id="n-title-en" data-ph="Article title..."></div>
+          </div>
         </div>
       </div>
       <div class="form-row full">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.excerpt.en">Excerpt (English)</label>
-          <textarea class="form-textarea" id="n-excerpt-en"></textarea>
+          <div class="rich-editor-wrap">
+            <div class="rich-toolbar">
+              <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="execFmt('bold')"><b>B</b></button>
+              <button type="button" class="rich-btn" title="Italic" onmousedown="event.preventDefault()" onclick="execFmt('italic')"><i>I</i></button>
+              <button type="button" class="rich-btn" title="Underline" onmousedown="event.preventDefault()" onclick="execFmt('underline')"><u>U</u></button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Heading 2" onmousedown="event.preventDefault()" onclick="execFmt('formatBlock','<h2>')">H2</button>
+              <button type="button" class="rich-btn" title="Heading 3" onmousedown="event.preventDefault()" onclick="execFmt('formatBlock','<h3>')">H3</button>
+              <button type="button" class="rich-btn" title="Paragraph" onmousedown="event.preventDefault()" onclick="execFmt('formatBlock','<p>')">¶</button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Bullet list" onmousedown="event.preventDefault()" onclick="execFmt('insertUnorderedList')">• List</button>
+              <button type="button" class="rich-btn" title="Numbered list" onmousedown="event.preventDefault()" onclick="execFmt('insertOrderedList')">1. List</button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Link" onmousedown="event.preventDefault()" onclick="insertLink()">Link</button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Clear formatting" onmousedown="event.preventDefault()" onclick="execFmt('removeFormat')">Clear</button>
+            </div>
+            <div class="rich-editor" contenteditable="true" id="n-excerpt-en" data-ph="Short description shown in news cards..."></div>
+          </div>
         </div>
       </div>
       <div class="form-section" data-i18n="modal.sec.zh">Chinese Content</div>
       <div class="form-row full">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.title.zh">Title (Chinese)</label>
-          <input class="form-input" id="n-title-zh">
+          <div class="rich-editor-wrap">
+            <div class="rich-toolbar">
+              <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="execFmt('bold')"><b>B</b></button>
+              <button type="button" class="rich-btn" title="Italic" onmousedown="event.preventDefault()" onclick="execFmt('italic')"><i>I</i></button>
+              <button type="button" class="rich-btn" title="Underline" onmousedown="event.preventDefault()" onclick="execFmt('underline')"><u>U</u></button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Clear" onmousedown="event.preventDefault()" onclick="execFmt('removeFormat')">Clear</button>
+            </div>
+            <div class="rich-editor rich-editor-title" contenteditable="true" id="n-title-zh" data-ph="文章标题..."></div>
+          </div>
         </div>
       </div>
       <div class="form-row full">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.excerpt.zh">Excerpt (Chinese)</label>
-          <textarea class="form-textarea" id="n-excerpt-zh"></textarea>
+          <div class="rich-editor-wrap">
+            <div class="rich-toolbar">
+              <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="execFmt('bold')"><b>B</b></button>
+              <button type="button" class="rich-btn" title="Italic" onmousedown="event.preventDefault()" onclick="execFmt('italic')"><i>I</i></button>
+              <button type="button" class="rich-btn" title="Underline" onmousedown="event.preventDefault()" onclick="execFmt('underline')"><u>U</u></button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Heading 2" onmousedown="event.preventDefault()" onclick="execFmt('formatBlock','<h2>')">H2</button>
+              <button type="button" class="rich-btn" title="Heading 3" onmousedown="event.preventDefault()" onclick="execFmt('formatBlock','<h3>')">H3</button>
+              <button type="button" class="rich-btn" title="Paragraph" onmousedown="event.preventDefault()" onclick="execFmt('formatBlock','<p>')">¶</button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Bullet list" onmousedown="event.preventDefault()" onclick="execFmt('insertUnorderedList')">• List</button>
+              <button type="button" class="rich-btn" title="Numbered list" onmousedown="event.preventDefault()" onclick="execFmt('insertOrderedList')">1. List</button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Link" onmousedown="event.preventDefault()" onclick="insertLink()">Link</button>
+              <span class="rich-sep"></span>
+              <button type="button" class="rich-btn" title="Clear formatting" onmousedown="event.preventDefault()" onclick="execFmt('removeFormat')">Clear</button>
+            </div>
+            <div class="rich-editor" contenteditable="true" id="n-excerpt-zh" data-ph="新闻卡片中显示的简短描述..."></div>
+          </div>
         </div>
       </div>
       <div class="form-section" data-i18n="modal.sec.details">Details</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category (English)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="form-input" id="n-category-en" list="cat-en-list" placeholder="e.g. Announcement" style="flex:1" oninput="onCategoryEnInput(this.value)">
+            <datalist id="cat-en-list"></datalist>
+            <button type="button" class="cat-add-btn" onclick="addCategory()" title="Save as a reusable category">+ Save</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category (Chinese)</label>
+          <input class="form-input" id="n-category-zh" placeholder="e.g. 公告">
+        </div>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.date.en">Date (English)</label>
@@ -1029,6 +1092,11 @@ const STORAGE_KEY = 'cccwa_cms_data';
 const DIRTY_KEY = 'cccwa_cms_dirty';
 
 const DEFAULT_DATA = {
+  categories: [
+    { en: 'Announcement', zh: '公告' },
+    { en: 'Community',    zh: '社区' },
+    { en: 'Event',        zh: '活动' }
+  ],
   news: [
     { id:'immigration-assets', category_en:'Announcement', category_zh:'公告',
       title_en:'CCCWA COVID-19 Weekly Star — Immigration Asset Disposal',
@@ -1120,6 +1188,7 @@ let editingEventId = null;
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) { try { data = JSON.parse(saved); } catch(e) {} }
+  if (!data.categories) data.categories = DEFAULT_DATA.categories;
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
 }
 
@@ -1148,7 +1217,10 @@ function doLogin() {
   }
 }
 document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePreview();
+  if (e.key === 'Enter' && document.activeElement?.classList.contains('rich-editor-title')) e.preventDefault();
+});
 
 function doLogout() {
   document.getElementById('app').style.display = 'none';
@@ -1189,10 +1261,11 @@ function updateDirtyIndicator() {
   el.style.fontSize = dirty ? '12px' : '28px';
 }
 
-function catTag(cat_en) {
+function catTag(cat_en, cat_zh) {
   const cls = cat_en === 'Event' ? 'tag-event' : cat_en === 'Community' ? 'tag-community' : '';
-  const label = lang === 'zh' ? ({ 'Announcement':'公告','Community':'社区','Event':'活动' }[cat_en] || cat_en) : cat_en;
-  return `<span class="tag ${cls}">${label}</span>`;
+  const zhFallback = (data.categories || []).find(c => c.en === cat_en)?.zh || cat_en;
+  const label = lang === 'zh' ? (cat_zh || zhFallback) : cat_en;
+  return `<span class="tag ${cls}">${esc(label)}</span>`;
 }
 
 function renderDashboard() {
@@ -1201,8 +1274,8 @@ function renderDashboard() {
   const tbody = document.getElementById('dash-news-rows');
   tbody.innerHTML = data.news.slice(0, 5).map(n => `
     <tr>
-      <td><div class="cell-title">${esc(n.title_en)}</div><div class="cell-sub">${esc(n.title_zh)}</div></td>
-      <td>${catTag(n.category_en)}</td>
+      <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
+      <td>${catTag(n.category_en, n.category_zh)}</td>
       <td style="color:var(--muted);font-size:12px">${esc(n.date_en)}</td>
     </tr>`).join('');
   updateDirtyIndicator();
@@ -1218,8 +1291,8 @@ function renderNewsTable() {
   tbody.innerHTML = data.news.map((n, i) => `
     <tr>
       <td>${n.image ? `<img src="../${esc(n.image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
-      <td><div class="cell-title">${esc(n.title_en)}</div><div class="cell-sub">${esc(n.title_zh)}</div></td>
-      <td>${catTag(n.category_en)}</td>
+      <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
+      <td>${catTag(n.category_en, n.category_zh)}</td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date_en)}</td>
       <td style="font-size:12px;color:var(--muted)">${n.article_page ? esc(n.article_page) : '—'}</td>
       <td>
@@ -1252,6 +1325,36 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html || '';
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function renderCategoryDatalist() {
+  const dl = document.getElementById('cat-en-list');
+  if (!dl) return;
+  dl.innerHTML = (data.categories || []).map(c => `<option value="${esc(c.en)}">`).join('');
+}
+
+function onCategoryEnInput(val) {
+  const cat = (data.categories || []).find(c => c.en.toLowerCase() === val.toLowerCase());
+  if (cat) document.getElementById('n-category-zh').value = cat.zh;
+}
+
+function addCategory() {
+  const en = document.getElementById('n-category-en').value.trim();
+  const zh = document.getElementById('n-category-zh').value.trim();
+  if (!en) { alert('Enter an English category name first.'); return; }
+  if (!zh) { alert('Enter the Chinese name for this category.'); return; }
+  if (!data.categories) data.categories = [];
+  const exists = data.categories.find(c => c.en.toLowerCase() === en.toLowerCase());
+  if (exists) { exists.zh = zh; toast('Category updated'); }
+  else { data.categories.push({ en, zh }); toast('Category added: ' + en); }
+  persistData();
+  renderCategoryDatalist();
+}
+
 /* ================================================================
    NEWS CRUD
 ================================================================ */
@@ -1259,12 +1362,14 @@ function openNewsModal(idx) {
   editingNewsId = idx !== undefined ? idx : null;
   document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : T('modal.news.add');
   const n = idx !== undefined ? data.news[idx] : {};
-  document.getElementById('n-id').value           = n.id || uid();
-  document.getElementById('n-title-en').value     = n.title_en || '';
-  document.getElementById('n-title-zh').value     = n.title_zh || '';
-  document.getElementById('n-category').value     = n.category_en || 'Announcement';
-  document.getElementById('n-excerpt-en').value   = n.excerpt_en || '';
-  document.getElementById('n-excerpt-zh').value   = n.excerpt_zh || '';
+  document.getElementById('n-id').value               = n.id || uid();
+  document.getElementById('n-title-en').innerHTML     = n.title_en || '';
+  document.getElementById('n-title-zh').innerHTML     = n.title_zh || '';
+  document.getElementById('n-category-en').value      = n.category_en || '';
+  document.getElementById('n-category-zh').value      = n.category_zh || '';
+  document.getElementById('n-excerpt-en').innerHTML   = n.excerpt_en || '';
+  document.getElementById('n-excerpt-zh').innerHTML   = n.excerpt_zh || '';
+  renderCategoryDatalist();
   document.getElementById('n-date-en').value      = n.date_en || '';
   document.getElementById('n-date-zh').value      = n.date_zh || '';
   document.getElementById('n-image').value        = n.image || '';
@@ -1288,26 +1393,27 @@ function openNewsModal(idx) {
 function closeNewsModal() { document.getElementById('news-modal').style.display = 'none'; }
 
 function saveNews() {
-  const cat = document.getElementById('n-category').value;
-  const catZh = { 'Announcement':'公告','Community':'社区','Event':'活动' }[cat] || cat;
+  const cat   = document.getElementById('n-category-en').value.trim() || 'Announcement';
+  const catZhInput = document.getElementById('n-category-zh').value.trim();
+  const catZh = catZhInput || (data.categories || []).find(c => c.en === cat)?.zh || cat;
   const id = document.getElementById('n-id').value || uid();
   const artPage = document.getElementById('n-article-page').value.trim();
   const item = {
     id,
     category_en:  cat, category_zh: catZh,
-    title_en:     document.getElementById('n-title-en').value.trim(),
-    title_zh:     document.getElementById('n-title-zh').value.trim(),
+    title_en:     document.getElementById('n-title-en').innerHTML.trim(),
+    title_zh:     document.getElementById('n-title-zh').innerHTML.trim(),
     date_en:      document.getElementById('n-date-en').value.trim(),
     date_zh:      document.getElementById('n-date-zh').value.trim(),
-    excerpt_en:   document.getElementById('n-excerpt-en').value.trim(),
-    excerpt_zh:   document.getElementById('n-excerpt-zh').value.trim(),
+    excerpt_en:   document.getElementById('n-excerpt-en').innerHTML.trim(),
+    excerpt_zh:   document.getElementById('n-excerpt-zh').innerHTML.trim(),
     image:        document.getElementById('n-image').value.trim(),
     article_page: artPage || (currentBlocks.length ? `article-view.html?id=${id}` : '')
   };
   if (currentBlocks.length) {
     item.content_blocks = JSON.parse(JSON.stringify(currentBlocks));
   }
-  if (!item.title_en) { alert(T('alert.title')); return; }
+  if (!stripHtml(item.title_en)) { alert(T('alert.title')); return; }
   if (editingNewsId !== null) data.news[editingNewsId] = item;
   else data.news.unshift(item);
   persistData(); renderNewsTable(); renderDashboard(); closeNewsModal();
@@ -1715,7 +1821,8 @@ let previewLang = 'en';
 
 function V(id) {
   const el = document.getElementById(id);
-  return el ? el.value : '';
+  if (!el) return '';
+  return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' ? el.value : el.innerHTML;
 }
 
 function prevEsc(s) {
@@ -1734,14 +1841,15 @@ function renderPreview() {
   const titleEn = V('n-title-en');
   const titleZh = V('n-title-zh') || titleEn;
   const title = isZh ? titleZh : titleEn;
-  const cat = V('n-category');
-  const catZh = { Announcement:'公告', Community:'社区', Event:'活动' }[cat] || cat;
-  const category = isZh ? catZh : cat;
+  const catEn = document.getElementById('n-category-en')?.value.trim() || 'Announcement';
+  const catZhVal = document.getElementById('n-category-zh')?.value.trim() ||
+    (data.categories || []).find(c => c.en === catEn)?.zh || catEn;
+  const category = isZh ? catZhVal : catEn;
   const date = isZh ? (V('n-date-zh') || V('n-date-en')) : V('n-date-en');
   const excerpt = isZh ? (V('n-excerpt-zh') || V('n-excerpt-en')) : V('n-excerpt-en');
   const image = V('n-image');
 
-  document.getElementById('prev-title-hint').textContent = title || 'Untitled Article';
+  document.getElementById('prev-title-hint').textContent = stripHtml(title) || 'Untitled Article';
 
   let html = `
     <div class="preview-nav-crumb">
@@ -1749,7 +1857,7 @@ function renderPreview() {
       ${isZh ? '返回新闻' : 'Back to News'}
     </div>
     <span class="prev-category">${prevEsc(category)}</span>
-    <h1 class="prev-title">${prevEsc(title) || '<span style="color:var(--muted);font-weight:400;font-size:0.7em">No title entered</span>'}</h1>
+    <h1 class="prev-title">${title || '<span style="color:var(--muted);font-weight:400;font-size:0.7em">No title entered</span>'}</h1>
     <div class="prev-meta">${prevEsc(date)}</div>`;
 
   if (image) {
@@ -1782,7 +1890,8 @@ function renderPreview() {
     });
     html += '<div style="clear:both"></div>';
   } else if (excerpt) {
-    html += `<div class="prev-text"><p>${prevEsc(excerpt)}</p></div>`;
+    const isHtmlExcerpt = /<[a-z][\s\S]*>/i.test(excerpt);
+    html += `<div class="prev-text">${isHtmlExcerpt ? excerpt : prevRenderText(stripHtml(excerpt))}</div>`;
   } else if (!blocks.length) {
     html += `<div class="prev-empty">No content yet — add text or image blocks in the editor.</div>`;
   }
