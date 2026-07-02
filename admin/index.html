@@ -1183,6 +1183,7 @@ const DEFAULT_DATA = {
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let dirty = false;
 let editingNewsId = null;
+let newsModalDirty = false;
 let editingEventId = null;
 
 function loadData() {
@@ -1221,6 +1222,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePreview();
   if (e.key === 'Enter' && document.activeElement?.classList.contains('rich-editor-title')) e.preventDefault();
 });
+document.getElementById('news-modal').addEventListener('input',  () => { newsModalDirty = true; });
+document.getElementById('news-modal').addEventListener('change', () => { newsModalDirty = true; });
 
 function doLogout() {
   document.getElementById('app').style.display = 'none';
@@ -1387,10 +1390,15 @@ function openNewsModal(idx) {
   currentBlocks = JSON.parse(JSON.stringify(n.content_blocks || []));
   renderBlocks();
   applyTranslations();
+  newsModalDirty = false;
   document.getElementById('news-modal').style.display = 'flex';
 }
 
-function closeNewsModal() { document.getElementById('news-modal').style.display = 'none'; }
+function closeNewsModal() {
+  if (newsModalDirty && !confirm('You have unsaved changes. Are you sure you want to close?')) return;
+  newsModalDirty = false;
+  document.getElementById('news-modal').style.display = 'none';
+}
 
 function saveNews() {
   const cat   = document.getElementById('n-category-en').value.trim() || 'Announcement';
@@ -1416,6 +1424,7 @@ function saveNews() {
   if (!stripHtml(item.title_en)) { alert(T('alert.title')); return; }
   if (editingNewsId !== null) data.news[editingNewsId] = item;
   else data.news.unshift(item);
+  newsModalDirty = false;
   persistData(); renderNewsTable(); renderDashboard(); closeNewsModal();
   toast(T('toast.article.saved'));
 }
@@ -1629,6 +1638,7 @@ function handleFeaturedImg(input) {
     const prev = document.getElementById('n-img-preview');
     prev.src = e.target.result;
     prev.style.display = 'block';
+    newsModalDirty = true;
   };
   reader.readAsDataURL(file);
   input.value = '';
@@ -1768,6 +1778,7 @@ function updateBlockField(i, field, val) {
 
 function setBlockProp(i, field, val) {
   if (currentBlocks[i]) currentBlocks[i][field] = val;
+  newsModalDirty = true;
   renderBlocks();
   setTimeout(() => {
     const item = document.getElementById('bitem-' + i);
@@ -1780,6 +1791,7 @@ function addBlock(type) {
     ? { type: 'text', en: '', zh: '' }
     : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '' };
   currentBlocks.push(block);
+  newsModalDirty = true;
   renderBlocks();
   setTimeout(() => {
     const item = document.getElementById('bitem-' + (currentBlocks.length - 1));
@@ -1789,6 +1801,7 @@ function addBlock(type) {
 
 function removeBlock(i) {
   currentBlocks.splice(i, 1);
+  newsModalDirty = true;
   renderBlocks();
 }
 
@@ -1796,6 +1809,7 @@ function moveBlock(i, dir) {
   const j = i + dir;
   if (j < 0 || j >= currentBlocks.length) return;
   [currentBlocks[i], currentBlocks[j]] = [currentBlocks[j], currentBlocks[i]];
+  newsModalDirty = true;
   renderBlocks();
 }
 
@@ -1804,6 +1818,7 @@ function handleBlockImg(input, i) {
   const reader = new FileReader();
   reader.onload = e => {
     currentBlocks[i].src = e.target.result;
+    newsModalDirty = true;
     renderBlocks();
     setTimeout(() => {
       const item = document.getElementById('bitem-' + i);
