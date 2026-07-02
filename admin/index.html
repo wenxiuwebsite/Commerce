@@ -1492,7 +1492,7 @@ function saveNews() {
     excerpt_en:   document.getElementById('n-excerpt-en').innerHTML.trim(),
     excerpt_zh:   document.getElementById('n-excerpt-zh').innerHTML.trim(),
     image:        document.getElementById('n-image').value.trim(),
-    article_page: artPage || (currentBlocks.length ? `article-view.html?id=${id}` : '')
+    article_page: artPage || `article-view.html?id=${id}`
   };
   if (currentBlocks.length) {
     item.content_blocks = JSON.parse(JSON.stringify(currentBlocks));
@@ -2024,7 +2024,12 @@ document.addEventListener('input', e => {
     const i = parseInt(e.target.dataset.bidx);
     const f = e.target.dataset.bfield;
     if (!isNaN(i) && f && currentBlocks[i]) currentBlocks[i][f] = e.target.innerHTML;
+    newsModalDirty = true;
   }
+});
+
+window.addEventListener('beforeunload', e => {
+  if (newsModalDirty) { e.preventDefault(); return e.returnValue = ''; }
 });
 
 function execFmt(cmd, val) {
