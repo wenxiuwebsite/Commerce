@@ -6,6 +6,7 @@
   <title>CCCWA Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="local-secrets.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -253,6 +254,31 @@
       border-bottom: 1px solid var(--accent-lt);
     }
     .form-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* Rich text editor */
+    .rich-editor-wrap { border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; margin-bottom: 10px; }
+    .rich-toolbar {
+      display: flex; gap: 1px; padding: 5px 8px; background: var(--bg);
+      border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center;
+    }
+    .rich-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+    .rich-btn {
+      background: none; border: none; cursor: pointer; padding: 3px 8px; border-radius: 4px;
+      font-size: 12px; font-weight: 700; color: var(--sub); font-family: inherit; line-height: 1.4;
+      transition: all var(--t);
+    }
+    .rich-btn:hover { background: var(--border); color: var(--text); }
+    .rich-editor {
+      min-height: 110px; padding: 10px 12px; outline: none; cursor: text;
+      font-size: 14px; line-height: 1.7; color: var(--text); background: var(--card);
+    }
+    .rich-editor:empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; }
+    .rich-editor p { margin-bottom: 8px; }
+    .rich-editor h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .rich-editor h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+    .rich-editor ul, .rich-editor ol { padding-left: 22px; margin-bottom: 8px; }
+    .rich-editor a { color: var(--accent); text-decoration: underline; }
+    .rich-lang-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 5px 10px 0; }
 
     /* Segmented ctrl buttons (align / size) */
     .ctrl-group { display: inline-flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden; }
@@ -584,6 +610,8 @@
             </button>
             <div class="pub-fallback">
               <button onclick="exportData()">Download data.js manually</button>
+              &nbsp;·&nbsp;
+              <button onclick="configureNetlifyAdmin()">Set up Netlify admin</button>
             </div>
 
             <hr class="pub-divider">
@@ -1445,15 +1473,32 @@ function renderBlocks() {
       ? `<span class="block-preview-text">${esc(b.en || '').slice(0, 60) || '(empty)'}</span>`
       : (b.src ? `<img src="${esc(b.src)}" style="width:36px;height:26px;object-fit:cover;border-radius:3px;flex-shrink:0">` : `<span class="block-preview-text">(no image)</span>`);
     let body = '';
+    const richToolbar = `<div class="rich-toolbar">
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('bold')" title="Bold"><b>B</b></button>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('italic')" title="Italic"><i>I</i></button>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('underline')" title="Underline"><u>U</u></button>
+          <span class="rich-sep"></span>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('formatBlock','h2')" title="Heading 2">H2</button>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('formatBlock','h3')" title="Heading 3">H3</button>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('formatBlock','p')" title="Paragraph">P</button>
+          <span class="rich-sep"></span>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('insertUnorderedList')" title="Bullet list">&#8226; List</button>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('insertOrderedList')" title="Numbered list">1. List</button>
+          <span class="rich-sep"></span>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();insertLink()" title="Link">Link</button>
+          <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('removeFormat')" title="Clear formatting">Clear</button>
+        </div>`;
     if (b.type === 'text') {
       body = `
-        <div style="margin-bottom:10px">
-          <div class="form-label" style="margin-bottom:5px">English</div>
-          <textarea class="form-textarea" style="min-height:90px" oninput="updateBlockField(${i},'en',this.value)">${esc(b.en||'')}</textarea>
+        <div class="rich-lang-label">English</div>
+        <div class="rich-editor-wrap">
+          ${richToolbar}
+          <div class="rich-editor" contenteditable="true" data-rich data-bidx="${i}" data-bfield="en" data-ph="English content...">${b.en||''}</div>
         </div>
-        <div>
-          <div class="form-label" style="margin-bottom:5px">Chinese</div>
-          <textarea class="form-textarea" style="min-height:90px" oninput="updateBlockField(${i},'zh',this.value)">${esc(b.zh||'')}</textarea>
+        <div class="rich-lang-label">Chinese</div>
+        <div class="rich-editor-wrap">
+          ${richToolbar}
+          <div class="rich-editor" contenteditable="true" data-rich data-bidx="${i}" data-bfield="zh" data-ph="中文内容...">${b.zh||''}</div>
         </div>`;
     } else {
       const al = b.align || 'center';
@@ -1581,6 +1626,63 @@ function handleBlockImg(input, i) {
   };
   reader.readAsDataURL(file);
   input.value = '';
+}
+
+/* ================================================================
+   RICH TEXT EDITOR
+================================================================ */
+let lastRichEd = null;
+
+document.addEventListener('focusin', e => {
+  if (e.target.dataset.rich !== undefined) lastRichEd = e.target;
+});
+
+document.addEventListener('input', e => {
+  if (e.target.dataset.rich !== undefined) {
+    const i = parseInt(e.target.dataset.bidx);
+    const f = e.target.dataset.bfield;
+    if (!isNaN(i) && f && currentBlocks[i]) currentBlocks[i][f] = e.target.innerHTML;
+  }
+});
+
+function execFmt(cmd, val) {
+  if (lastRichEd) lastRichEd.focus();
+  document.execCommand(cmd, false, val || null);
+  if (lastRichEd) {
+    const i = parseInt(lastRichEd.dataset.bidx);
+    const f = lastRichEd.dataset.bfield;
+    if (!isNaN(i) && f && currentBlocks[i]) currentBlocks[i][f] = lastRichEd.innerHTML;
+  }
+}
+
+function insertLink() {
+  if (lastRichEd) lastRichEd.focus();
+  const url = prompt('Enter URL (e.g. https://example.com):');
+  if (url) execFmt('createLink', url);
+}
+
+/* ================================================================
+   TOKEN AUTO-LOAD & NETLIFY SETUP
+================================================================ */
+(function initSecrets() {
+  // Load from local-secrets.js if present
+  if (window.CCCWA_LOCAL_CONFIG && window.CCCWA_LOCAL_CONFIG.ghToken) {
+    localStorage.setItem('cccwa_gh_token', window.CCCWA_LOCAL_CONFIG.ghToken);
+  }
+  // Load from URL hash (set by configureNetlifyAdmin)
+  const m = window.location.hash.match(/ghtoken=([^&]+)/);
+  if (m) {
+    localStorage.setItem('cccwa_gh_token', decodeURIComponent(m[1]));
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    toast('GitHub token configured — you can now publish with one click');
+  }
+})();
+
+function configureNetlifyAdmin() {
+  const token = localStorage.getItem('cccwa_gh_token');
+  if (!token) { toast('No token found'); return; }
+  const url = 'https://thunderous-bavarois-667c98.netlify.app/admin/#ghtoken=' + encodeURIComponent(token);
+  window.open(url, '_blank');
 }
 
 // Init
