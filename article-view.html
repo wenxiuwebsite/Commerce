@@ -172,13 +172,12 @@
 
     document.title = (title || 'Article') + ' — CCCWA';
 
+    // Text-only by design — cover_image/body_images/body_galleries are
+    // intentionally not rendered here. The data is still stored, so images
+    // can be turned back on later without re-uploading anything.
     let html = '<div class="article-category">' + C.escHtml(category || '') + '</div>' +
       '<h1 class="article-title">' + C.escHtml(title || '') + '</h1>' +
       '<div class="article-meta">' + C.escHtml(date) + '</div>';
-
-    if (article.cover_image) {
-      html += '<img class="article-hero-img" src="' + C.escHtml(article.cover_image) + '" alt="' + C.escHtml(title || '') + '">';
-    }
 
     root.innerHTML = html;
 
@@ -186,8 +185,6 @@
     bodyWrap.className = 'article-block-text';
     if (body) {
       bodyWrap.innerHTML = window.marked ? window.marked.parse(body) : body.replace(/\n\n+/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>');
-      insertBodyImages(bodyWrap, article.body_images);
-      insertBodyGalleries(bodyWrap, article.body_galleries);
     } else if (summary) {
       bodyWrap.innerHTML = '<p>' + C.escHtml(summary) + '</p>';
     }

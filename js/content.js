@@ -143,17 +143,16 @@
     scrollToAnchorIfPresent();
   }
 
+  // Text-only cards by design — cover_image is intentionally not rendered
+  // here (or on the article page). The data is still stored, so images can
+  // be turned back on later without re-uploading anything.
   function newsCardHtml(n, featured, zh) {
     const title = zh ? (n.title_zh || n.title_en) : (n.title_en || n.title_zh);
     const category = zh ? n.category_zh : n.category_en;
     const date = formatDate(n.date, zh);
     const excerpt = excerptFrom(n, zh);
-    const img = n.cover_image
-      ? '<img src="' + escHtml(n.cover_image) + '" alt="' + escHtml(title) + '" class="' + (featured ? 'news-img' : 'news-img-thumb') + '">'
-      : '';
     return '<div class="news-card' + (featured ? ' featured' : '') + '" id="post-' + escHtml(n.id) + '">' +
-      img +
-      '<div class="news-content"' + (!n.cover_image ? ' style="padding-top:22px"' : '') + '>' +
+      '<div class="news-content" style="padding-top:22px">' +
       '<span class="news-category">' + escHtml(category || '') + '</span>' +
       '<h3>' + escHtml(title || '') + '</h3>' +
       '<p>' + escHtml(excerpt) + '</p>' +
@@ -286,12 +285,8 @@
       const date = formatDate(n.date, zh);
       const excerpt = excerptFrom(n, zh);
       const featured = i === 0;
-      const img = n.cover_image
-        ? '<img src="' + escHtml(n.cover_image) + '" alt="' + escHtml(title) + '" class="' + (featured ? 'news-img' : 'news-img-thumb') + '"' + (featured ? '' : ' style="width:100%;height:140px;object-fit:cover;"') + '>'
-        : '';
       return '<div class="news-card' + (featured ? ' featured' : '') + '">' +
-        img +
-        '<div class="news-content"' + (!n.cover_image ? ' style="padding-top:22px"' : '') + '>' +
+        '<div class="news-content" style="padding-top:22px">' +
         '<span class="news-category">' + escHtml(category || '') + '</span>' +
         '<h3>' + escHtml(title || '') + '</h3>' +
         '<p>' + escHtml(excerpt) + '</p>' +
