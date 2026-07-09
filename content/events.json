@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "id": "e1",
+      "date": "2026-07-12",
+      "time": "6:00 PM – 10:00 PM",
+      "title_en": "Annual Business Gala & Awards Dinner",
+      "title_zh": "年度商业晚会及颁奖典礼",
+      "location_en": "Westin Seattle Hotel, Seattle",
+      "location_zh": "西雅图威斯汀酒店",
+      "desc_en": "Join us for our flagship annual dinner celebrating CCCWA members and recognizing outstanding contributions to the Washington business community.",
+      "desc_zh": "诚邀您出席年度旗舰晚会，共同表彰CCCWA会员中的杰出贡献。",
+      "register_url": "contact.html"
+    },
+    {
+      "id": "e2",
+      "date": "2026-07-24",
+      "time": "9:00 AM – 5:00 PM",
+      "title_en": "US-China Trade Forum 2026",
+      "title_zh": "2026年中美贸易论坛",
+      "location_en": "Washington State Convention Center",
+      "location_zh": "华盛顿州展览中心",
+      "desc_en": "A full-day forum featuring keynote speakers, panel discussions, and networking opportunities.",
+      "desc_zh": "全天论坛，包括主题演讲、圆桌讨论和交流合作机会。",
+      "register_url": "contact.html"
+    },
+    {
+      "id": "e3",
+      "date": "2026-08-09",
+      "time": "6:30 PM – 9:00 PM",
+      "title_en": "Member Networking Mixer",
+      "title_zh": "会员交流活动",
+      "location_en": "Bellevue, WA",
+      "location_zh": "华盛顿州贝尔维尤",
+      "desc_en": "A casual networking event for CCCWA members and prospective members. RSVP required.",
+      "desc_zh": "为CCCWA会员及潜在会员举办的轻松交流活动，需提前报名。",
+      "register_url": "contact.html"
+    }
+  ]
+}

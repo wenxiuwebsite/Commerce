@@ -1,2 +1,7 @@
 admin/local-secrets.js
 .claude/
+
+# Raw scraped source archive of the old ccc-wa.org site (299 HTML files +
+# 949 images) — used once to migrate content into content/news.json, not
+# needed at runtime. Keep out of git per the project checklist (item C1).
+old/

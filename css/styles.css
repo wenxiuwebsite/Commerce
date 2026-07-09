@@ -581,6 +581,43 @@ img { max-width: 100%; display: block; }
 .news-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); }
 .read-more { font-weight: 600; color: var(--accent); font-size: 12px; }
 
+/* News category filter bar */
+.news-filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.filter-pill {
+  font-family: inherit; cursor: pointer; font-size: 13px; font-weight: 600;
+  padding: 6px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--bg-card); color: var(--text-secondary); transition: all var(--t);
+}
+.filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+.filter-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Pagination */
+.news-pagination { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 32px; }
+.pagination-btn {
+  font-family: inherit; cursor: pointer; font-size: 13px; font-weight: 600;
+  min-width: 34px; height: 34px; padding: 0 6px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--bg-card); color: var(--text-secondary); transition: all var(--t);
+}
+.pagination-btn:hover { border-color: var(--accent); color: var(--accent); }
+.pagination-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Empty / error state */
+.content-empty-state {
+  text-align: center; padding: 60px 24px; color: var(--text-muted); font-size: 14px;
+  background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius-md);
+}
+
+/* Anchor-scroll highlight for #post-xxx links */
+.news-card-highlight { box-shadow: 0 0 0 3px var(--accent) !important; transition: box-shadow 0.3s; }
+
+/* Archive "clear filter" + empty state */
+.archive-clear {
+  display: block; width: calc(100% - 36px); margin: 10px 18px 4px; font-family: inherit;
+  cursor: pointer; font-size: 12px; font-weight: 600; color: var(--accent);
+  background: var(--accent-lt); border: 1px solid transparent; border-radius: 6px; padding: 6px 10px;
+}
+.archive-empty { padding: 14px 18px; font-size: 13px; color: var(--text-muted); }
+
 /* News Archive Sidebar */
 .news-sidebar { position: sticky; top: 88px; }
 .sidebar-box {

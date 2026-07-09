@@ -190,44 +190,8 @@
       <span class="section-tag" data-i18n="news.tag">Updates</span>
       <h2 data-i18n="news.title">Latest News</h2>
     </div>
-    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:22px;">
-      <div class="news-card featured">
-        <img src="images/news-1.png" alt="CCCWA COVID Relief" class="news-img">
-        <div class="news-content">
-          <span class="news-category" data-i18n="news.cat_announcement">Announcement</span>
-          <h3 data-i18n="news.n1_title">CCCWA Supports Community COVID-19 Relief Efforts</h3>
-          <p data-i18n="news.n1_excerpt">CCCWA united businesses and community organizations to provide meals, supplies, and support to vulnerable residents...</p>
-          <div class="news-meta">
-            <span data-i18n="news.n1_date">August 24, 2020</span>
-            <a href="news.html" class="read-more" data-i18n="news.read_more">Read More</a>
-          </div>
-        </div>
-      </div>
-      <div class="news-card">
-        <img src="images/news-2.png" alt="CCCWA Community" class="news-img-thumb" style="width:100%;height:140px;object-fit:cover;">
-        <div class="news-content">
-          <span class="news-category" data-i18n="news.cat_program">Community</span>
-          <h3 data-i18n="news.n2_title">CCCWA Foundation Unites Community Against COVID-19</h3>
-          <p data-i18n="news.n2_excerpt">The CCCWA Foundation coordinated relief drives across the Greater Seattle area...</p>
-          <div class="news-meta">
-            <span data-i18n="news.n2_date">August 20, 2020</span>
-            <a href="news.html" class="read-more" data-i18n="news.read_more">Read More</a>
-          </div>
-        </div>
-      </div>
-      <div class="news-card">
-        <img src="images/news-butterfly.jpg" alt="CCCWA Gala" class="news-img-thumb" style="width:100%;height:140px;object-fit:cover;">
-        <div class="news-content">
-          <span class="news-category" data-i18n="news.cat_event">Event</span>
-          <h3 data-i18n="news.n3_title">2018 Chinese New Year Gala Highlights</h3>
-          <p data-i18n="news.n3_excerpt">Hundreds of members gathered to celebrate the Spring Festival with performances and awards...</p>
-          <div class="news-meta">
-            <span data-i18n="news.n3_date">February 2018</span>
-            <a href="news.html" class="read-more" data-i18n="news.read_more">Read More</a>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Populated by js/content.js from content/news.json (latest 3) -->
+    <div class="home-news-preview" style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:22px;"></div>
     <div class="section-footer">
       <a href="news.html" class="btn-outline-dark" data-i18n="news.view_all">View All News</a>
     </div>
@@ -246,5 +210,6 @@
 <div id="footer-ph"></div>
 <script src="js/layout.js"></script>
 <script src="js/main.js"></script>
+<script src="js/content.js"></script>
 </body>
 </html>

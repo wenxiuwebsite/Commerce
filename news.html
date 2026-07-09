@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <script src="content/data.js"></script>
 </head>
 <body data-page="news">
 <div id="nav-ph"></div>
@@ -23,191 +22,16 @@
   <div class="container">
     <div class="news-layout">
 
-      <!-- Main news feed -->
+      <!-- Main news feed — populated by js/content.js from content/news.json -->
       <div>
-        <div class="news-grid">
-
-          <div class="news-card featured">
-            <img src="images/news-1.png" alt="CCCWA COVID Relief" class="news-img">
-            <div class="news-content">
-              <span class="news-category" data-i18n="news.cat_announcement">Announcement</span>
-              <h3 data-i18n="news.n1_title">CCCWA COVID-19 Weekly Star — Immigration Asset Disposal</h3>
-              <p data-i18n="news.n1_excerpt">Attorney Cai discusses immigration asset management challenges for Chinese families settling in the US, including remote notarization, inheritance, real estate disposal, and cross-border fund transfers during the pandemic.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n1_date">August 24, 2020</span>
-                <a href="article-immigration-assets.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <img src="images/news-2.png" alt="CCCWA COVID Community" class="news-img-thumb">
-            <div class="news-content">
-              <span class="news-category" data-i18n="news.cat_program">Community</span>
-              <h3 data-i18n="news.n2_title">CCCWA Foundation Unites Community Against COVID-19</h3>
-              <p data-i18n="news.n2_excerpt">CCCWA Foundation coordinated with local businesses and volunteers across Greater Seattle to support communities affected by COVID-19.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n2_date">August 20, 2020</span>
-                <a href="article-covid-community.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <img src="images/news-butterfly.jpg" alt="CCCWA Event" class="news-img-thumb">
-            <div class="news-content">
-              <span class="news-category" data-i18n="news.cat_event">Event</span>
-              <h3 data-i18n="news.n3_title">2018 Chinese New Year Gala Highlights</h3>
-              <p data-i18n="news.n3_excerpt">Hundreds of members and guests gathered to celebrate the Chinese New Year with performances, a gala banquet, and award presentations.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n3_date">2018</span>
-                <a href="article-new-year-2018.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <img src="images/news-3.jpg" alt="CCCWA" class="news-img-thumb">
-            <div class="news-content">
-              <span class="news-category" data-i18n="news.cat_program">Community</span>
-              <h3 data-i18n="news.n4_title">Dou Lao Fang Restaurant: One Pot, One World</h3>
-              <p data-i18n="news.n4_excerpt">Feature on Dou Lao Fang restaurant joining CCCWA's COVID charity meal campaign — supporting the community one meal at a time.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n4_date">2020</span>
-                <a href="article-dou-lao-fang.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <img src="images/news-4.jpg" alt="CCCWA" class="news-img-thumb">
-            <div class="news-content">
-              <span class="news-category" data-i18n="news.cat_announcement">Announcement</span>
-              <h3 data-i18n="news.n5_title">CCCWA COVID Charity Meal Drive — Latest Update</h3>
-              <p data-i18n="news.n5_excerpt">Latest update on CCCWA's charity meal fundraising effort, supporting local restaurants and vulnerable residents affected by COVID-19.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n5_date">2020</span>
-                <a href="article-meal-drive.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <div class="news-content" style="padding-top:22px;">
-              <span class="news-category" data-i18n="news.cat_event">Event</span>
-              <h3 data-i18n="news.n6_title">Paralympic Ambassador Hou Bin Keynote: Promoting the Olympic Spirit</h3>
-              <p data-i18n="news.n6_excerpt">CCCWA hosted Paralympic ambassador Hou Bin for a keynote speech on the Olympic spirit and international cooperation.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n6_date">July 2018</span>
-                <a href="article-hou-bin.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <img src="images/news-5.png" alt="CCCWA Trade Forum" class="news-img-thumb">
-            <div class="news-content">
-              <span class="news-category" data-i18n="news.cat_program">Community</span>
-              <h3 data-i18n="news.n7_title">China Province & Washington State Trade and Investment Cooperation Forum</h3>
-              <p data-i18n="news.n7_excerpt">CCCWA hosted a major trade and investment cooperation forum connecting Chinese provincial delegations with Washington State business and government representatives.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n7_date">July 26, 2017</span>
-                <a href="article-trade-forum-2017.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="news-card">
-            <div class="news-content" style="padding-top:22px;">
-              <span class="news-category" data-i18n="news.cat_announcement">Announcement</span>
-              <h3 data-i18n="news.n8_title">CCCWA Celebrates 20th Anniversary of Hong Kong SAR</h3>
-              <p data-i18n="news.n8_excerpt">The Chinese Chamber of Commerce in Washington State held a celebration marking the 20th anniversary of the establishment of the Hong Kong Special Administrative Region.</p>
-              <div class="news-meta">
-                <span data-i18n="news.n8_date">July 2017</span>
-                <a href="article-hk-anniversary.html" class="read-more" data-i18n="news.read_more">Read More</a>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <div class="news-grid"></div>
       </div>
 
-      <!-- Sidebar with archives -->
+      <!-- Sidebar with dynamic monthly archives -->
       <aside class="news-sidebar">
         <div class="sidebar-box">
           <h3 data-i18n="news.archive_title">News Archives</h3>
-          <div class="archive-list">
-
-            <div class="archive-group">
-              <div class="archive-year">2020</div>
-              <div class="archive-months">
-                <a href="news-archive-2020.html#aug-2020" class="archive-month">Aug</a>
-                <a href="news-archive-2020.html#jul-2020" class="archive-month">Jul</a>
-                <a href="news-archive-2020.html#jun-2020" class="archive-month">Jun</a>
-                <a href="news-archive-2020.html#may-2020" class="archive-month">May</a>
-                <a href="news-archive-2020.html#apr-2020" class="archive-month">Apr</a>
-                <a href="news-archive-2020.html#mar-2020" class="archive-month">Mar</a>
-                <a href="news-archive-2020.html#feb-2020" class="archive-month">Feb</a>
-              </div>
-            </div>
-
-            <div class="archive-group">
-              <div class="archive-year">2019</div>
-              <div class="archive-months">
-                <a href="news-archive-2019.html#nov-2019" class="archive-month">Nov</a>
-                <a href="news-archive-2019.html#oct-2019" class="archive-month">Oct</a>
-                <a href="news-archive-2019.html#jul-2019" class="archive-month">Jul</a>
-              </div>
-            </div>
-
-            <div class="archive-group">
-              <div class="archive-year">2018</div>
-              <div class="archive-months">
-                <a href="news-archive-2018.html#nov-2018" class="archive-month">Nov</a>
-                <a href="news-archive-2018.html#jul-2018" class="archive-month">Jul</a>
-                <a href="news-archive-2018.html#may-2018" class="archive-month">May</a>
-                <a href="news-archive-2018.html#mar-2018" class="archive-month">Mar</a>
-                <a href="news-archive-2018.html#jan-2018" class="archive-month">Jan</a>
-              </div>
-            </div>
-
-            <div class="archive-group">
-              <div class="archive-year">2017</div>
-              <div class="archive-months">
-                <a href="news-archive-2017.html#nov-2017" class="archive-month">Nov</a>
-                <a href="news-archive-2017.html#oct-2017" class="archive-month">Oct</a>
-                <a href="news-archive-2017.html#sep-2017" class="archive-month">Sep</a>
-                <a href="news-archive-2017.html#aug-2017" class="archive-month">Aug</a>
-                <a href="news-archive-2017.html#jul-2017" class="archive-month">Jul</a>
-                <a href="news-archive-2017.html#jun-2017" class="archive-month">Jun</a>
-                <a href="news-archive-2017.html#may-2017" class="archive-month">May</a>
-                <a href="news-archive-2017.html#apr-2017" class="archive-month">Apr</a>
-                <a href="news-archive-2017.html#mar-2017" class="archive-month">Mar</a>
-                <a href="news-archive-2017.html#feb-2017" class="archive-month">Feb</a>
-                <a href="news-archive-2017.html#jan-2017" class="archive-month">Jan</a>
-              </div>
-            </div>
-
-            <div class="archive-group">
-              <div class="archive-year">2016</div>
-              <div class="archive-months">
-                <a href="news-archive-2016.html#dec-2016" class="archive-month">Dec</a>
-                <a href="news-archive-2016.html#nov-2016" class="archive-month">Nov</a>
-                <a href="news-archive-2016.html#sep-2016" class="archive-month">Sep</a>
-                <a href="news-archive-2016.html#aug-2016" class="archive-month">Aug</a>
-                <a href="news-archive-2016.html#jul-2016" class="archive-month">Jul</a>
-                <a href="news-archive-2016.html#jun-2016" class="archive-month">Jun</a>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="sidebar-box">
-          <h3 data-i18n="news.older_title">Previous Posts</h3>
-          <div style="padding:14px 18px;">
-            <a href="http://www.ccc-wa.org/news/previous/2" target="_blank" rel="noopener" style="font-size:13px;color:var(--accent);" data-i18n="news.older_link">View Older Posts on Original Site</a>
-          </div>
+          <div class="archive-list"></div>
         </div>
       </aside>
 
@@ -218,5 +42,6 @@
 <div id="footer-ph"></div>
 <script src="js/layout.js"></script>
 <script src="js/main.js"></script>
+<script src="js/content.js"></script>
 </body>
 </html>

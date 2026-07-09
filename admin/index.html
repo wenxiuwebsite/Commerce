@@ -6,7 +6,7 @@
   <title>CCCWA Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="local-secrets.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -305,7 +305,7 @@
     }
     .prev-meta { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
     .prev-hero { width: 100%; max-height: 440px; object-fit: cover; border-radius: 12px; margin-bottom: 36px; display: block; }
-    .prev-text { font-size: 16px; line-height: 1.85; color: var(--sub); margin-bottom: 28px; }
+    .prev-text { font-size: 16px; line-height: 1.85; color: var(--sub); margin-bottom: 28px; overflow-wrap: break-word; word-break: break-word; }
     .prev-text img { max-width: 100%; height: auto; border-radius: 8px; }
     .prev-text p { margin-bottom: 16px; }
     .prev-text p:last-child { margin-bottom: 0; }
@@ -525,6 +525,11 @@
     </div>
     <button class="login-btn" onclick="doLogin()" data-i18n="login.btn">Sign In</button>
     <div class="login-err" id="login-err" data-i18n="login.err">Incorrect password. Try again.</div>
+    <div style="text-align:center;margin:16px 0;color:var(--muted);font-size:12px">— or —</div>
+    <button class="login-btn" type="button" style="background:none;border:1.5px solid var(--accent);color:var(--accent)" onclick="netlifyIdentity.open('login')">
+      Log in with Netlify Identity
+    </button>
+    <div class="form-hint" style="margin-top:8px;text-align:center">Real per-person login. Publishing this way goes live directly. Requires your account to have been invited.</div>
   </div>
 </div>
 
@@ -616,7 +621,7 @@
         <div class="topbar">
           <span class="topbar-title" data-i18n="nav.news">News Articles</span>
           <div class="topbar-controls">
-            <button id="sync-btn" class="btn-secondary" onclick="syncFromGitHub()" style="margin-right:8px">⟳ Sync</button>
+            <button id="sync-btn" class="btn-secondary" onclick="syncFromFiles()" style="margin-right:8px">⟳ Sync</button>
             <button class="btn-primary" onclick="openNewsModal()" data-i18n="news.add">+ New Article</button>
             <div class="lang-toggle">
               <button class="lang-opt active" id="news-en" onclick="setLang('en')">EN</button>
@@ -629,6 +634,9 @@
           </div>
         </div>
         <div class="panel-body">
+          <div style="margin-bottom:14px">
+            <input type="text" id="news-search" class="form-input" placeholder="Search articles by title or category..." oninput="renderNewsTable()" style="max-width:340px">
+          </div>
           <div class="content-card">
             <table>
               <thead>
@@ -637,7 +645,6 @@
                   <th data-i18n="news.col.title">Title</th>
                   <th data-i18n="news.col.category">Category</th>
                   <th data-i18n="news.col.date">Date</th>
-                  <th data-i18n="news.col.page">Article Page</th>
                   <th style="width:130px" data-i18n="news.col.actions">Actions</th>
                 </tr>
               </thead>
@@ -664,6 +671,9 @@
           </div>
         </div>
         <div class="panel-body">
+          <div style="margin-bottom:14px">
+            <input type="text" id="events-search" class="form-input" placeholder="Search events by title or location..." oninput="renderEventsTable()" style="max-width:340px">
+          </div>
           <div class="content-card">
             <table>
               <thead>
@@ -704,32 +714,13 @@
               Publish to Website
             </button>
             <div class="pub-fallback">
-              <button onclick="exportData()">Download data.js manually</button>
-              &nbsp;·&nbsp;
-              <button onclick="configureNetlifyAdmin()">Set up Netlify admin</button>
+              <button onclick="exportData()">Download JSON files manually</button>
             </div>
 
             <hr class="pub-divider">
-            <div class="pub-settings-label">GitHub Settings</div>
+            <div class="pub-settings-label">Local Backend</div>
             <div id="pub-conn-status" style="font-size:12px;margin-bottom:12px;color:var(--muted)"></div>
-            <div style="margin-bottom:10px">
-              <div class="form-label" style="margin-bottom:5px">Personal Access Token</div>
-              <div class="pub-token-row">
-                <input type="password" class="pub-field" id="gh-token-input" placeholder="ghp_...">
-                <button class="pub-save-btn" onclick="saveGhSettings()">Save</button>
-              </div>
-              <div class="pub-hint">Go to github.com → Settings → Developer settings → Personal access tokens (classic) → needs <strong>repo</strong> scope. Stored only in this browser.</div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-              <div>
-                <div class="form-label" style="margin-bottom:5px">Repository</div>
-                <input class="pub-field" id="gh-repo-input" value="wenxiuwebsite/Commerce">
-              </div>
-              <div>
-                <div class="form-label" style="margin-bottom:5px">Branch</div>
-                <input class="pub-field" id="gh-branch-input" value="main">
-              </div>
-            </div>
+            <div class="pub-hint">Publishing writes straight to <code>content/news.json</code> and <code>content/events.json</code> via the local proxy. Run <code>npx decap-server</code> in a second terminal (see docs/SOP.md) — if it's not running, Publish will fail and tell you so.</div>
           </div>
         </div>
       </div>
@@ -812,7 +803,7 @@
       </div>
       <div class="form-row full">
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.excerpt.en">Excerpt (English)</label>
+          <label class="form-label" data-i18n="modal.news.excerpt.en">Summary (English, optional)</label>
           <div class="rich-editor-wrap">
             <div class="rich-toolbar">
               <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="execFmt('bold')"><b>B</b></button>
@@ -830,7 +821,7 @@
               <span class="rich-sep"></span>
               <button type="button" class="rich-btn" title="Clear formatting" onmousedown="event.preventDefault()" onclick="execFmt('removeFormat')">Clear</button>
             </div>
-            <div class="rich-editor" contenteditable="true" id="n-excerpt-en" data-ph="Short description shown in news cards..."></div>
+            <div class="rich-editor" contenteditable="true" id="n-excerpt-en" data-ph="Leave blank to auto-excerpt the body..."></div>
           </div>
         </div>
       </div>
@@ -852,7 +843,7 @@
       </div>
       <div class="form-row full">
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.excerpt.zh">Excerpt (Chinese)</label>
+          <label class="form-label" data-i18n="modal.news.excerpt.zh">Summary (Chinese, optional)</label>
           <div class="rich-editor-wrap">
             <div class="rich-toolbar">
               <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="execFmt('bold')"><b>B</b></button>
@@ -870,7 +861,7 @@
               <span class="rich-sep"></span>
               <button type="button" class="rich-btn" title="Clear formatting" onmousedown="event.preventDefault()" onclick="execFmt('removeFormat')">Clear</button>
             </div>
-            <div class="rich-editor" contenteditable="true" id="n-excerpt-zh" data-ph="新闻卡片中显示的简短描述..."></div>
+            <div class="rich-editor" contenteditable="true" id="n-excerpt-zh" data-ph="留空则自动摘取正文内容..."></div>
           </div>
         </div>
       </div>
@@ -891,29 +882,31 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.date.en">Date (English)</label>
-          <input class="form-input" id="n-date-en" placeholder="e.g. August 24, 2020">
+          <label class="form-label" data-i18n="modal.news.date.en">Publish Date</label>
+          <input class="form-input" type="date" id="n-date">
         </div>
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.date.zh">Date (Chinese)</label>
-          <input class="form-input" id="n-date-zh" placeholder="e.g. 2020年8月24日">
+          <label class="form-label">External Link <span style="font-weight:400;color:var(--muted)">(e.g. WeChat original post, optional)</span></label>
+          <input class="form-input" id="n-external-link" placeholder="https://...">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Featured Image</label>
           <div class="img-upload-row">
-            <input class="form-input" id="n-image" placeholder="images/news-1.png" style="flex:1">
-            <button type="button" class="img-file-btn" onclick="document.getElementById('n-img-file').click()">Upload</button>
+            <input class="form-input" id="n-image" placeholder="/assets/uploads/news/photo.jpg" style="flex:1">
+            <button type="button" class="img-file-btn" id="n-img-upload-btn" onclick="document.getElementById('n-img-file').click()">Upload</button>
+            <button type="button" class="img-file-btn" onclick="openMediaModal('featured')">Browse</button>
             <input type="file" id="n-img-file" accept="image/*" style="display:none" onchange="handleFeaturedImg(this)">
             <img id="n-img-preview" class="img-preview-thumb" alt="">
           </div>
           <span class="form-hint">Upload a file or enter a path. Leave blank if no image.</span>
         </div>
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.page">Article Page</label>
-          <input class="form-input" id="n-article-page" placeholder="article-view.html?id=slug">
-          <span class="form-hint">Auto-filled when using content blocks below.</span>
+          <label class="form-label">External Link Label</label>
+          <input class="form-input" id="n-external-link-label-en" placeholder="Read original →" style="margin-bottom:6px">
+          <input class="form-input" id="n-external-link-label-zh" placeholder="阅读原文 →">
+          <span class="form-hint">Shown at the bottom of the article (EN / ZH).</span>
         </div>
       </div>
       <div class="form-section">Article Content Blocks</div>
@@ -941,12 +934,12 @@
       <div class="form-section" data-i18n="modal.events.sec.date">Event Date</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.events.month">Month Label</label>
-          <input class="form-input" id="e-month" placeholder="JUL" maxlength="3" style="text-transform:uppercase">
+          <label class="form-label" data-i18n="modal.events.month">Date</label>
+          <input class="form-input" type="date" id="e-date">
         </div>
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.events.day">Day Number</label>
-          <input class="form-input" id="e-day" placeholder="12">
+          <label class="form-label" data-i18n="modal.events.time">Time</label>
+          <input class="form-input" id="e-time" placeholder="6:00 PM – 10:00 PM">
         </div>
       </div>
       <div class="form-section" data-i18n="modal.sec.en">English Content</div>
@@ -956,14 +949,10 @@
           <input class="form-input" id="e-title-en">
         </div>
       </div>
-      <div class="form-row">
+      <div class="form-row full">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.events.location.en">Location (English)</label>
           <input class="form-input" id="e-location-en" placeholder="Venue, City">
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-i18n="modal.events.time">Time</label>
-          <input class="form-input" id="e-time" placeholder="6:00 PM – 10:00 PM">
         </div>
       </div>
       <div class="form-row full">
@@ -1002,6 +991,22 @@
     <div class="modal-foot">
       <button class="btn-outline" onclick="closeEventModal()" data-i18n="btn.cancel">Cancel</button>
       <button class="btn-primary" onclick="saveEvent()" data-i18n="btn.save.event">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEDIA LIBRARY -->
+<div class="modal-backdrop" id="media-modal" style="display:none" onclick="if(event.target===this)closeMediaModal()">
+  <div class="modal-box" style="width:720px">
+    <div class="modal-head">
+      <h3>Choose an Image</h3>
+      <button class="modal-close" onclick="closeMediaModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div id="media-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-height:440px;overflow-y:auto"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeMediaModal()" data-i18n="btn.cancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -1168,99 +1173,64 @@ function toggleTheme() {
 applyTheme();
 
 /* ================================================================
+   NETLIFY IDENTITY — real per-person login, used alongside (not
+   instead of) the shared password so nothing breaks if Identity
+   hasn't been enabled/invited yet. When logged in via Identity,
+   Publish goes live through Git Gateway instead of the local
+   decap-server proxy.
+================================================================ */
+const NETLIFY_SITE_URL = 'https://thunderous-bavarois-667c98.netlify.app';
+const GIT_GATEWAY_BASE = NETLIFY_SITE_URL + '/.netlify/git/github';
+let identityUser = null;
+
+if (window.netlifyIdentity) {
+  netlifyIdentity.init({ APIUrl: NETLIFY_SITE_URL + '/.netlify/identity' });
+  netlifyIdentity.on('login', user => {
+    identityUser = user;
+    netlifyIdentity.close();
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadData();
+    renderAll();
+    syncFromFiles(true);
+    toast('Logged in as ' + (user.email || 'Netlify Identity user'));
+  });
+  netlifyIdentity.on('logout', () => {
+    identityUser = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  });
+  netlifyIdentity.on('init', user => {
+    if (user) {
+      identityUser = user;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadData();
+      renderAll();
+      syncFromFiles(true);
+    }
+  });
+}
+
+/* ================================================================
    DATA
 ================================================================ */
 const PASS = 'cccwa2024';
 const STORAGE_KEY = 'cccwa_cms_data';
 const DIRTY_KEY = 'cccwa_cms_dirty';
+const LOCAL_API = 'http://localhost:8081/api/v1';
 
+// Content lives in content/news.json + content/events.json (fetched fresh on
+// login via syncFromFiles) — this is just the shape used before that first
+// load resolves, or if fetching the real files ever fails.
 const DEFAULT_DATA = {
   categories: [
     { en: 'Announcement', zh: '公告' },
     { en: 'Community',    zh: '社区' },
     { en: 'Event',        zh: '活动' }
   ],
-  news: [
-    { id:'immigration-assets', category_en:'Announcement', category_zh:'公告',
-      title_en:'CCCWA COVID-19 Weekly Star — Immigration Asset Disposal',
-      title_zh:'CCCWA抗击疫情·每周一星 — 移民资产处置问题',
-      date_en:'August 24, 2020', date_zh:'2020年8月24日',
-      excerpt_en:'Attorney Cai discusses immigration asset management challenges for Chinese families settling in the US.',
-      excerpt_zh:'蔡律师讨论华裔家庭在海外安家落户过程中的资产管理挑战。',
-      image:'images/news-1.png', article_page:'article-immigration-assets.html' },
-    { id:'covid-community', category_en:'Community', category_zh:'社区',
-      title_en:'CCCWA Foundation Unites Community Against COVID-19',
-      title_zh:'CCCWA一心抗疫，凝聚社区力量',
-      date_en:'August 20, 2020', date_zh:'2020年8月20日',
-      excerpt_en:'CCCWA Foundation coordinated with local businesses and volunteers across Greater Seattle to support communities affected by COVID-19.',
-      excerpt_zh:'CCCWA与西雅图地区各个企业和志愿者协调配合，支持受COVID-19影响的社区。',
-      image:'images/news-2.png', article_page:'article-covid-community.html' },
-    { id:'new-year-2018', category_en:'Event', category_zh:'活动',
-      title_en:'2018 Chinese New Year Gala Highlights',
-      title_zh:'2018年春节晚会活动回顾',
-      date_en:'2018', date_zh:'2018年',
-      excerpt_en:'Hundreds of members and guests gathered to celebrate the Chinese New Year with performances, a gala banquet, and award presentations.',
-      excerpt_zh:'数百位会员和宾客欢聚一堂，共贺春节，举行文艺表演、晚会大餐和颁奖典礼。',
-      image:'images/news-butterfly.jpg', article_page:'article-new-year-2018.html' },
-    { id:'dou-lao-fang', category_en:'Community', category_zh:'社区',
-      title_en:'Dou Lao Fang Restaurant: One Pot, One World',
-      title_zh:'抗击疫情·爱心餐厅系列：豆捞坊——一锅一世界',
-      date_en:'2020', date_zh:'2020年',
-      excerpt_en:'Feature on Dou Lao Fang restaurant joining CCCWA\'s COVID charity meal campaign.',
-      excerpt_zh:'豆捞坊餐厅加入CCCWA爱心午餐活动，用一锅汤底送出爱心，支援社区。',
-      image:'images/news-3.jpg', article_page:'article-dou-lao-fang.html' },
-    { id:'meal-drive', category_en:'Announcement', category_zh:'公告',
-      title_en:'CCCWA COVID Charity Meal Drive — Latest Update',
-      title_zh:'CCCWA抗击疫情爱心午餐募捐活动最新动态',
-      date_en:'2020', date_zh:'2020年',
-      excerpt_en:'Latest update on CCCWA\'s charity meal fundraising effort, supporting local restaurants and vulnerable residents.',
-      excerpt_zh:'最新动态：CCCWA爱心募捐活动，支持受疫情影响的当地餐厅和弱势居民。',
-      image:'images/news-4.jpg', article_page:'article-meal-drive.html' },
-    { id:'hou-bin', category_en:'Event', category_zh:'活动',
-      title_en:'Paralympic Ambassador Hou Bin Keynote: Promoting the Olympic Spirit',
-      title_zh:'北京冬奥会形象大使侯斌先生主题演讲：弘扬奥运精神',
-      date_en:'July 2018', date_zh:'2018年7月',
-      excerpt_en:'CCCWA hosted Paralympic ambassador Hou Bin for a keynote speech on the Olympic spirit.',
-      excerpt_zh:'CCCWA主办残奥会形象大使侯斌先生主题演讲，分享奥运精神与国际合作理念。',
-      image:'', article_page:'article-hou-bin.html' },
-    { id:'trade-forum-2017', category_en:'Community', category_zh:'社区',
-      title_en:'China Province & Washington State Trade and Investment Cooperation Forum',
-      title_zh:'中国省与华盛顿州贸易投资合作论坛',
-      date_en:'July 26, 2017', date_zh:'2017年7月26日',
-      excerpt_en:'CCCWA hosted a major forum connecting Chinese provincial delegations with Washington State representatives.',
-      excerpt_zh:'CCCWA主办中美贸易投资合作论坛，搭建中国省级代表团与华盛顿州政商界之间的交流平台。',
-      image:'images/news-5.png', article_page:'article-trade-forum-2017.html' },
-    { id:'hk-anniversary', category_en:'Announcement', category_zh:'公告',
-      title_en:'CCCWA Celebrates 20th Anniversary of Hong Kong SAR',
-      title_zh:'华盛顿州中国总商会庆祝香港特别行政区成立20周年',
-      date_en:'July 2017', date_zh:'2017年7月',
-      excerpt_en:'CCCWA held a celebration marking the 20th anniversary of the establishment of the Hong Kong Special Administrative Region.',
-      excerpt_zh:'CCCWA举办庆典活动，热烈庆祝香港特别行政区回归祖国20周年。',
-      image:'', article_page:'article-hk-anniversary.html' }
-  ],
-  events: [
-    { id:'e1', month:'JUL', day:'12',
-      title_en:'Annual Business Gala & Awards Dinner', title_zh:'年度商业晚会及颁奖典礼',
-      location_en:'Westin Seattle Hotel, Seattle', location_zh:'西雅图威斯汀酒店',
-      time:'6:00 PM – 10:00 PM',
-      desc_en:'Join us for our flagship annual dinner celebrating CCCWA members and recognizing outstanding contributions to the Washington business community.',
-      desc_zh:'诚邀您出席年度旗舰晚会，共同表彰CCCWA会员中的杰出贡献。',
-      register_url:'contact.html' },
-    { id:'e2', month:'JUL', day:'24',
-      title_en:'US-China Trade Forum 2026', title_zh:'2026年中美贸易论坛',
-      location_en:'Washington State Convention Center', location_zh:'华盛顿州展览中心',
-      time:'9:00 AM – 5:00 PM',
-      desc_en:'A full-day forum featuring keynote speakers, panel discussions, and networking opportunities.',
-      desc_zh:'全天论坛，包括主题演讲、圆桌讨论和交流合作机会。',
-      register_url:'contact.html' },
-    { id:'e3', month:'AUG', day:'9',
-      title_en:'Member Networking Mixer', title_zh:'会员交流活动',
-      location_en:'Bellevue, WA', location_zh:'华盛顿州贝尔维尤',
-      time:'6:30 PM – 9:00 PM',
-      desc_en:'A casual networking event for CCCWA members and prospective members. RSVP required.',
-      desc_zh:'为CCCWA会员及潜在会员举办的轻松交流活动，需提前报名。',
-      register_url:'contact.html' }
-  ]
+  news: [],
+  events: []
 };
 
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -1273,6 +1243,8 @@ function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) { try { data = JSON.parse(saved); } catch(e) {} }
   if (!data.categories) data.categories = DEFAULT_DATA.categories;
+  if (!data.news) data.news = [];
+  if (!data.events) data.events = [];
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
 }
 
@@ -1285,6 +1257,97 @@ function persistData() {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
+function slugify(str) {
+  return String(str || '').toLowerCase().trim()
+    .replace(/[^\w一-龥]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function countParagraphs(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html || '';
+  const ps = tmp.querySelectorAll('p');
+  return ps.length || (String(html || '').trim() ? 1 : 0);
+}
+
+function splitParagraphs(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html || '';
+  const kids = Array.from(tmp.children);
+  return kids.length ? kids.map(el => el.outerHTML) : (html ? [html] : []);
+}
+
+// content_blocks (ordered text/image blocks) -> body_en/body_zh + body_images.
+// Images are anchored to whichever text paragraph precedes them.
+function blocksToBody(blocks) {
+  let bodyEn = [], bodyZh = [], images = [], galleries = [];
+  let pCountEn = 0, pCountZh = 0;
+  blocks.forEach(b => {
+    if (b.type === 'text') {
+      if (b.en) { bodyEn.push(b.en); pCountEn += countParagraphs(b.en); }
+      if (b.zh) { bodyZh.push(b.zh); pCountZh += countParagraphs(b.zh); }
+    } else if (b.type === 'image' && b.src) {
+      images.push({
+        src: b.src, alt: b.alt || '',
+        caption_en: b.caption_en || '', caption_zh: b.caption_zh || '',
+        align: b.align || 'center', size: b.size || '100',
+        after_paragraph: Math.max(pCountEn, pCountZh, 0)
+      });
+    } else if (b.type === 'gallery' && (b.images || []).some(im => im.src)) {
+      galleries.push({
+        images: (b.images || []).filter(im => im.src).map(im => ({
+          src: im.src, alt: im.alt || '',
+          caption_en: im.caption_en || '', caption_zh: im.caption_zh || ''
+        })),
+        after_paragraph: Math.max(pCountEn, pCountZh, 0)
+      });
+    }
+  });
+  return { body_en: bodyEn.join('\n\n'), body_zh: bodyZh.join('\n\n'), body_images: images, body_galleries: galleries };
+}
+
+// Reverse of blocksToBody — reconstructs an editable ordered block list from
+// a saved article, splitting the body back into text blocks around each
+// positioned image/gallery so it can be edited the same way it was authored.
+function bodyToBlocks(article) {
+  const bodyImages = article.body_images || [];
+  const bodyGalleries = article.body_galleries || [];
+  if (!bodyImages.length && !bodyGalleries.length) {
+    return (article.body_en || article.body_zh)
+      ? [{ type: 'text', en: article.body_en || '', zh: article.body_zh || '' }]
+      : [];
+  }
+  const enParas = splitParagraphs(article.body_en);
+  const zhParas = splitParagraphs(article.body_zh);
+  const maxLen = Math.max(enParas.length, zhParas.length);
+  const byPos = {};
+  bodyImages.forEach(img => { (byPos[img.after_paragraph] = byPos[img.after_paragraph] || []).push({ kind: 'image', data: img }); });
+  bodyGalleries.forEach(gal => { (byPos[gal.after_paragraph] = byPos[gal.after_paragraph] || []).push({ kind: 'gallery', data: gal }); });
+  const blocks = [];
+  let bufEn = [], bufZh = [];
+  for (let i = 0; i < maxLen; i++) {
+    if (enParas[i]) bufEn.push(enParas[i]);
+    if (zhParas[i]) bufZh.push(zhParas[i]);
+    if (byPos[i + 1]) {
+      blocks.push({ type: 'text', en: bufEn.join(''), zh: bufZh.join('') });
+      bufEn = []; bufZh = [];
+      byPos[i + 1].forEach(entry => {
+        if (entry.kind === 'image') {
+          const img = entry.data;
+          blocks.push({
+            type: 'image', src: img.src, alt: img.alt || '',
+            caption_en: img.caption_en || '', caption_zh: img.caption_zh || '',
+            align: img.align || 'center', size: img.size || '100'
+          });
+        } else {
+          blocks.push({ type: 'gallery', images: (entry.data.images || []).map(im => ({ ...im })) });
+        }
+      });
+    }
+  }
+  if (bufEn.length || bufZh.length) blocks.push({ type: 'text', en: bufEn.join(''), zh: bufZh.join('') });
+  return blocks;
+}
+
 /* ================================================================
    AUTH
 ================================================================ */
@@ -1294,7 +1357,7 @@ function doLogin() {
     document.getElementById('app').style.display = 'block';
     loadData();
     renderAll();
-    syncFromGitHub(true); // pull latest team data in background
+    syncFromFiles(true); // pull latest saved content/news.json + events.json in background
   } else {
     document.getElementById('login-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -1310,6 +1373,10 @@ document.getElementById('news-modal').addEventListener('input',  () => { newsMod
 document.getElementById('news-modal').addEventListener('change', () => { newsModalDirty = true; });
 
 function doLogout() {
+  if (identityUser && window.netlifyIdentity) {
+    netlifyIdentity.logout(); // triggers the 'logout' handler above, which hides the app
+    return;
+  }
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pw').value = '';
@@ -1326,7 +1393,7 @@ function showPanel(name, el) {
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
   if (name === 'dashboard') renderDashboard();
-  if (name === 'publish') updatePubSettings();
+  if (name === 'publish') updateLocalBackendStatus();
   if (name === 'inbox') { updateInboxSettings(); fetchInboxSubmissions(); }
   applyTranslations();
 }
@@ -1360,11 +1427,12 @@ function renderDashboard() {
   document.getElementById('stat-news').textContent = data.news.length;
   document.getElementById('stat-events').textContent = data.events.length;
   const tbody = document.getElementById('dash-news-rows');
-  tbody.innerHTML = data.news.slice(0, 5).map(n => `
+  const sorted = [...data.news].sort((a, b) => new Date(b.date) - new Date(a.date));
+  tbody.innerHTML = sorted.slice(0, 5).map(n => `
     <tr>
       <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
       <td>${catTag(n.category_en, n.category_zh)}</td>
-      <td style="color:var(--muted);font-size:12px">${esc(n.date_en)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(n.date)}</td>
     </tr>`).join('');
   updateDirtyIndicator();
 }
@@ -1372,17 +1440,26 @@ function renderDashboard() {
 function renderNewsTable() {
   const tbody = document.getElementById('news-rows');
   if (!data.news.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">${T('news.empty')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">${T('news.empty')}</td></tr>`;
     return;
   }
   const docIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-  tbody.innerHTML = data.news.map((n, i) => `
+  const q = (document.getElementById('news-search')?.value || '').trim().toLowerCase();
+  let sorted = data.news.map((n, i) => ({ n, i })).sort((a, b) => new Date(b.n.date) - new Date(a.n.date));
+  if (q) {
+    sorted = sorted.filter(({ n }) => [n.title_en, n.title_zh, n.category_en, n.category_zh]
+      .some(v => stripHtml(v || '').toLowerCase().includes(q)));
+  }
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No articles match "${esc(q)}".</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map(({ n, i }) => `
     <tr>
-      <td>${n.image ? `<img src="${n.image.startsWith('data:') ? esc(n.image) : '../' + esc(n.image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
+      <td>${n.cover_image ? `<img src="${esc(n.cover_image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
       <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
       <td>${catTag(n.category_en, n.category_zh)}</td>
-      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date_en)}</td>
-      <td style="font-size:12px;color:var(--muted)">${n.article_page ? esc(n.article_page) : '—'}</td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date)}</td>
       <td>
         <button class="btn-edit" onclick="openNewsModal(${i})">${T('btn.edit')}</button>
         <button class="btn-danger" onclick="deleteNews(${i})">${T('btn.delete')}</button>
@@ -1396,9 +1473,24 @@ function renderEventsTable() {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">${T('events.empty')}</td></tr>`;
     return;
   }
-  tbody.innerHTML = data.events.map((e, i) => `
+  const monthAbbr = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const q = (document.getElementById('events-search')?.value || '').trim().toLowerCase();
+  let sorted = data.events.map((e, i) => ({ e, i })).sort((a, b) => new Date(a.e.date) - new Date(b.e.date));
+  if (q) {
+    sorted = sorted.filter(({ e }) => [e.title_en, e.title_zh, e.location_en, e.location_zh]
+      .some(v => (v || '').toLowerCase().includes(q)));
+  }
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No events match "${esc(q)}".</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map(({ e, i }) => {
+    const d = e.date ? new Date(e.date + 'T00:00:00') : null;
+    const m = d && !isNaN(d) ? monthAbbr[d.getMonth()] : '—';
+    const day = d && !isNaN(d) ? d.getDate() : '—';
+    return `
     <tr>
-      <td><div class="event-badge"><span class="event-badge-m">${esc(e.month)}</span><span class="event-badge-d">${esc(e.day)}</span></div></td>
+      <td><div class="event-badge"><span class="event-badge-m">${esc(m)}</span><span class="event-badge-d">${esc(day)}</span></div></td>
       <td><div class="cell-title">${esc(lang === 'zh' ? e.title_zh : e.title_en)}</div><div class="cell-sub">${esc(lang === 'zh' ? e.title_en : e.title_zh)}</div></td>
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? e.location_zh : e.location_en)}</td>
       <td style="font-size:12px;color:var(--muted);white-space:nowrap">${esc(e.time)}</td>
@@ -1406,7 +1498,8 @@ function renderEventsTable() {
         <button class="btn-edit" onclick="openEventModal(${i})">${T('btn.edit')}</button>
         <button class="btn-danger" onclick="deleteEvent(${i})">${T('btn.delete')}</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function esc(s) {
@@ -1450,29 +1543,31 @@ function openNewsModal(idx) {
   editingNewsId = idx !== undefined ? idx : null;
   document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : T('modal.news.add');
   const n = idx !== undefined ? data.news[idx] : {};
-  document.getElementById('n-id').value               = n.id || uid();
-  document.getElementById('n-title-en').innerHTML     = n.title_en || '';
-  document.getElementById('n-title-zh').innerHTML     = n.title_zh || '';
-  document.getElementById('n-category-en').value      = n.category_en || '';
-  document.getElementById('n-category-zh').value      = n.category_zh || '';
-  document.getElementById('n-excerpt-en').innerHTML   = n.excerpt_en || '';
-  document.getElementById('n-excerpt-zh').innerHTML   = n.excerpt_zh || '';
+  document.getElementById('n-id').value                     = n.id || '';
+  document.getElementById('n-title-en').innerHTML           = n.title_en || '';
+  document.getElementById('n-title-zh').innerHTML           = n.title_zh || '';
+  document.getElementById('n-category-en').value            = n.category_en || '';
+  document.getElementById('n-category-zh').value            = n.category_zh || '';
+  document.getElementById('n-excerpt-en').innerHTML          = n.summary_en || '';
+  document.getElementById('n-excerpt-zh').innerHTML          = n.summary_zh || '';
   renderCategoryDatalist();
-  document.getElementById('n-date-en').value      = n.date_en || '';
-  document.getElementById('n-date-zh').value      = n.date_zh || '';
-  document.getElementById('n-image').value        = n.image || '';
-  document.getElementById('n-article-page').value = n.article_page || '';
-  // Featured image preview
+  document.getElementById('n-date').value                    = n.date || '';
+  document.getElementById('n-image').value                   = n.cover_image || '';
+  document.getElementById('n-external-link').value            = n.external_link || '';
+  document.getElementById('n-external-link-label-en').value   = n.external_link_label_en || '';
+  document.getElementById('n-external-link-label-zh').value   = n.external_link_label_zh || '';
+  // Featured image preview — cover_image is always a real, directly-servable
+  // path now (e.g. /assets/uploads/news/x.jpg), no base64 special-casing needed.
   const prev = document.getElementById('n-img-preview');
-  if (n.image) {
-    prev.src = n.image.startsWith('data:') ? n.image : '../' + n.image;
+  if (n.cover_image) {
+    prev.src = n.cover_image;
     prev.style.display = 'block';
     prev.onerror = () => { prev.style.display = 'none'; };
   } else {
     prev.src = ''; prev.style.display = 'none';
   }
-  // Content blocks
-  currentBlocks = JSON.parse(JSON.stringify(n.content_blocks || []));
+  // Content blocks — reconstructed from body_en/body_zh + body_images
+  currentBlocks = bodyToBlocks(n);
   renderBlocks();
   applyTranslations();
   newsModalDirty = false;
@@ -1489,24 +1584,26 @@ function saveNews() {
   const cat   = document.getElementById('n-category-en').value.trim() || 'Announcement';
   const catZhInput = document.getElementById('n-category-zh').value.trim();
   const catZh = catZhInput || (data.categories || []).find(c => c.en === cat)?.zh || cat;
-  const id = document.getElementById('n-id').value || uid();
-  const artPage = document.getElementById('n-article-page').value.trim();
+  const id = document.getElementById('n-id').value.trim() || slugify(stripHtml(document.getElementById('n-title-en').innerHTML) || stripHtml(document.getElementById('n-title-zh').innerHTML)) || uid();
+  const bodyParts = blocksToBody(currentBlocks);
   const item = {
     id,
+    date:         document.getElementById('n-date').value.trim(),
     category_en:  cat, category_zh: catZh,
     title_en:     document.getElementById('n-title-en').innerHTML.trim(),
     title_zh:     document.getElementById('n-title-zh').innerHTML.trim(),
-    date_en:      document.getElementById('n-date-en').value.trim(),
-    date_zh:      document.getElementById('n-date-zh').value.trim(),
-    excerpt_en:   document.getElementById('n-excerpt-en').innerHTML.trim(),
-    excerpt_zh:   document.getElementById('n-excerpt-zh').innerHTML.trim(),
-    image:        document.getElementById('n-image').value.trim(),
-    article_page: artPage || `article-view.html?id=${id}`
+    summary_en:   document.getElementById('n-excerpt-en').innerHTML.trim(),
+    summary_zh:   document.getElementById('n-excerpt-zh').innerHTML.trim(),
+    cover_image:  document.getElementById('n-image').value.trim(),
+    body_en:      bodyParts.body_en,
+    body_zh:      bodyParts.body_zh,
+    body_images:  bodyParts.body_images,
+    body_galleries: bodyParts.body_galleries,
+    external_link: document.getElementById('n-external-link').value.trim(),
+    external_link_label_en: document.getElementById('n-external-link-label-en').value.trim(),
+    external_link_label_zh: document.getElementById('n-external-link-label-zh').value.trim()
   };
-  if (currentBlocks.length) {
-    item.content_blocks = JSON.parse(JSON.stringify(currentBlocks));
-  }
-  if (!stripHtml(item.title_en)) { alert(T('alert.title')); return; }
+  if (!stripHtml(item.title_zh) && !stripHtml(item.title_en)) { alert(T('alert.title')); return; }
   if (editingNewsId !== null) data.news[editingNewsId] = item;
   else data.news.unshift(item);
   newsModalDirty = false;
@@ -1528,9 +1625,8 @@ function openEventModal(idx) {
   editingEventId = idx !== undefined ? idx : null;
   document.getElementById('event-modal-title').textContent = idx !== undefined ? T('modal.events.edit') : T('modal.events.add');
   const e = idx !== undefined ? data.events[idx] : {};
-  document.getElementById('e-id').value           = e.id || uid();
-  document.getElementById('e-month').value        = e.month || '';
-  document.getElementById('e-day').value          = e.day || '';
+  document.getElementById('e-id').value           = e.id || '';
+  document.getElementById('e-date').value         = e.date || '';
   document.getElementById('e-title-en').value     = e.title_en || '';
   document.getElementById('e-title-zh').value     = e.title_zh || '';
   document.getElementById('e-location-en').value  = e.location_en || '';
@@ -1546,10 +1642,10 @@ function openEventModal(idx) {
 function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
 
 function saveEvent() {
+  const id = document.getElementById('e-id').value.trim() || slugify(document.getElementById('e-title-en').value || document.getElementById('e-title-zh').value) || uid();
   const item = {
-    id:           document.getElementById('e-id').value || uid(),
-    month:        document.getElementById('e-month').value.trim().toUpperCase(),
-    day:          document.getElementById('e-day').value.trim(),
+    id,
+    date:         document.getElementById('e-date').value.trim(),
     title_en:     document.getElementById('e-title-en').value.trim(),
     title_zh:     document.getElementById('e-title-zh').value.trim(),
     location_en:  document.getElementById('e-location-en').value.trim(),
@@ -1559,7 +1655,7 @@ function saveEvent() {
     desc_zh:      document.getElementById('e-desc-zh').value.trim(),
     register_url: document.getElementById('e-register-url').value.trim() || 'contact.html'
   };
-  if (!item.title_en) { alert(T('alert.title')); return; }
+  if (!item.title_en && !item.title_zh) { alert(T('alert.title')); return; }
   if (editingEventId !== null) data.events[editingEventId] = item;
   else data.events.push(item);
   persistData(); renderEventsTable(); renderDashboard(); closeEventModal();
@@ -1574,18 +1670,19 @@ function deleteEvent(idx) {
 }
 
 /* ================================================================
-   EXPORT & PUBLISH
+   EXPORT & PUBLISH — writes straight to content/news.json and
+   content/events.json via the local decap-server proxy (same file
+   API previously used/validated for the Decap CMS setup), instead
+   of the old GitHub Contents API + Personal Access Token.
 ================================================================ */
-function generateDataJs() {
-  return `/* CCCWA Site Content — generated ${new Date().toLocaleString()}. Edit via admin/index.html */\nwindow.CCCWA_DATA = ${JSON.stringify(data, null, 2)};\n`;
-}
-
 function exportData() {
-  const blob = new Blob([generateDataJs()], { type: 'application/javascript' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'data.js'; a.click();
-  URL.revokeObjectURL(url);
+  [['news.json', { items: data.news }], ['events.json', { items: data.events }]].forEach(([name, obj]) => {
+    const blob = new Blob([JSON.stringify(obj, null, 2) + '\n'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+  });
   dirty = false;
   localStorage.setItem(DIRTY_KEY, 'false');
   updateDirtyIndicator();
@@ -1600,140 +1697,141 @@ function setPubStatus(state, msg) {
   el.textContent = msg;
 }
 
-function saveGhSettings() {
-  const token  = document.getElementById('gh-token-input').value.trim();
-  const repo   = document.getElementById('gh-repo-input').value.trim();
-  const branch = document.getElementById('gh-branch-input').value.trim();
-  if (token)  localStorage.setItem('cccwa_gh_token',  token);
-  if (repo)   localStorage.setItem('cccwa_gh_repo',   repo);
-  if (branch) localStorage.setItem('cccwa_gh_branch', branch);
-  document.getElementById('gh-token-input').value = '';
-  updatePubSettings();
-  toast('Settings saved');
+async function checkLocalBackend() {
+  try {
+    const res = await fetch(LOCAL_API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'info', params: {} })
+    });
+    return res.ok;
+  } catch (e) { return false; }
 }
 
-function updatePubSettings() {
-  const hasToken = !!localStorage.getItem('cccwa_gh_token');
-  const repo     = localStorage.getItem('cccwa_gh_repo')   || 'wenxiuwebsite/Commerce';
-  const branch   = localStorage.getItem('cccwa_gh_branch') || 'main';
-  const repoEl   = document.getElementById('gh-repo-input');
-  const branchEl = document.getElementById('gh-branch-input');
-  const connEl   = document.getElementById('pub-conn-status');
-  if (repoEl)   repoEl.value   = repo;
-  if (branchEl) branchEl.value = branch;
+async function updateLocalBackendStatus() {
+  const connEl = document.getElementById('pub-conn-status');
   if (connEl) {
-    connEl.textContent = hasToken
-      ? `Token saved — connected to ${repo} (${branch})`
-      : 'No token saved. Enter one below to enable one-click publishing.';
-    connEl.style.color = hasToken ? 'var(--accent)' : 'var(--muted)';
+    if (identityUser) {
+      connEl.textContent = `Logged in as ${identityUser.email} via Netlify Identity — Publish goes live through Git Gateway.`;
+      connEl.style.color = 'var(--accent)';
+    } else {
+      const ok = await checkLocalBackend();
+      connEl.textContent = ok
+        ? 'Local backend connected (decap-server on :8081) — Publish writes to local files only. Log in with Netlify Identity (login screen) to publish live instead.'
+        : 'Local backend not reachable — run "npx decap-server" in a second terminal, then reload this page.';
+      connEl.style.color = ok ? 'var(--accent)' : 'var(--danger)';
+    }
   }
   const lastPub = localStorage.getItem('cccwa_last_pub');
   if (lastPub) {
-    const d = new Date(lastPub);
-    setPubStatus('ok', `Last published ${d.toLocaleString()}`);
+    setPubStatus('ok', `Last published ${new Date(lastPub).toLocaleString()}`);
   } else {
     setPubStatus('idle', 'Ready to publish');
   }
 }
 
-async function publishToSite() {
-  const token  = localStorage.getItem('cccwa_gh_token');
-  const repo   = localStorage.getItem('cccwa_gh_repo')   || 'wenxiuwebsite/Commerce';
-  const branch = localStorage.getItem('cccwa_gh_branch') || 'main';
-  if (!token) {
-    setPubStatus('err', 'No GitHub token found — add one in settings below.');
-    return;
+async function persistJsonFile(path, obj, collectionName) {
+  const raw = JSON.stringify(obj, null, 2) + '\n';
+  const res = await fetch(LOCAL_API, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'persistEntry',
+      params: {
+        branch: 'main',
+        dataFiles: [{ slug: collectionName, path, raw, newPath: path }],
+        assets: [],
+        options: { collectionName, commitMessage: `Update ${path} via admin`, useWorkflow: false, hasAssetStore: true, draft: false, status: 'draft' }
+      }
+    })
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+  return json;
+}
+
+// Writes a file through Git Gateway (real GitHub commit, authenticated via
+// the logged-in Netlify Identity user's JWT — no token ever touches the
+// browser's storage). This is what makes Publish actually go live.
+async function putFileViaGitGateway(path, obj) {
+  const jwt = await identityUser.jwt();
+  const headers = { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' };
+  const content = JSON.stringify(obj, null, 2) + '\n';
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+
+  const getRes = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}?ref=main`, { headers });
+  let sha;
+  if (getRes.ok) {
+    sha = (await getRes.json()).sha;
+  } else if (getRes.status !== 404) {
+    const err = await getRes.json().catch(() => ({}));
+    throw new Error(err.message || `HTTP ${getRes.status} reading ${path}`);
   }
+
+  const putRes = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}`, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ message: `Update ${path} via admin`, content: encoded, sha, branch: 'main' })
+  });
+  const result = await putRes.json().catch(() => ({}));
+  if (!putRes.ok) throw new Error(result.message || `HTTP ${putRes.status} writing ${path}`);
+  return result;
+}
+
+async function publishToSite() {
   const btn = document.getElementById('pub-main-btn');
   btn.disabled = true;
   setPubStatus('busy', 'Publishing...');
-  const path = 'content/data.js';
-  const content = generateDataJs();
-  const encoded = btoa(unescape(encodeURIComponent(content)));
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json'
-  };
   try {
-    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, { headers });
-    const current = await getRes.json();
-    if (!getRes.ok) throw new Error(current.message || `HTTP ${getRes.status}`);
-    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-      method: 'PUT', headers,
-      body: JSON.stringify({
-        message: `Update site content — ${new Date().toLocaleString()}`,
-        content: encoded,
-        sha: current.sha,
-        branch
-      })
-    });
-    const result = await putRes.json();
-    if (!putRes.ok) throw new Error(result.message || `HTTP ${putRes.status}`);
+    if (identityUser) {
+      await putFileViaGitGateway('content/news.json', { items: data.news });
+      await putFileViaGitGateway('content/events.json', { items: data.events });
+      setPubStatus('ok', 'Published live via Git Gateway — Netlify is deploying now');
+      toast('Published to the live site!');
+    } else {
+      await persistJsonFile('content/news.json', { items: data.news }, 'news');
+      await persistJsonFile('content/events.json', { items: data.events }, 'events');
+      setPubStatus('ok', 'Published — saved to content/news.json and content/events.json (local only)');
+      toast('Published locally!');
+    }
     dirty = false;
     localStorage.setItem(DIRTY_KEY, 'false');
     localStorage.setItem('cccwa_last_pub', new Date().toISOString());
     updateDirtyIndicator();
-    setPubStatus('ok', `Published successfully — Netlify is deploying now`);
-    toast('Published! Site is deploying...');
   } catch (e) {
-    setPubStatus('err', 'Error: ' + e.message);
-    toast('Publish failed — check settings');
+    setPubStatus('err', 'Error: ' + e.message + (identityUser ? '' : ' — is decap-server running?'));
+    toast('Publish failed');
   } finally {
     btn.disabled = false;
   }
 }
 
 /* ================================================================
-   TEAM SYNC — fetch published content/data.js from GitHub and use
-   it as source of truth so all team members see the same content
+   SYNC — reload content/news.json + content/events.json from disk,
+   so this stays the shared source of truth (e.g. after someone else
+   published, or after pulling the latest from git).
 ================================================================ */
-async function syncFromGitHub(silent) {
-  const token  = localStorage.getItem('cccwa_gh_token');
-  const repo   = localStorage.getItem('cccwa_gh_repo')   || 'wenxiuwebsite/Commerce';
-  const branch = localStorage.getItem('cccwa_gh_branch') || 'main';
-
-  if (!token) {
-    if (!silent) toast('No GitHub token — add one in Publish settings first');
-    return;
-  }
-
+async function syncFromFiles(silent) {
   const syncBtn = document.getElementById('sync-btn');
   if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = '⟳ Syncing…'; }
-  if (!silent) toast('Syncing from GitHub…');
+  if (!silent) toast('Syncing…');
 
   try {
-    const res = await fetch(
-      `https://api.github.com/repos/${repo}/contents/content/data.js?ref=${branch}`,
-      { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
-    );
-    if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
+    const [newsRes, eventsRes] = await Promise.all([
+      fetch('../content/news.json?_=' + Date.now()),
+      fetch('../content/events.json?_=' + Date.now())
+    ]);
+    if (!newsRes.ok || !eventsRes.ok) throw new Error('Could not load content files');
+    const newsJson = await newsRes.json();
+    const eventsJson = await eventsRes.json();
 
-    const json = await res.json();
-    const raw  = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
-
-    const anchor = raw.indexOf('window.CCCWA_DATA');
-    const start  = raw.indexOf('{', anchor);
-    if (anchor === -1 || start === -1) throw new Error('Unrecognised data.js format');
-
-    let depth = 0, i = start;
-    for (; i < raw.length; i++) {
-      if (raw[i] === '{') depth++;
-      else if (raw[i] === '}' && --depth === 0) break;
-    }
-
-    const parsed = JSON.parse(raw.substring(start, i + 1));
-    data = parsed;
+    data.news = newsJson.items || [];
+    data.events = eventsJson.items || [];
     if (!data.categories) data.categories = DEFAULT_DATA.categories;
-    if (!data.news)   data.news   = [];
-    if (!data.events) data.events = [];
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     dirty = false;
     localStorage.setItem(DIRTY_KEY, 'false');
     renderAll();
-    toast('Synced ✓ — showing latest team content');
-  } catch(e) {
+    if (!silent) toast('Synced ✓ — showing latest saved content');
+  } catch (e) {
     if (!silent) toast('Sync failed: ' + e.message);
   } finally {
     if (syncBtn) { syncBtn.disabled = false; syncBtn.textContent = '⟳ Sync'; }
@@ -1769,20 +1867,129 @@ function toggleEye() {
 }
 
 /* ================================================================
-   FEATURED IMAGE UPLOAD
+   IMAGE UPLOAD — files are written for real under assets/uploads/news/
+   via the local decap-server proxy (persistMedia), same as the Decap
+   CMS setup used. cover_image / block.src always end up as a plain
+   servable path, never embedded base64.
 ================================================================ */
-function handleFeaturedImg(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById('n-image').value = e.target.result;
+function uploadImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(',')[1];
+        const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
+        const path = `assets/uploads/news/${Date.now()}-${safeName}`;
+        const res = await fetch(LOCAL_API, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'persistMedia',
+            params: { branch: 'main', asset: { path, content: base64, encoding: 'base64' }, options: { commitMessage: 'Upload image via admin' } }
+          })
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+        resolve('/' + path);
+      } catch (e) { reject(e); }
+    };
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ================================================================
+   MEDIA LIBRARY — browse and reuse images already uploaded under
+   assets/uploads/news/, via decap-server's getMedia API.
+================================================================ */
+let mediaModalTarget = null; // 'featured' or { block: i }
+
+function mimeFromName(name) {
+  const ext = (String(name || '').match(/\.[a-zA-Z0-9]+$/) || [''])[0].toLowerCase();
+  const map = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+  return map[ext] || 'image/jpeg';
+}
+
+async function openMediaModal(target) {
+  mediaModalTarget = target;
+  const grid = document.getElementById('media-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">Loading…</div>';
+  document.getElementById('media-modal').style.display = 'flex';
+  try {
+    const res = await fetch(LOCAL_API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getMedia', params: { branch: 'main', mediaFolder: 'assets/uploads/news' } })
+    });
+    const files = await res.json().catch(() => ([]));
+    if (!res.ok) throw new Error((files && files.error) || `HTTP ${res.status}`);
+    if (!Array.isArray(files) || !files.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">No images uploaded yet.</div>';
+      return;
+    }
+    grid.innerHTML = files.map(f => {
+      const name = f.name || (f.path || '').split('/').pop();
+      const dataUrl = `data:${mimeFromName(name)};base64,${f.content}`;
+      return `<div onclick="selectMediaItem('${esc(f.path)}')" title="${esc(name)}"
+        style="cursor:pointer;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--bg)">
+        <img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">
+      </div>`;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--danger);padding:30px">${esc(e.message)}<br><span style="font-size:12px">Is decap-server running?</span></div>`;
+  }
+}
+
+function closeMediaModal() {
+  document.getElementById('media-modal').style.display = 'none';
+  mediaModalTarget = null;
+}
+
+function selectMediaItem(path) {
+  const p = '/' + path;
+  if (mediaModalTarget === 'featured') {
+    document.getElementById('n-image').value = p;
     const prev = document.getElementById('n-img-preview');
-    prev.src = e.target.result;
+    prev.src = p; prev.style.display = 'block';
+    newsModalDirty = true;
+  } else if (mediaModalTarget && typeof mediaModalTarget === 'object' && mediaModalTarget.block !== undefined) {
+    const i = mediaModalTarget.block;
+    currentBlocks[i].src = p;
+    newsModalDirty = true;
+    renderBlocks();
+    setTimeout(() => {
+      const item = document.getElementById('bitem-' + i);
+      if (item) item.classList.add('open');
+    }, 0);
+  } else if (mediaModalTarget && typeof mediaModalTarget === 'object' && mediaModalTarget.galleryBlock !== undefined) {
+    const i = mediaModalTarget.galleryBlock, j = mediaModalTarget.imgIdx;
+    currentBlocks[i].images[j].src = p;
+    newsModalDirty = true;
+    renderBlocks();
+    setTimeout(() => {
+      const item = document.getElementById('bitem-' + i);
+      if (item) item.classList.add('open');
+    }, 0);
+  }
+  closeMediaModal();
+}
+
+async function handleFeaturedImg(input) {
+  const file = input.files[0]; if (!file) return;
+  const btn = document.getElementById('n-img-upload-btn');
+  const prevLabel = btn.textContent;
+  btn.textContent = 'Uploading…'; btn.disabled = true;
+  try {
+    const path = await uploadImageFile(file);
+    document.getElementById('n-image').value = path;
+    const prev = document.getElementById('n-img-preview');
+    prev.src = path;
     prev.style.display = 'block';
     newsModalDirty = true;
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
+  } catch (e) {
+    alert('Upload failed: ' + e.message + '\n\nIs decap-server running? (npx decap-server)');
+  } finally {
+    btn.textContent = prevLabel; btn.disabled = false;
+    input.value = '';
+  }
 }
 
 /* ================================================================
@@ -1799,15 +2006,20 @@ function renderBlocks() {
       <div class="blocks-add-row">
         <button type="button" class="block-add-btn" onclick="addBlock('text')">+ Text Block</button>
         <button type="button" class="block-add-btn" onclick="addBlock('image')">+ Image Block</button>
+        <button type="button" class="block-add-btn" onclick="addBlock('gallery')">+ Image Gallery</button>
       </div></div>`;
     return;
   }
   const items = currentBlocks.map((b, i) => {
     const badge = b.type === 'text'
       ? `<span class="block-badge block-badge-text">Text</span>`
+      : b.type === 'gallery'
+      ? `<span class="block-badge block-badge-img">Gallery</span>`
       : `<span class="block-badge block-badge-img">Image</span>`;
     const preview = b.type === 'text'
       ? `<span class="block-preview-text">${esc(stripHtml(b.en || '')).slice(0, 60) || '(empty)'}</span>`
+      : b.type === 'gallery'
+      ? `<span class="block-preview-text">${(b.images || []).length} image${(b.images || []).length === 1 ? '' : 's'} grouped together</span>`
       : (b.src ? `<img src="${esc(b.src)}" style="width:36px;height:26px;object-fit:cover;border-radius:3px;flex-shrink:0">` : `<span class="block-preview-text">(no image)</span>`);
     let body = '';
     const richToolbar = `<div class="rich-toolbar">
@@ -1837,6 +2049,28 @@ function renderBlocks() {
           ${richToolbar}
           <div class="rich-editor" contenteditable="true" data-rich data-bidx="${i}" data-bfield="zh" data-ph="中文内容...">${b.zh||''}</div>
         </div>`;
+    } else if (b.type === 'gallery') {
+      const imgs = b.images || [];
+      body = `
+        <div class="form-label" style="margin-bottom:10px">Images in this gallery (shown together as a grid)</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:14px">
+          ${imgs.map((im, j) => `
+            <div style="border:1px solid var(--border);border-radius:8px;padding:10px;position:relative">
+              <button type="button" onclick="removeGalleryImage(${i},${j})" title="Remove this image" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:16px;color:var(--muted);cursor:pointer;line-height:1">&times;</button>
+              ${im.src
+                ? `<img src="${esc(im.src)}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px">`
+                : `<div style="width:100%;height:100px;background:var(--bg);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">No image</div>`}
+              <div style="display:flex;gap:6px;margin-bottom:8px">
+                <button type="button" class="img-file-btn" style="flex:1;font-size:11px;padding:5px 6px" onclick="document.getElementById('gimg-${i}-${j}').click()">Upload</button>
+                <button type="button" class="img-file-btn" style="flex:1;font-size:11px;padding:5px 6px" onclick="openMediaModal({galleryBlock:${i},imgIdx:${j}})">Browse</button>
+                <input type="file" id="gimg-${i}-${j}" accept="image/*" style="display:none" onchange="handleGalleryImg(this,${i},${j})">
+              </div>
+              <input class="form-input" style="font-size:12px;margin-bottom:6px" value="${esc(im.alt||'')}" oninput="updateGalleryImageField(${i},${j},'alt',this.value)" placeholder="Alt text">
+              <input class="form-input" style="font-size:12px;margin-bottom:6px" value="${esc(im.caption_en||'')}" oninput="updateGalleryImageField(${i},${j},'caption_en',this.value)" placeholder="Caption (EN)">
+              <input class="form-input" style="font-size:12px" value="${esc(im.caption_zh||'')}" oninput="updateGalleryImageField(${i},${j},'caption_zh',this.value)" placeholder="Caption (ZH)">
+            </div>`).join('')}
+        </div>
+        <button type="button" class="block-add-btn" onclick="addGalleryImage(${i})">+ Add Image to Gallery</button>`;
     } else {
       const al = b.align || 'center';
       const sz = b.size  || '100';
@@ -1844,6 +2078,7 @@ function renderBlocks() {
         <div style="margin-bottom:14px">
           ${b.src ? `<img src="${esc(b.src)}" alt="" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;display:block;margin-bottom:10px">` : ''}
           <button type="button" class="img-file-btn" onclick="document.getElementById('bimg-${i}').click()">Upload Image</button>
+          <button type="button" class="img-file-btn" onclick="openMediaModal({block:${i}})">Browse</button>
           <input type="file" id="bimg-${i}" accept="image/*" style="display:none" onchange="handleBlockImg(this,${i})">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
@@ -1905,6 +2140,7 @@ function renderBlocks() {
     <div class="blocks-add-row">
       <button type="button" class="block-add-btn" onclick="addBlock('text')">+ Text Block</button>
       <button type="button" class="block-add-btn" onclick="addBlock('image')">+ Image Block</button>
+      <button type="button" class="block-add-btn" onclick="addBlock('gallery')">+ Image Gallery</button>
     </div></div>`;
 }
 
@@ -1928,8 +2164,8 @@ function setBlockProp(i, field, val) {
 }
 
 function addBlock(type) {
-  const block = type === 'text'
-    ? { type: 'text', en: '', zh: '' }
+  const block = type === 'text' ? { type: 'text', en: '', zh: '' }
+    : type === 'gallery' ? { type: 'gallery', images: [] }
     : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '' };
   currentBlocks.push(block);
   newsModalDirty = true;
@@ -1938,6 +2174,53 @@ function addBlock(type) {
     const item = document.getElementById('bitem-' + (currentBlocks.length - 1));
     if (item) item.classList.add('open');
   }, 0);
+}
+
+function addGalleryImage(blockIdx) {
+  if (!currentBlocks[blockIdx]) return;
+  if (!currentBlocks[blockIdx].images) currentBlocks[blockIdx].images = [];
+  currentBlocks[blockIdx].images.push({ src: '', alt: '', caption_en: '', caption_zh: '' });
+  newsModalDirty = true;
+  renderBlocks();
+  setTimeout(() => {
+    const item = document.getElementById('bitem-' + blockIdx);
+    if (item) item.classList.add('open');
+  }, 0);
+}
+
+function removeGalleryImage(blockIdx, imgIdx) {
+  if (!currentBlocks[blockIdx] || !currentBlocks[blockIdx].images) return;
+  currentBlocks[blockIdx].images.splice(imgIdx, 1);
+  newsModalDirty = true;
+  renderBlocks();
+  setTimeout(() => {
+    const item = document.getElementById('bitem-' + blockIdx);
+    if (item) item.classList.add('open');
+  }, 0);
+}
+
+function updateGalleryImageField(blockIdx, imgIdx, field, val) {
+  if (currentBlocks[blockIdx] && currentBlocks[blockIdx].images && currentBlocks[blockIdx].images[imgIdx]) {
+    currentBlocks[blockIdx].images[imgIdx][field] = val;
+  }
+}
+
+async function handleGalleryImg(input, blockIdx, imgIdx) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const path = await uploadImageFile(file);
+    currentBlocks[blockIdx].images[imgIdx].src = path;
+    newsModalDirty = true;
+    renderBlocks();
+    setTimeout(() => {
+      const item = document.getElementById('bitem-' + blockIdx);
+      if (item) item.classList.add('open');
+    }, 0);
+  } catch (e) {
+    alert('Upload failed: ' + e.message + '\n\nIs decap-server running? (npx decap-server)');
+  } finally {
+    input.value = '';
+  }
 }
 
 function removeBlock(i) {
@@ -1954,20 +2237,22 @@ function moveBlock(i, dir) {
   renderBlocks();
 }
 
-function handleBlockImg(input, i) {
+async function handleBlockImg(input, i) {
   const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    currentBlocks[i].src = e.target.result;
+  try {
+    const path = await uploadImageFile(file);
+    currentBlocks[i].src = path;
     newsModalDirty = true;
     renderBlocks();
     setTimeout(() => {
       const item = document.getElementById('bitem-' + i);
       if (item) item.classList.add('open');
     }, 0);
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
+  } catch (e) {
+    alert('Upload failed: ' + e.message + '\n\nIs decap-server running? (npx decap-server)');
+  } finally {
+    input.value = '';
+  }
 }
 
 /* ================================================================
@@ -2001,7 +2286,7 @@ function renderPreview() {
   const catZhVal = document.getElementById('n-category-zh')?.value.trim() ||
     (data.categories || []).find(c => c.en === catEn)?.zh || catEn;
   const category = isZh ? catZhVal : catEn;
-  const date = isZh ? (V('n-date-zh') || V('n-date-en')) : V('n-date-en');
+  const date = V('n-date');
   const excerpt = isZh ? (V('n-excerpt-zh') || V('n-excerpt-en')) : V('n-excerpt-en');
   const image = V('n-image');
 
@@ -2017,8 +2302,7 @@ function renderPreview() {
     <div class="prev-meta">${prevEsc(date)}</div>`;
 
   if (image) {
-    const src = image.startsWith('data:') ? image : '../' + image;
-    html += `<img class="prev-hero" src="${prevEsc(src)}" alt="${prevEsc(title)}" onerror="this.style.display='none'">`;
+    html += `<img class="prev-hero" src="${prevEsc(image)}" alt="${prevEsc(title)}" onerror="this.style.display='none'">`;
   }
 
   const blocks = currentBlocks;
@@ -2031,7 +2315,7 @@ function renderPreview() {
           html += `<div class="prev-text">${isHtmlContent ? text : prevRenderText(text)}</div>`;
         }
       } else if (b.type === 'image' && b.src) {
-        const caption = isZh ? (b.caption_zh || b.caption_en) : b.caption_en;
+        const caption = isZh ? (b.caption_zh || b.caption_en) : (b.caption_en || b.caption_zh);
         const al = b.align || 'center';
         const sz = parseInt(b.size || '100', 10);
         let figStyle;
@@ -2042,6 +2326,17 @@ function renderPreview() {
           <img src="${prevEsc(b.src)}" alt="${prevEsc(b.alt||'')}" style="width:100%;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
           ${caption ? `<figcaption style="font-size:13px;color:var(--muted);margin-top:8px;font-style:italic">${prevEsc(caption)}</figcaption>` : ''}
         </figure>`;
+      } else if (b.type === 'gallery' && (b.images || []).some(im => im.src)) {
+        const imgs = (b.images || []).filter(im => im.src);
+        html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:28px 0;clear:both">
+          ${imgs.map(im => {
+            const cap = isZh ? (im.caption_zh || im.caption_en) : (im.caption_en || im.caption_zh);
+            return `<figure style="margin:0">
+              <img src="${prevEsc(im.src)}" alt="${prevEsc(im.alt||'')}" style="width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+              ${cap ? `<figcaption style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">${prevEsc(cap)}</figcaption>` : ''}
+            </figure>`;
+          }).join('')}
+        </div>`;
       }
     });
     html += '<div style="clear:both"></div>';
@@ -2113,29 +2408,6 @@ function insertLink() {
   if (url) execFmt('createLink', url);
 }
 
-/* ================================================================
-   TOKEN AUTO-LOAD & NETLIFY SETUP
-================================================================ */
-(function initSecrets() {
-  // Load from local-secrets.js if present
-  if (window.CCCWA_LOCAL_CONFIG && window.CCCWA_LOCAL_CONFIG.ghToken) {
-    localStorage.setItem('cccwa_gh_token', window.CCCWA_LOCAL_CONFIG.ghToken);
-  }
-  // Load from URL hash (set by configureNetlifyAdmin)
-  const m = window.location.hash.match(/ghtoken=([^&]+)/);
-  if (m) {
-    localStorage.setItem('cccwa_gh_token', decodeURIComponent(m[1]));
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-    toast('GitHub token configured — you can now publish with one click');
-  }
-})();
-
-function configureNetlifyAdmin() {
-  const token = localStorage.getItem('cccwa_gh_token');
-  if (!token) { toast('No token found'); return; }
-  const url = 'https://thunderous-bavarois-667c98.netlify.app/admin/#ghtoken=' + encodeURIComponent(token);
-  window.open(url, '_blank');
-}
 
 /* ================================================================
    INBOX

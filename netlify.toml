@@ -6,6 +6,64 @@
   to    = "/admin/index.html"
   status = 200
 
+# Legacy static article pages retired in favor of the Decap-managed
+# content/news.json + article-view.html?id=... system.
+[[redirects]]
+  from  = "/article-immigration-assets.html"
+  to    = "/article-view.html?id=immigration-assets"
+  status = 301
+[[redirects]]
+  from  = "/article-covid-community.html"
+  to    = "/article-view.html?id=covid-community"
+  status = 301
+[[redirects]]
+  from  = "/article-new-year-2018.html"
+  to    = "/article-view.html?id=new-year-2018"
+  status = 301
+[[redirects]]
+  from  = "/article-dou-lao-fang.html"
+  to    = "/article-view.html?id=dou-lao-fang"
+  status = 301
+[[redirects]]
+  from  = "/article-meal-drive.html"
+  to    = "/article-view.html?id=meal-drive"
+  status = 301
+[[redirects]]
+  from  = "/article-hou-bin.html"
+  to    = "/article-view.html?id=hou-bin"
+  status = 301
+[[redirects]]
+  from  = "/article-trade-forum-2017.html"
+  to    = "/article-view.html?id=trade-forum-2017"
+  status = 301
+[[redirects]]
+  from  = "/article-hk-anniversary.html"
+  to    = "/article-view.html?id=hk-anniversary"
+  status = 301
+
+# Legacy static per-year archive pages retired in favor of the dynamic
+# monthly archive sidebar on news.html.
+[[redirects]]
+  from  = "/news-archive-2016.html"
+  to    = "/news.html"
+  status = 301
+[[redirects]]
+  from  = "/news-archive-2017.html"
+  to    = "/news.html"
+  status = 301
+[[redirects]]
+  from  = "/news-archive-2018.html"
+  to    = "/news.html"
+  status = 301
+[[redirects]]
+  from  = "/news-archive-2019.html"
+  to    = "/news.html"
+  status = 301
+[[redirects]]
+  from  = "/news-archive-2020.html"
+  to    = "/news.html"
+  status = 301
+
 [[headers]]
   for = "/admin/*"
   [headers.values]

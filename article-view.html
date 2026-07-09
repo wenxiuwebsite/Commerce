@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <script src="content/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     .article-wrap { max-width: 800px; margin: 0 auto; padding: 48px 24px 80px; }
     .article-back {
@@ -29,7 +29,7 @@
     .article-hero-img {
       width: 100%; max-height: 440px; object-fit: cover; border-radius: 12px; margin-bottom: 36px;
     }
-    .article-block-text { font-size: 16px; line-height: 1.85; color: var(--text-secondary); margin-bottom: 28px; }
+    .article-block-text { font-size: 16px; line-height: 1.85; color: var(--text-secondary); margin-bottom: 28px; overflow-wrap: break-word; word-break: break-word; }
     .article-block-text p { margin-bottom: 16px; }
     .article-block-text p:last-child { margin-bottom: 0; }
     .article-block-text h2 { font-size: 22px; font-weight: 800; margin: 28px 0 12px; color: var(--text); }
@@ -44,7 +44,12 @@
     .article-block-text img { max-width: 100%; height: auto; border-radius: 8px; }
     .article-block-img { margin: 32px 0; text-align: center; }
     .article-block-img img { max-width: 100%; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .article-block-img figcaption { font-size: 13px; color: var(--text-muted); margin-top: 10px; font-style: italic; }
+    .article-block-img figcaption { font-size: 13px; color: var(--text-muted); margin-top: 10px; font-style: italic; overflow-wrap: break-word; word-break: break-word; }
+    .article-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin: 32px 0; clear: both; }
+    .article-gallery figure { margin: 0; }
+    .article-gallery img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: block; }
+    .article-gallery figcaption { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-style: italic; overflow-wrap: break-word; word-break: break-word; }
+    .article-external-link { display: inline-block; margin-top: 12px; font-weight: 600; color: var(--accent); }
     .article-not-found { text-align: center; padding: 80px 24px; color: var(--text-muted); }
     .article-not-found h2 { font-size: 24px; margin-bottom: 12px; }
   </style>
@@ -63,99 +68,153 @@
 <div id="footer-ph"></div>
 <script src="js/layout.js"></script>
 <script src="js/main.js"></script>
+<script src="js/content.js"></script>
 <script>
 (function () {
-  function escHtml(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const C = window.CCCWAContent;
+  let newsCache = null;
+
+  function insertBodyImages(container, images) {
+    if (!images || !images.length) return;
+    const byParagraph = {};
+    images.forEach(img => {
+      const n = parseInt(img.after_paragraph, 10) || 0;
+      (byParagraph[n] = byParagraph[n] || []).push(img);
+    });
+    let pCount = 0;
+    const children = Array.from(container.children);
+    children.forEach(node => {
+      if (node.tagName === 'P') {
+        pCount++;
+        const imgs = byParagraph[pCount];
+        if (imgs) {
+          imgs.forEach(img => {
+            const fig = document.createElement('figure');
+            fig.className = 'article-block-img';
+            const isZh = C.isZh();
+            const caption = isZh ? (img.caption_zh || img.caption_en) : (img.caption_en || img.caption_zh);
+            const al = img.align || 'center';
+            const sz = parseInt(img.size || '100', 10);
+            fig.style.cssText = al === 'left'
+              ? `float:left;margin:4px 28px 16px 0;max-width:${sz}%`
+              : al === 'right'
+              ? `float:right;margin:4px 0 16px 28px;max-width:${sz}%`
+              : `display:block;margin:0 auto 28px;max-width:${sz}%`;
+            fig.innerHTML = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '">' +
+              (caption ? '<figcaption>' + C.escHtml(caption) + '</figcaption>' : '');
+            node.insertAdjacentElement('afterend', fig);
+          });
+        }
+      }
+    });
   }
 
-  function renderText(text) {
-    if (!text) return '';
-    return text.split(/\n\n+/).map(p => {
-      p = p.trim();
-      return p ? '<p>' + escHtml(p).replace(/\n/g, '<br>') + '</p>' : '';
-    }).join('');
+  // Groups of images shown together as a grid (not wrapped by text), placed
+  // after their target paragraph the same way single images are.
+  function insertBodyGalleries(container, galleries) {
+    if (!galleries || !galleries.length) return;
+    const byParagraph = {};
+    galleries.forEach(gal => {
+      const n = parseInt(gal.after_paragraph, 10) || 0;
+      (byParagraph[n] = byParagraph[n] || []).push(gal);
+    });
+    let pCount = 0;
+    const children = Array.from(container.children);
+    children.forEach(node => {
+      if (node.tagName === 'P') {
+        pCount++;
+        const gals = byParagraph[pCount];
+        if (gals) {
+          gals.forEach(gal => {
+            const isZh = C.isZh();
+            const wrap = document.createElement('div');
+            wrap.className = 'article-gallery';
+            (gal.images || []).forEach(img => {
+              const caption = isZh ? (img.caption_zh || img.caption_en) : (img.caption_en || img.caption_zh);
+              const fig = document.createElement('figure');
+              fig.innerHTML = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '">' +
+                (caption ? '<figcaption>' + C.escHtml(caption) + '</figcaption>' : '');
+              wrap.appendChild(fig);
+            });
+            node.insertAdjacentElement('afterend', wrap);
+          });
+        }
+      }
+    });
   }
 
   function renderArticle() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     const root = document.getElementById('article-root');
-
-    const lang = localStorage.getItem('lang') || 'en';
-    const isZh = lang === 'zh-cn';
+    const isZh = C.isZh();
 
     document.getElementById('back-label').textContent = isZh ? '返回新闻' : 'Back to News';
 
-    if (!id || !window.CCCWA_DATA) {
+    if (!newsCache) return; // still loading
+
+    if (!id) {
       root.innerHTML = '<div class="article-not-found"><h2>Article not found</h2></div>';
       return;
     }
 
-    const article = window.CCCWA_DATA.news.find(n => n.id === id);
+    const article = newsCache.find(n => n.id === id);
     if (!article) {
       root.innerHTML = '<div class="article-not-found"><h2>Article not found</h2><p>This article may have been removed or the URL is incorrect.</p></div>';
       return;
     }
 
-    const title    = isZh ? (article.title_zh    || article.title_en)    : article.title_en;
-    const category = isZh ? (article.category_zh || article.category_en) : article.category_en;
-    const date     = isZh ? (article.date_zh     || article.date_en)     : article.date_en;
-    const excerpt  = isZh ? (article.excerpt_zh  || article.excerpt_en)  : article.excerpt_en;
+    const title    = isZh ? (article.title_zh    || article.title_en)    : (article.title_en || article.title_zh);
+    const category = isZh ? (article.category_zh || article.category_en) : (article.category_en || article.category_zh);
+    const date     = C.formatDate(article.date, isZh);
+    const body     = isZh ? (article.body_zh || article.body_en) : (article.body_en || article.body_zh);
+    const summary  = isZh ? (article.summary_zh || article.summary_en) : (article.summary_en || article.summary_zh);
 
-    const titlePlain = (function(h){ const d=document.createElement('div'); d.innerHTML=h; return d.textContent||''; })(title);
-    document.title = titlePlain + ' — CCCWA';
+    document.title = (title || 'Article') + ' — CCCWA';
 
-    const isHtmlTitle = /<[a-z][\s\S]*>/i.test(title);
-    let html = `
-      <div class="article-category">${escHtml(category)}</div>
-      <h1 class="article-title">${isHtmlTitle ? title : escHtml(title)}</h1>
-      <div class="article-meta">${escHtml(date)}</div>`;
+    let html = '<div class="article-category">' + C.escHtml(category || '') + '</div>' +
+      '<h1 class="article-title">' + C.escHtml(title || '') + '</h1>' +
+      '<div class="article-meta">' + C.escHtml(date) + '</div>';
 
-    if (article.image) {
-      html += `<img class="article-hero-img" src="${escHtml(article.image)}" alt="${escHtml(title)}">`;
+    if (article.cover_image) {
+      html += '<img class="article-hero-img" src="' + C.escHtml(article.cover_image) + '" alt="' + C.escHtml(title || '') + '">';
     }
 
-    const blocks = article.content_blocks || [];
-    if (blocks.length) {
-      blocks.forEach(b => {
-        if (b.type === 'text') {
-          const text = isZh ? (b.zh || b.en) : b.en;
-          if (text) {
-            const isHtml = /<[a-z][\s\S]*>/i.test(text);
-            html += `<div class="article-block-text">${isHtml ? text : renderText(text)}</div>`;
-          }
-        } else if (b.type === 'image' && b.src) {
-          const caption = isZh ? (b.caption_zh || b.caption_en) : b.caption_en;
-          const al  = b.align || 'center';
-          const sz  = parseInt(b.size  || '100', 10);
-          let figStyle = '';
-          if (al === 'left') {
-            figStyle = `float:left;margin:4px 28px 16px 0;max-width:${sz}%;`;
-          } else if (al === 'right') {
-            figStyle = `float:right;margin:4px 0 16px 28px;max-width:${sz}%;`;
-          } else {
-            figStyle = `display:block;margin:0 auto 28px;max-width:${sz}%;`;
-          }
-          html += `<figure class="article-block-img" style="${figStyle}text-align:center">
-            <img src="${escHtml(b.src)}" alt="${escHtml(b.alt || '')}" style="width:100%;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
-            ${caption ? `<figcaption style="font-size:13px;color:var(--text-muted);margin-top:8px;font-style:italic">${escHtml(caption)}</figcaption>` : ''}
-          </figure>`;
-        }
-      });
-    } else if (excerpt) {
-      const isHtmlExcerpt = /<[a-z][\s\S]*>/i.test(excerpt);
-      html += `<div class="article-block-text">${isHtmlExcerpt ? excerpt : '<p>' + escHtml(excerpt) + '</p>'}</div>`;
+    root.innerHTML = html;
+
+    const bodyWrap = document.createElement('div');
+    bodyWrap.className = 'article-block-text';
+    if (body) {
+      bodyWrap.innerHTML = window.marked ? window.marked.parse(body) : body.replace(/\n\n+/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>');
+      insertBodyImages(bodyWrap, article.body_images);
+      insertBodyGalleries(bodyWrap, article.body_galleries);
+    } else if (summary) {
+      bodyWrap.innerHTML = '<p>' + C.escHtml(summary) + '</p>';
+    }
+    root.appendChild(bodyWrap);
+
+    const extLink = article.external_link;
+    if (extLink) {
+      const label = isZh
+        ? (article.external_link_label_zh || article.external_link_label_en || '阅读原文 →')
+        : (article.external_link_label_en || article.external_link_label_zh || 'Read original →');
+      const a = document.createElement('a');
+      a.href = extLink; a.target = '_blank'; a.rel = 'noopener';
+      a.className = 'article-external-link';
+      a.textContent = label;
+      root.appendChild(a);
     }
 
-    root.innerHTML = html + '<div style="clear:both"></div>';
+    root.appendChild(document.createElement('div')).style.clear = 'both';
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderArticle);
-  } else {
+  C.fetchJSON('content/news.json').then(data => {
+    newsCache = C.ensureIds(data.items || []);
     renderArticle();
-  }
+  }).catch(() => {
+    document.getElementById('article-root').innerHTML =
+      '<div class="article-not-found"><h2>Article not found</h2><p>Could not load article data.</p></div>';
+  });
 
   // Re-render when language changes (main.js updates html[lang])
   new MutationObserver(renderArticle).observe(document.documentElement, {
