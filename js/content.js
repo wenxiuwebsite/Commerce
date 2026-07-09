@@ -297,8 +297,34 @@
   }
 
   /* ============================================================
-     EVENTS PAGE (upcoming.html): .events-list — upcoming only
+     EVENTS — shared upcoming-events logic for the full list
+     (upcoming.html: .events-list) and the home page preview
+     (index.html: .home-events-preview, next 3 only)
      ============================================================ */
+  const EVENT_MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const EVENT_PIN_SVG = '<svg class="icon-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+  function upcomingEvents(items) {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return items
+      .filter(ev => { const d = new Date(ev.date + 'T00:00:00'); return !isNaN(d) && d >= today; })
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  function eventItemHtml(ev, zh) {
+    const d = new Date(ev.date + 'T00:00:00');
+    const title = zh ? (ev.title_zh || ev.title_en) : (ev.title_en || ev.title_zh);
+    const location = zh ? (ev.location_zh || ev.location_en) : (ev.location_en || ev.location_zh);
+    const desc = zh ? (ev.desc_zh || ev.desc_en) : (ev.desc_en || ev.desc_zh);
+    return '<div class="event-item">' +
+      '<div class="event-date"><span class="event-month">' + EVENT_MONTH_ABBR[d.getMonth()] + '</span><span class="event-day">' + d.getDate() + '</span></div>' +
+      '<div class="event-info"><h4>' + escHtml(title || '') + '</h4>' +
+      '<p class="event-meta">' + EVENT_PIN_SVG + '<span>' + escHtml(location || '') + '</span><span class="event-time">' + escHtml(ev.time || '') + '</span></p>' +
+      '<p>' + escHtml(desc || '') + '</p></div>' +
+      '<a href="' + escHtml(ev.register_url || 'contact.html') + '" class="btn btn-sm">' + (zh ? '报名' : 'Register') + '</a>' +
+      '</div>';
+  }
+
   function initEventsList() {
     const list = document.querySelector('.events-list');
     if (!list) return;
@@ -311,32 +337,33 @@
 
   function renderEventsList(list, items) {
     const zh = isZh();
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const upcoming = items
-      .filter(ev => { const d = new Date(ev.date + 'T00:00:00'); return !isNaN(d) && d >= today; })
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    const upcoming = upcomingEvents(items);
     if (!upcoming.length) { list.innerHTML = emptyStateHtml(zh); return; }
-    const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    const pin = '<svg class="icon-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
-    list.innerHTML = upcoming.map(ev => {
-      const d = new Date(ev.date + 'T00:00:00');
-      const title = zh ? (ev.title_zh || ev.title_en) : (ev.title_en || ev.title_zh);
-      const location = zh ? (ev.location_zh || ev.location_en) : (ev.location_en || ev.location_zh);
-      const desc = zh ? (ev.desc_zh || ev.desc_en) : (ev.desc_en || ev.desc_zh);
-      return '<div class="event-item">' +
-        '<div class="event-date"><span class="event-month">' + monthAbbr[d.getMonth()] + '</span><span class="event-day">' + d.getDate() + '</span></div>' +
-        '<div class="event-info"><h4>' + escHtml(title || '') + '</h4>' +
-        '<p class="event-meta">' + pin + '<span>' + escHtml(location || '') + '</span><span class="event-time">' + escHtml(ev.time || '') + '</span></p>' +
-        '<p>' + escHtml(desc || '') + '</p></div>' +
-        '<a href="' + escHtml(ev.register_url || 'contact.html') + '" class="btn btn-sm">' + (zh ? '报名' : 'Register') + '</a>' +
-        '</div>';
-    }).join('');
+    list.innerHTML = upcoming.map(ev => eventItemHtml(ev, zh)).join('');
+  }
+
+  function initHomeEventsPreview() {
+    const wrap = document.querySelector('.home-events-preview');
+    if (!wrap) return;
+    fetchJSON(EVENTS_URL).then(data => {
+      const items = ensureIds(data.items || []);
+      renderHomeEventsPreview(wrap, items);
+      new MutationObserver(() => renderHomeEventsPreview(wrap, items)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => { wrap.innerHTML = errorStateHtml(isZh()); });
+  }
+
+  function renderHomeEventsPreview(wrap, items) {
+    const zh = isZh();
+    const upcoming = upcomingEvents(items).slice(0, 3);
+    if (!upcoming.length) { wrap.innerHTML = emptyStateHtml(zh); return; }
+    wrap.innerHTML = upcoming.map(ev => eventItemHtml(ev, zh)).join('');
   }
 
   function boot() {
     initNewsPage();
     initHomePreview();
     initEventsList();
+    initHomeEventsPreview();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

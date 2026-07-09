@@ -26,6 +26,11 @@
       margin-bottom: 12px; color: var(--text);
     }
     .article-meta { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+    .article-lang-note {
+      display: inline-block; font-size: 13px; color: var(--text-muted);
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 14px; margin: -16px 0 28px;
+    }
     .article-hero-img {
       width: 100%; max-height: 440px; object-fit: cover; border-radius: 12px; margin-bottom: 36px;
     }
@@ -127,14 +132,23 @@
         if (gals) {
           gals.forEach(gal => {
             const isZh = C.isZh();
-            const wrap = document.createElement('div');
-            wrap.className = 'article-gallery';
-            (gal.images || []).forEach(img => {
+            const imgs = gal.images || [];
+            // A "gallery" of exactly one photo isn't really a gallery — show
+            // it as a normal centered image instead of an odd single-cell grid.
+            const wrap = document.createElement(imgs.length === 1 ? 'figure' : 'div');
+            wrap.className = imgs.length === 1 ? 'article-block-img' : 'article-gallery';
+            if (imgs.length === 1) wrap.style.cssText = 'display:block;margin:0 auto 28px;max-width:100%';
+            imgs.forEach(img => {
               const caption = isZh ? (img.caption_zh || img.caption_en) : (img.caption_en || img.caption_zh);
-              const fig = document.createElement('figure');
-              fig.innerHTML = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '">' +
+              const imgHtml = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '">' +
                 (caption ? '<figcaption>' + C.escHtml(caption) + '</figcaption>' : '');
-              wrap.appendChild(fig);
+              if (imgs.length === 1) {
+                wrap.innerHTML = imgHtml;
+              } else {
+                const fig = document.createElement('figure');
+                fig.innerHTML = imgHtml;
+                wrap.appendChild(fig);
+              }
             });
             node.insertAdjacentElement('afterend', wrap);
           });
@@ -172,12 +186,23 @@
 
     document.title = (title || 'Article') + ' — CCCWA';
 
-    // Text-only by design — cover_image/body_images/body_galleries are
-    // intentionally not rendered here. The data is still stored, so images
-    // can be turned back on later without re-uploading anything.
     let html = '<div class="article-category">' + C.escHtml(category || '') + '</div>' +
       '<h1 class="article-title">' + C.escHtml(title || '') + '</h1>' +
       '<div class="article-meta">' + C.escHtml(date) + '</div>';
+
+    // This article only ever existed in one language (common for older,
+    // migrated archive posts) — say so plainly instead of silently showing
+    // the other language, which can look like the toggle is broken.
+    const hasZhTitle = !!article.title_zh, hasEnTitle = !!article.title_en;
+    if (hasZhTitle !== hasEnTitle) {
+      const noteZh = hasZhTitle ? '本文仅提供中文版本。' : '本文仅提供英文版本。';
+      const noteEn = hasZhTitle ? 'This article was only ever published in Chinese.' : 'This article was only ever published in English.';
+      html += '<div class="article-lang-note">' + C.escHtml(isZh ? noteZh : noteEn) + '</div>';
+    }
+
+    if (article.cover_image) {
+      html += '<img class="article-hero-img" src="' + C.escHtml(article.cover_image) + '" alt="' + C.escHtml(title || '') + '">';
+    }
 
     root.innerHTML = html;
 
@@ -185,6 +210,8 @@
     bodyWrap.className = 'article-block-text';
     if (body) {
       bodyWrap.innerHTML = window.marked ? window.marked.parse(body) : body.replace(/\n\n+/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>');
+      insertBodyImages(bodyWrap, article.body_images);
+      insertBodyGalleries(bodyWrap, article.body_galleries);
     } else if (summary) {
       bodyWrap.innerHTML = '<p>' + C.escHtml(summary) + '</p>';
     }

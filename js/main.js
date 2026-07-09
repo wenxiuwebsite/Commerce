@@ -121,7 +121,7 @@ const LOCALES = {
     "mission.to_leadership": "Meet Our Leadership",
     "mission.to_join": "Join CCCWA",
     "leadership.hero_title": "Chamber Leadership",
-    "leadership.hero_sub": "管理委员会 — The dedicated leaders of CCCWA",
+    "leadership.hero_sub": "The dedicated leaders of CCCWA",
     "leadership.intro": "Our board of directors and executive committee bring together experienced business leaders, legal professionals, and community advocates committed to advancing the mission of CCCWA.",
     "leadership.exec_tag": "Executive Committee",
     "leadership.exec_title": "Board of Directors",
