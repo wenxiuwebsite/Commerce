@@ -1,6 +1,38 @@
 {
   "items": [
     {
+      "id": "a",
+      "date": "",
+      "category_en": "Announcement",
+      "category_zh": "公告",
+      "title_en": "a",
+      "title_zh": "",
+      "summary_en": "a",
+      "summary_zh": "",
+      "cover_image": "",
+      "cover_focus": "50% 50%",
+      "body_en": "",
+      "body_zh": "",
+      "body_images": [
+        {
+          "src": "/assets/uploads/news/1783659160167-OIP.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100",
+          "after_paragraph": 0
+        }
+      ],
+      "body_galleries": [],
+      "external_link": "",
+      "external_link_label_en": "",
+      "external_link_label_zh": ""
+    },
+    {
       "id": "immigration-assets",
       "date": "2020-08-24",
       "category_en": "Announcement",
