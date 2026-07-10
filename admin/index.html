@@ -1289,6 +1289,7 @@ function blocksToBody(blocks) {
       images.push({
         src: b.src, alt: b.alt || '',
         caption_en: b.caption_en || '', caption_zh: b.caption_zh || '',
+        text_en: b.text_en || '', text_zh: b.text_zh || '',
         align: b.align || 'center', size: b.size || '100',
         after_paragraph: Math.max(pCountEn, pCountZh, 0)
       });
@@ -1336,6 +1337,7 @@ function bodyToBlocks(article) {
           blocks.push({
             type: 'image', src: img.src, alt: img.alt || '',
             caption_en: img.caption_en || '', caption_zh: img.caption_zh || '',
+            text_en: img.text_en || '', text_zh: img.text_zh || '',
             align: img.align || 'center', size: img.size || '100'
           });
         } else {
@@ -1872,7 +1874,14 @@ function toggleEye() {
    CMS setup used. cover_image / block.src always end up as a plain
    servable path, never embedded base64.
 ================================================================ */
+// Logged in via Netlify Identity (production/live site) -> commit the file
+// straight to GitHub through Git Gateway. Otherwise (local dev) -> the local
+// decap-server proxy, same as before.
 function uploadImageFile(file) {
+  return identityUser ? uploadImageFileGitGateway(file) : uploadImageFileLocal(file);
+}
+
+function uploadImageFileLocal(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async () => {
@@ -1897,6 +1906,30 @@ function uploadImageFile(file) {
   });
 }
 
+function uploadImageFileGitGateway(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(',')[1];
+        const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
+        const path = `assets/uploads/news/${Date.now()}-${safeName}`;
+        const jwt = await identityUser.jwt();
+        const res = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: 'Upload image via admin', content: base64, branch: 'main' })
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.message || `HTTP ${res.status}`);
+        resolve('/' + path);
+      } catch (e) { reject(e); }
+    };
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
 /* ================================================================
    MEDIA LIBRARY — browse and reuse images already uploaded under
    assets/uploads/news/, via decap-server's getMedia API.
@@ -1909,32 +1942,50 @@ function mimeFromName(name) {
   return map[ext] || 'image/jpeg';
 }
 
+async function getMediaLocal() {
+  const res = await fetch(LOCAL_API, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'getMedia', params: { branch: 'main', mediaFolder: 'assets/uploads/news' } })
+  });
+  const files = await res.json().catch(() => ([]));
+  if (!res.ok) throw new Error((files && files.error) || `HTTP ${res.status}`);
+  return (Array.isArray(files) ? files : []).map(f => {
+    const name = f.name || (f.path || '').split('/').pop();
+    return { name, path: f.path, src: `data:${mimeFromName(name)};base64,${f.content}` };
+  });
+}
+
+async function getMediaGitGateway() {
+  const jwt = await identityUser.jwt();
+  const res = await fetch(`${GIT_GATEWAY_BASE}/contents/assets/uploads/news?ref=main`, {
+    headers: { 'Authorization': `Bearer ${jwt}` }
+  });
+  if (res.status === 404) return []; // folder doesn't exist yet — no uploads yet
+  const json = await res.json().catch(() => ([]));
+  if (!res.ok) throw new Error((json && json.message) || `HTTP ${res.status}`);
+  return (Array.isArray(json) ? json : [])
+    .filter(f => f.type === 'file')
+    .map(f => ({ name: f.name, path: f.path, src: f.download_url }));
+}
+
 async function openMediaModal(target) {
   mediaModalTarget = target;
   const grid = document.getElementById('media-grid');
   grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">Loading…</div>';
   document.getElementById('media-modal').style.display = 'flex';
   try {
-    const res = await fetch(LOCAL_API, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getMedia', params: { branch: 'main', mediaFolder: 'assets/uploads/news' } })
-    });
-    const files = await res.json().catch(() => ([]));
-    if (!res.ok) throw new Error((files && files.error) || `HTTP ${res.status}`);
-    if (!Array.isArray(files) || !files.length) {
+    const files = identityUser ? await getMediaGitGateway() : await getMediaLocal();
+    if (!files.length) {
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">No images uploaded yet.</div>';
       return;
     }
-    grid.innerHTML = files.map(f => {
-      const name = f.name || (f.path || '').split('/').pop();
-      const dataUrl = `data:${mimeFromName(name)};base64,${f.content}`;
-      return `<div onclick="selectMediaItem('${esc(f.path)}')" title="${esc(name)}"
+    grid.innerHTML = files.map(f => `<div onclick="selectMediaItem('${esc(f.path)}')" title="${esc(f.name)}"
         style="cursor:pointer;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--bg)">
-        <img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">
-      </div>`;
-    }).join('');
+        <img src="${esc(f.src)}" style="width:100%;height:100%;object-fit:cover">
+      </div>`).join('');
   } catch (e) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--danger);padding:30px">${esc(e.message)}<br><span style="font-size:12px">Is decap-server running?</span></div>`;
+    const hint = identityUser ? '' : '<br><span style="font-size:12px">Is decap-server running?</span>';
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--danger);padding:30px">${esc(e.message)}${hint}</div>`;
   }
 }
 
@@ -1985,7 +2036,7 @@ async function handleFeaturedImg(input) {
     prev.style.display = 'block';
     newsModalDirty = true;
   } catch (e) {
-    alert('Upload failed: ' + e.message + '\n\nIs decap-server running? (npx decap-server)');
+    alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
     btn.textContent = prevLabel; btn.disabled = false;
     input.value = '';
@@ -2120,6 +2171,13 @@ function renderBlocks() {
             <div class="form-label" style="margin-bottom:5px">Caption (ZH)</div>
             <input class="form-input" value="${esc(b.caption_zh||'')}" oninput="updateBlockField(${i},'caption_zh',this.value)" placeholder="可选">
           </div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="form-label" style="margin-bottom:5px">Paragraph Text Beside Image (EN)</div>
+          <div class="pub-hint" style="margin:-2px 0 8px">Only shows up when Position is Left or Right — the text wraps around the image, like a magazine layout.</div>
+          <textarea class="form-input" rows="3" style="resize:vertical;margin-bottom:10px" oninput="updateBlockField(${i},'text_en',this.value)" placeholder="Optional text to run alongside the image">${esc(b.text_en||'')}</textarea>
+          <div class="form-label" style="margin-bottom:5px">Paragraph Text Beside Image (ZH)</div>
+          <textarea class="form-input" rows="3" style="resize:vertical" oninput="updateBlockField(${i},'text_zh',this.value)" placeholder="可选">${esc(b.text_zh||'')}</textarea>
         </div>`;
     }
     return `
@@ -2166,7 +2224,7 @@ function setBlockProp(i, field, val) {
 function addBlock(type) {
   const block = type === 'text' ? { type: 'text', en: '', zh: '' }
     : type === 'gallery' ? { type: 'gallery', images: [] }
-    : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '' };
+    : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '', text_en: '', text_zh: '' };
   currentBlocks.push(block);
   newsModalDirty = true;
   renderBlocks();
@@ -2217,7 +2275,7 @@ async function handleGalleryImg(input, blockIdx, imgIdx) {
       if (item) item.classList.add('open');
     }, 0);
   } catch (e) {
-    alert('Upload failed: ' + e.message + '\n\nIs decap-server running? (npx decap-server)');
+    alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
     input.value = '';
   }
@@ -2249,7 +2307,7 @@ async function handleBlockImg(input, i) {
       if (item) item.classList.add('open');
     }, 0);
   } catch (e) {
-    alert('Upload failed: ' + e.message + '\n\nIs decap-server running? (npx decap-server)');
+    alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
     input.value = '';
   }
@@ -2322,10 +2380,14 @@ function renderPreview() {
         if (al === 'left')       figStyle = `float:left;margin:4px 28px 16px 0;max-width:${sz}%`;
         else if (al === 'right') figStyle = `float:right;margin:4px 0 16px 28px;max-width:${sz}%`;
         else                     figStyle = `display:block;margin:0 auto 28px;max-width:${sz}%`;
+        const sideText = isZh ? (b.text_zh || b.text_en) : (b.text_en || b.text_zh);
         html += `<figure style="${figStyle};text-align:center">
           <img src="${prevEsc(b.src)}" alt="${prevEsc(b.alt||'')}" style="width:100%;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
           ${caption ? `<figcaption style="font-size:13px;color:var(--muted);margin-top:8px;font-style:italic">${prevEsc(caption)}</figcaption>` : ''}
         </figure>`;
+        if (sideText) {
+          html += `<p style="margin:0 0 16px;line-height:1.85;color:var(--text-secondary)">${prevEsc(sideText).replace(/\n/g,'<br>')}</p>`;
+        }
       } else if (b.type === 'gallery' && (b.images || []).some(im => im.src)) {
         const imgs = (b.images || []).filter(im => im.src);
         html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:28px 0;clear:both">

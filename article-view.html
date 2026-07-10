@@ -50,6 +50,7 @@
     .article-block-img { margin: 32px 0; text-align: center; }
     .article-block-img img { max-width: 100%; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
     .article-block-img figcaption { font-size: 13px; color: var(--text-muted); margin-top: 10px; font-style: italic; overflow-wrap: break-word; word-break: break-word; }
+    .article-block-img-text { font-size: 16px; line-height: 1.85; color: var(--text-secondary); margin: 0 0 28px; overflow-wrap: break-word; word-break: break-word; }
     .article-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin: 32px 0; clear: both; }
     .article-gallery figure { margin: 0; }
     .article-gallery img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: block; }
@@ -57,6 +58,27 @@
     .article-external-link { display: inline-block; margin-top: 12px; font-weight: 600; color: var(--accent); }
     .article-not-found { text-align: center; padding: 80px 24px; color: var(--text-muted); }
     .article-not-found h2 { font-size: 24px; margin-bottom: 12px; }
+
+    .article-hero-img, .article-block-img img, .article-gallery img, .article-block-text img {
+      cursor: zoom-in;
+    }
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 9999; display: none;
+      align-items: center; justify-content: center; padding: 32px;
+      background: rgba(0,0,0,0.92); cursor: zoom-out;
+    }
+    .lightbox-overlay.open { display: flex; }
+    .lightbox-overlay img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+      border-radius: 6px; box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+      cursor: default;
+    }
+    .lightbox-close {
+      position: absolute; top: 18px; right: 24px; width: 40px; height: 40px;
+      border: none; border-radius: 50%; background: rgba(255,255,255,0.12);
+      color: #fff; font-size: 22px; line-height: 1; cursor: pointer;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.22); }
   </style>
 </head>
 <body data-page="news">
@@ -68,6 +90,11 @@
     <span id="back-label">Back to News</span>
   </a>
   <div id="article-root"></div>
+</div>
+
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+  <button type="button" class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
 </div>
 
 <div id="footer-ph"></div>
@@ -108,6 +135,13 @@
             fig.innerHTML = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '">' +
               (caption ? '<figcaption>' + C.escHtml(caption) + '</figcaption>' : '');
             node.insertAdjacentElement('afterend', fig);
+            const sideText = isZh ? (img.text_zh || img.text_en) : (img.text_en || img.text_zh);
+            if (sideText) {
+              const p = document.createElement('p');
+              p.className = 'article-block-img-text';
+              p.innerHTML = C.escHtml(sideText).replace(/\n/g, '<br>');
+              fig.insertAdjacentElement('afterend', p);
+            }
           });
         }
       }
@@ -244,6 +278,24 @@
   new MutationObserver(renderArticle).observe(document.documentElement, {
     attributes: true, attributeFilter: ['lang']
   });
+
+  // Fullscreen lightbox — click any article image (hero, inline, gallery) to
+  // view it uncropped/unscaled, since inline images are float-sized or
+  // grid-cropped and can otherwise look cut off.
+  document.getElementById('article-root').addEventListener('click', e => {
+    const img = e.target.closest('img');
+    if (!img) return;
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox-img').alt = img.alt || '';
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  window.closeLightbox = function () {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 })();
 </script>
 </body>
