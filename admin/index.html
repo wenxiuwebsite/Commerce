@@ -527,7 +527,7 @@
     <button class="login-btn" onclick="doLogin()" data-i18n="login.btn">Sign In</button>
     <div class="login-err" id="login-err" data-i18n="login.err">Incorrect password. Try again.</div>
     <div style="text-align:center;margin:16px 0;color:var(--muted);font-size:12px">— or —</div>
-    <button class="login-btn" type="button" style="background:none;border:1.5px solid var(--accent);color:var(--accent)" onclick="openIdentityLogin()">
+    <button class="login-btn" type="button" style="background:none;border:1.5px solid var(--accent);color:var(--accent)" onclick="netlifyIdentity.open('login')">
       Log in with Netlify Identity
     </button>
     <div class="form-hint" style="margin-top:8px;text-align:center">Real per-person login. Publishing this way goes live directly. Requires your account to have been invited.</div>
@@ -722,12 +722,6 @@
             <div class="pub-settings-label">Local Backend</div>
             <div id="pub-conn-status" style="font-size:12px;margin-bottom:12px;color:var(--muted)"></div>
             <div class="pub-hint">Publishing writes straight to <code>content/news.json</code> and <code>content/events.json</code> via the local proxy. Run <code>npx decap-server</code> in a second terminal (see docs/SOP.md) — if it's not running, Publish will fail and tell you so.</div>
-
-            <hr class="pub-divider">
-            <div class="pub-settings-label">Face-Aware Crop Backfill</div>
-            <div class="pub-hint" style="margin-bottom:10px">Re-scans every existing news image for faces and re-centers the crop on them (cover images and gallery images that get cropped). New uploads already do this automatically — this is only for photos added before that existed. Runs in your browser; nothing is saved live until you Publish afterward.</div>
-            <button class="pub-save-btn" id="backfill-focus-btn" onclick="backfillFaceFocus()">Re-center Faces in Existing Images</button>
-            <div id="backfill-focus-status" style="font-size:12px;margin-top:10px;color:var(--muted)"></div>
           </div>
         </div>
       </div>
@@ -1190,14 +1184,6 @@ applyTheme();
 const NETLIFY_SITE_URL = 'https://thunderous-bavarois-667c98.netlify.app';
 const GIT_GATEWAY_BASE = NETLIFY_SITE_URL + '/.netlify/git/github';
 let identityUser = null;
-
-function openIdentityLogin() {
-  if (!window.netlifyIdentity) {
-    alert('Netlify Identity could not load in this browser (a common cause is an ad blocker or privacy extension blocking scripts from identity.netlify.com). Try disabling it for this site, or use a private/incognito window, then reload the page.');
-    return;
-  }
-  netlifyIdentity.open('login');
-}
 
 if (window.netlifyIdentity) {
   netlifyIdentity.init({ APIUrl: NETLIFY_SITE_URL + '/.netlify/identity' });
@@ -1930,51 +1916,6 @@ async function detectFaceFocus(src) {
   } catch (e) {
     return '50% 50%';
   }
-}
-
-// One-time sweep over every already-published image (cover + block + gallery)
-// so photos uploaded before face detection existed also get re-centered.
-// Only re-detects images that are still on the default center focus, so
-// re-running this after someone has manually adjusted a crop won't undo it.
-async function backfillFaceFocus() {
-  const btn = document.getElementById('backfill-focus-btn');
-  const statusEl = document.getElementById('backfill-focus-status');
-  const jobs = [];
-  data.news.forEach(item => {
-    if (item.cover_image && (!item.cover_focus || item.cover_focus === '50% 50%')) {
-      jobs.push({ src: item.cover_image, set: f => { item.cover_focus = f; } });
-    }
-    (item.body_images || []).forEach(img => {
-      if (img.src && (!img.focus || img.focus === '50% 50%')) jobs.push({ src: img.src, set: f => { img.focus = f; } });
-    });
-    (item.body_galleries || []).forEach(gal => {
-      (gal.images || []).forEach(im => {
-        if (im.src && (!im.focus || im.focus === '50% 50%')) jobs.push({ src: im.src, set: f => { im.focus = f; } });
-      });
-    });
-  });
-  if (!jobs.length) {
-    statusEl.textContent = 'Nothing to do — every image already has a crop focus set.';
-    return;
-  }
-  btn.disabled = true;
-  let done = 0, found = 0;
-  statusEl.textContent = `Detecting faces… 0/${jobs.length}`;
-  for (const job of jobs) {
-    try {
-      const focus = await detectFaceFocus(job.src);
-      job.set(focus);
-      if (focus !== '50% 50%') found++;
-    } catch (e) { /* leave this one at the default center-crop */ }
-    done++;
-    statusEl.textContent = `Detecting faces… ${done}/${jobs.length}`;
-  }
-  persistData();
-  renderNewsTable();
-  renderDashboard();
-  btn.disabled = false;
-  statusEl.textContent = `Done — found and centered faces in ${found} of ${jobs.length} images. Click "Publish to Website" above to save.`;
-  toast(`Re-centered ${found} image${found === 1 ? '' : 's'} with faces`);
 }
 
 /* ================================================================
