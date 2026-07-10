@@ -5,6 +5,14 @@
    and set <body data-page="pagekey"> for active nav highlight.
 */
 (function () {
+  // Netlify Identity invite/recovery/confirmation links point at the site's
+  // root URL, but the Identity widget is only wired up on /admin/. Bounce
+  // straight there so the widget can pick up the token from the hash.
+  if (/^#(invite_token|recovery_token|confirmation_token|email_change_token)=/.test(location.hash)) {
+    location.replace('/admin/' + location.hash);
+    return;
+  }
+
   const page = document.body.getAttribute('data-page') || '';
 
   const links = [
