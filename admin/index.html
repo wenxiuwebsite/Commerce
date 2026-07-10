@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -898,9 +899,10 @@
             <button type="button" class="img-file-btn" id="n-img-upload-btn" onclick="document.getElementById('n-img-file').click()">Upload</button>
             <button type="button" class="img-file-btn" onclick="openMediaModal('featured')">Browse</button>
             <input type="file" id="n-img-file" accept="image/*" style="display:none" onchange="handleFeaturedImg(this)">
+            <input type="hidden" id="n-image-focus" value="50% 50%">
             <img id="n-img-preview" class="img-preview-thumb" alt="">
           </div>
-          <span class="form-hint">Upload a file or enter a path. Leave blank if no image.</span>
+          <span class="form-hint">Upload a file or enter a path. Leave blank if no image. Faces are detected automatically and kept in frame when this image is cropped.</span>
         </div>
         <div class="form-group">
           <label class="form-label">External Link Label</label>
@@ -1290,6 +1292,7 @@ function blocksToBody(blocks) {
         src: b.src, alt: b.alt || '',
         caption_en: b.caption_en || '', caption_zh: b.caption_zh || '',
         text_en: b.text_en || '', text_zh: b.text_zh || '',
+        focus: b.focus || '50% 50%',
         align: b.align || 'center', size: b.size || '100',
         after_paragraph: Math.max(pCountEn, pCountZh, 0)
       });
@@ -1297,7 +1300,8 @@ function blocksToBody(blocks) {
       galleries.push({
         images: (b.images || []).filter(im => im.src).map(im => ({
           src: im.src, alt: im.alt || '',
-          caption_en: im.caption_en || '', caption_zh: im.caption_zh || ''
+          caption_en: im.caption_en || '', caption_zh: im.caption_zh || '',
+          focus: im.focus || '50% 50%'
         })),
         after_paragraph: Math.max(pCountEn, pCountZh, 0)
       });
@@ -1338,10 +1342,11 @@ function bodyToBlocks(article) {
             type: 'image', src: img.src, alt: img.alt || '',
             caption_en: img.caption_en || '', caption_zh: img.caption_zh || '',
             text_en: img.text_en || '', text_zh: img.text_zh || '',
+            focus: img.focus || '50% 50%',
             align: img.align || 'center', size: img.size || '100'
           });
         } else {
-          blocks.push({ type: 'gallery', images: (entry.data.images || []).map(im => ({ ...im })) });
+          blocks.push({ type: 'gallery', images: (entry.data.images || []).map(im => ({ focus: '50% 50%', ...im })) });
         }
       });
     }
@@ -1458,7 +1463,7 @@ function renderNewsTable() {
   }
   tbody.innerHTML = sorted.map(({ n, i }) => `
     <tr>
-      <td>${n.cover_image ? `<img src="${esc(n.cover_image)}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
+      <td>${n.cover_image ? `<img src="${esc(n.cover_image)}" class="thumb" style="object-position:${esc(n.cover_focus||'50% 50%')}" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
       <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
       <td>${catTag(n.category_en, n.category_zh)}</td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date)}</td>
@@ -1555,6 +1560,7 @@ function openNewsModal(idx) {
   renderCategoryDatalist();
   document.getElementById('n-date').value                    = n.date || '';
   document.getElementById('n-image').value                   = n.cover_image || '';
+  document.getElementById('n-image-focus').value              = n.cover_focus || '50% 50%';
   document.getElementById('n-external-link').value            = n.external_link || '';
   document.getElementById('n-external-link-label-en').value   = n.external_link_label_en || '';
   document.getElementById('n-external-link-label-zh').value   = n.external_link_label_zh || '';
@@ -1563,6 +1569,7 @@ function openNewsModal(idx) {
   const prev = document.getElementById('n-img-preview');
   if (n.cover_image) {
     prev.src = n.cover_image;
+    prev.style.objectPosition = n.cover_focus || '50% 50%';
     prev.style.display = 'block';
     prev.onerror = () => { prev.style.display = 'none'; };
   } else {
@@ -1597,6 +1604,7 @@ function saveNews() {
     summary_en:   document.getElementById('n-excerpt-en').innerHTML.trim(),
     summary_zh:   document.getElementById('n-excerpt-zh').innerHTML.trim(),
     cover_image:  document.getElementById('n-image').value.trim(),
+    cover_focus:  document.getElementById('n-image-focus').value.trim() || '50% 50%',
     body_en:      bodyParts.body_en,
     body_zh:      bodyParts.body_zh,
     body_images:  bodyParts.body_images,
@@ -1869,6 +1877,48 @@ function toggleEye() {
 }
 
 /* ================================================================
+   FACE-AWARE CROP FOCUS — run once here in the admin panel, right
+   when a photo is uploaded/selected, instead of in every visitor's
+   browser on every page load. The detected face center is saved as a
+   CSS object-position value ("62.0% 30.5%") alongside the image, so
+   object-fit:cover crops on the site keep the face in frame instead
+   of always centering on the whole frame.
+================================================================ */
+let faceModelsPromise = null;
+function loadFaceModels() {
+  if (!faceModelsPromise) {
+    faceModelsPromise = (async () => {
+      if (!window.faceapi) throw new Error('face-api.js not loaded');
+      const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    })();
+  }
+  return faceModelsPromise;
+}
+
+// Falls back to plain center-crop ("50% 50%") if no face is found, the
+// model fails to load, or the browser can't run it — never blocks or
+// fails the upload itself.
+async function detectFaceFocus(src) {
+  try {
+    await loadFaceModels();
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error('image failed to load'));
+      el.src = src;
+    });
+    const result = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions());
+    if (!result) return '50% 50%';
+    const cx = ((result.box.x + result.box.width / 2) / img.naturalWidth) * 100;
+    const cy = ((result.box.y + result.box.height / 2) / img.naturalHeight) * 100;
+    return `${Math.max(0, Math.min(100, cx)).toFixed(1)}% ${Math.max(0, Math.min(100, cy)).toFixed(1)}%`;
+  } catch (e) {
+    return '50% 50%';
+  }
+}
+
+/* ================================================================
    IMAGE UPLOAD — files are written for real under assets/uploads/news/
    via the local decap-server proxy (persistMedia), same as the Decap
    CMS setup used. cover_image / block.src always end up as a plain
@@ -1998,27 +2048,36 @@ function selectMediaItem(path) {
   const p = '/' + path;
   if (mediaModalTarget === 'featured') {
     document.getElementById('n-image').value = p;
+    document.getElementById('n-image-focus').value = '50% 50%';
     const prev = document.getElementById('n-img-preview');
-    prev.src = p; prev.style.display = 'block';
+    prev.src = p; prev.style.objectPosition = '50% 50%'; prev.style.display = 'block';
     newsModalDirty = true;
+    detectFaceFocus(p).then(focus => {
+      document.getElementById('n-image-focus').value = focus;
+      prev.style.objectPosition = focus;
+    });
   } else if (mediaModalTarget && typeof mediaModalTarget === 'object' && mediaModalTarget.block !== undefined) {
     const i = mediaModalTarget.block;
     currentBlocks[i].src = p;
+    currentBlocks[i].focus = '50% 50%';
     newsModalDirty = true;
     renderBlocks();
     setTimeout(() => {
       const item = document.getElementById('bitem-' + i);
       if (item) item.classList.add('open');
     }, 0);
+    detectFaceFocus(p).then(focus => { if (currentBlocks[i]) currentBlocks[i].focus = focus; });
   } else if (mediaModalTarget && typeof mediaModalTarget === 'object' && mediaModalTarget.galleryBlock !== undefined) {
     const i = mediaModalTarget.galleryBlock, j = mediaModalTarget.imgIdx;
     currentBlocks[i].images[j].src = p;
+    currentBlocks[i].images[j].focus = '50% 50%';
     newsModalDirty = true;
     renderBlocks();
     setTimeout(() => {
       const item = document.getElementById('bitem-' + i);
       if (item) item.classList.add('open');
     }, 0);
+    detectFaceFocus(p).then(focus => { if (currentBlocks[i] && currentBlocks[i].images[j]) currentBlocks[i].images[j].focus = focus; });
   }
   closeMediaModal();
 }
@@ -2031,10 +2090,16 @@ async function handleFeaturedImg(input) {
   try {
     const path = await uploadImageFile(file);
     document.getElementById('n-image').value = path;
+    document.getElementById('n-image-focus').value = '50% 50%';
     const prev = document.getElementById('n-img-preview');
     prev.src = path;
+    prev.style.objectPosition = '50% 50%';
     prev.style.display = 'block';
     newsModalDirty = true;
+    detectFaceFocus(path).then(focus => {
+      document.getElementById('n-image-focus').value = focus;
+      prev.style.objectPosition = focus;
+    });
   } catch (e) {
     alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
@@ -2224,7 +2289,7 @@ function setBlockProp(i, field, val) {
 function addBlock(type) {
   const block = type === 'text' ? { type: 'text', en: '', zh: '' }
     : type === 'gallery' ? { type: 'gallery', images: [] }
-    : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '', text_en: '', text_zh: '' };
+    : { type: 'image', src: '', alt: '', caption_en: '', caption_zh: '', text_en: '', text_zh: '', focus: '50% 50%' };
   currentBlocks.push(block);
   newsModalDirty = true;
   renderBlocks();
@@ -2237,7 +2302,7 @@ function addBlock(type) {
 function addGalleryImage(blockIdx) {
   if (!currentBlocks[blockIdx]) return;
   if (!currentBlocks[blockIdx].images) currentBlocks[blockIdx].images = [];
-  currentBlocks[blockIdx].images.push({ src: '', alt: '', caption_en: '', caption_zh: '' });
+  currentBlocks[blockIdx].images.push({ src: '', alt: '', caption_en: '', caption_zh: '', focus: '50% 50%' });
   newsModalDirty = true;
   renderBlocks();
   setTimeout(() => {
@@ -2268,12 +2333,16 @@ async function handleGalleryImg(input, blockIdx, imgIdx) {
   try {
     const path = await uploadImageFile(file);
     currentBlocks[blockIdx].images[imgIdx].src = path;
+    currentBlocks[blockIdx].images[imgIdx].focus = '50% 50%';
     newsModalDirty = true;
     renderBlocks();
     setTimeout(() => {
       const item = document.getElementById('bitem-' + blockIdx);
       if (item) item.classList.add('open');
     }, 0);
+    detectFaceFocus(path).then(focus => {
+      if (currentBlocks[blockIdx] && currentBlocks[blockIdx].images[imgIdx]) currentBlocks[blockIdx].images[imgIdx].focus = focus;
+    });
   } catch (e) {
     alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
@@ -2300,12 +2369,14 @@ async function handleBlockImg(input, i) {
   try {
     const path = await uploadImageFile(file);
     currentBlocks[i].src = path;
+    currentBlocks[i].focus = '50% 50%';
     newsModalDirty = true;
     renderBlocks();
     setTimeout(() => {
       const item = document.getElementById('bitem-' + i);
       if (item) item.classList.add('open');
     }, 0);
+    detectFaceFocus(path).then(focus => { if (currentBlocks[i]) currentBlocks[i].focus = focus; });
   } catch (e) {
     alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
@@ -2360,7 +2431,8 @@ function renderPreview() {
     <div class="prev-meta">${prevEsc(date)}</div>`;
 
   if (image) {
-    html += `<img class="prev-hero" src="${prevEsc(image)}" alt="${prevEsc(title)}" onerror="this.style.display='none'">`;
+    const imageFocus = document.getElementById('n-image-focus')?.value || '50% 50%';
+    html += `<img class="prev-hero" src="${prevEsc(image)}" alt="${prevEsc(title)}" style="object-position:${prevEsc(imageFocus)}" onerror="this.style.display='none'">`;
   }
 
   const blocks = currentBlocks;
@@ -2394,7 +2466,7 @@ function renderPreview() {
           ${imgs.map(im => {
             const cap = isZh ? (im.caption_zh || im.caption_en) : (im.caption_en || im.caption_zh);
             return `<figure style="margin:0">
-              <img src="${prevEsc(im.src)}" alt="${prevEsc(im.alt||'')}" style="width:100%;height:140px;object-fit:cover;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+              <img src="${prevEsc(im.src)}" alt="${prevEsc(im.alt||'')}" style="width:100%;height:140px;object-fit:cover;object-position:${prevEsc(im.focus||'50% 50%')};border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
               ${cap ? `<figcaption style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">${prevEsc(cap)}</figcaption>` : ''}
             </figure>`;
           }).join('')}

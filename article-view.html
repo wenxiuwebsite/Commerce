@@ -174,7 +174,11 @@
             if (imgs.length === 1) wrap.style.cssText = 'display:block;margin:0 auto 28px;max-width:100%';
             imgs.forEach(img => {
               const caption = isZh ? (img.caption_zh || img.caption_en) : (img.caption_en || img.caption_zh);
-              const imgHtml = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '">' +
+              // Only the multi-image grid actually crops (object-fit:cover);
+              // a lone gallery image renders uncropped, so the focus point
+              // only needs to apply there.
+              const style = imgs.length === 1 ? '' : ' style="object-position:' + C.escHtml(img.focus || '50% 50%') + '"';
+              const imgHtml = '<img src="' + C.escHtml(img.src) + '" alt="' + C.escHtml(img.alt || '') + '"' + style + '>' +
                 (caption ? '<figcaption>' + C.escHtml(caption) + '</figcaption>' : '');
               if (imgs.length === 1) {
                 wrap.innerHTML = imgHtml;
@@ -235,7 +239,8 @@
     }
 
     if (article.cover_image) {
-      html += '<img class="article-hero-img" src="' + C.escHtml(article.cover_image) + '" alt="' + C.escHtml(title || '') + '">';
+      html += '<img class="article-hero-img" src="' + C.escHtml(article.cover_image) + '" alt="' + C.escHtml(title || '') +
+        '" style="object-position:' + C.escHtml(article.cover_focus || '50% 50%') + '">';
     }
 
     root.innerHTML = html;
