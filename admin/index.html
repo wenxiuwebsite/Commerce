@@ -1402,6 +1402,16 @@ function persistData() {
   updateDirtyIndicator();
 }
 
+/* ================================================================
+   LOCAL IMAGE PREVIEWS — when uploading via Git Gateway (Netlify
+   Identity), the file is committed straight to GitHub but the live
+   site only serves it once Netlify finishes its next deploy. Rather
+   than show a broken image until that deploy lands, keep a client-side
+   object URL for any path uploaded this session and prefer it.
+================================================================ */
+const localImagePreviews = {};
+function previewSrc(path) { return (path && localImagePreviews[path]) || path; }
+
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 function slugify(str) {
@@ -1611,7 +1621,7 @@ function renderNewsTable() {
   }
   tbody.innerHTML = sorted.map(({ n, i }) => `
     <tr>
-      <td>${n.cover_image ? `<img src="${esc(n.cover_image)}" class="thumb" style="object-position:${esc(n.cover_focus||'50% 50%')}" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
+      <td>${n.cover_image ? `<img src="${esc(previewSrc(n.cover_image))}" class="thumb" style="object-position:${esc(n.cover_focus||'50% 50%')}" onerror="this.style.display='none'">` : `<div class="no-img">${docIcon}</div>`}</td>
       <td><div class="cell-title">${esc(stripHtml(n.title_en))}</div><div class="cell-sub">${esc(stripHtml(n.title_zh))}</div></td>
       <td>${catTag(n.category_en, n.category_zh)}</td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date)}</td>
@@ -1716,7 +1726,7 @@ function openNewsModal(idx) {
   // path now (e.g. /assets/uploads/news/x.jpg), no base64 special-casing needed.
   const prev = document.getElementById('n-img-preview');
   if (n.cover_image) {
-    prev.src = n.cover_image;
+    prev.src = previewSrc(n.cover_image);
     prev.style.objectPosition = n.cover_focus || '50% 50%';
     prev.style.display = 'block';
     prev.onerror = () => { prev.style.display = 'none'; };
@@ -2237,10 +2247,11 @@ async function handleFeaturedImg(input) {
   btn.textContent = 'Uploading…'; btn.disabled = true;
   try {
     const path = await uploadImageFile(file);
+    localImagePreviews[path] = URL.createObjectURL(file);
     document.getElementById('n-image').value = path;
     document.getElementById('n-image-focus').value = '50% 50%';
     const prev = document.getElementById('n-img-preview');
-    prev.src = path;
+    prev.src = previewSrc(path);
     prev.style.objectPosition = '50% 50%';
     prev.style.display = 'block';
     newsModalDirty = true;
@@ -2284,7 +2295,7 @@ function renderBlocks() {
       ? `<span class="block-preview-text">${esc(stripHtml(b.en || '')).slice(0, 60) || '(empty)'}</span>`
       : b.type === 'gallery'
       ? `<span class="block-preview-text">${(b.images || []).length} image${(b.images || []).length === 1 ? '' : 's'} grouped together</span>`
-      : (b.src ? `<img src="${esc(b.src)}" style="width:36px;height:26px;object-fit:cover;border-radius:3px;flex-shrink:0">` : `<span class="block-preview-text">(no image)</span>`);
+      : (b.src ? `<img src="${esc(previewSrc(b.src))}" style="width:36px;height:26px;object-fit:cover;border-radius:3px;flex-shrink:0">` : `<span class="block-preview-text">(no image)</span>`);
     let body = '';
     const richToolbar = `<div class="rich-toolbar">
           <button type="button" class="rich-btn" onmousedown="event.preventDefault();execFmt('bold')" title="Bold"><b>B</b></button>
@@ -2322,7 +2333,7 @@ function renderBlocks() {
             <div style="border:1px solid var(--border);border-radius:8px;padding:10px;position:relative">
               <button type="button" onclick="removeGalleryImage(${i},${j})" title="Remove this image" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:16px;color:var(--muted);cursor:pointer;line-height:1">&times;</button>
               ${im.src
-                ? `<img src="${esc(im.src)}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px">`
+                ? `<img src="${esc(previewSrc(im.src))}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px">`
                 : `<div style="width:100%;height:100px;background:var(--bg);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">No image</div>`}
               <div style="display:flex;gap:6px;margin-bottom:8px">
                 <button type="button" class="img-file-btn" style="flex:1;font-size:11px;padding:5px 6px" onclick="document.getElementById('gimg-${i}-${j}').click()">Upload</button>
@@ -2340,7 +2351,7 @@ function renderBlocks() {
       const sz = b.size  || '100';
       body = `
         <div style="margin-bottom:14px">
-          ${b.src ? `<img src="${esc(b.src)}" alt="" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;display:block;margin-bottom:10px">` : ''}
+          ${b.src ? `<img src="${esc(previewSrc(b.src))}" alt="" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;display:block;margin-bottom:10px">` : ''}
           <button type="button" class="img-file-btn" onclick="document.getElementById('bimg-${i}').click()">Upload Image</button>
           <button type="button" class="img-file-btn" onclick="openMediaModal({block:${i}})">Browse</button>
           <input type="file" id="bimg-${i}" accept="image/*" style="display:none" onchange="handleBlockImg(this,${i})">
@@ -2480,6 +2491,7 @@ async function handleGalleryImg(input, blockIdx, imgIdx) {
   const file = input.files[0]; if (!file) return;
   try {
     const path = await uploadImageFile(file);
+    localImagePreviews[path] = URL.createObjectURL(file);
     currentBlocks[blockIdx].images[imgIdx].src = path;
     currentBlocks[blockIdx].images[imgIdx].focus = '50% 50%';
     newsModalDirty = true;
@@ -2516,6 +2528,7 @@ async function handleBlockImg(input, i) {
   const file = input.files[0]; if (!file) return;
   try {
     const path = await uploadImageFile(file);
+    localImagePreviews[path] = URL.createObjectURL(file);
     currentBlocks[i].src = path;
     currentBlocks[i].focus = '50% 50%';
     newsModalDirty = true;
@@ -2580,7 +2593,7 @@ function renderPreview() {
 
   if (image) {
     const imageFocus = document.getElementById('n-image-focus')?.value || '50% 50%';
-    html += `<img class="prev-hero" src="${prevEsc(image)}" alt="${prevEsc(title)}" style="object-position:${prevEsc(imageFocus)}" onerror="this.style.display='none'">`;
+    html += `<img class="prev-hero" src="${prevEsc(previewSrc(image))}" alt="${prevEsc(title)}" style="object-position:${prevEsc(imageFocus)}" onerror="this.style.display='none'">`;
   }
 
   const blocks = currentBlocks;
@@ -2602,7 +2615,7 @@ function renderPreview() {
         else                     figStyle = `display:block;margin:0 auto 28px;max-width:${sz}%`;
         const sideText = isZh ? (b.text_zh || b.text_en) : (b.text_en || b.text_zh);
         html += `<figure style="${figStyle};text-align:center">
-          <img src="${prevEsc(b.src)}" alt="${prevEsc(b.alt||'')}" style="width:100%;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+          <img src="${prevEsc(previewSrc(b.src))}" alt="${prevEsc(b.alt||'')}" style="width:100%;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
           ${caption ? `<figcaption style="font-size:13px;color:var(--muted);margin-top:8px;font-style:italic">${prevEsc(caption)}</figcaption>` : ''}
         </figure>`;
         if (sideText) {
@@ -2614,7 +2627,7 @@ function renderPreview() {
           ${imgs.map(im => {
             const cap = isZh ? (im.caption_zh || im.caption_en) : (im.caption_en || im.caption_zh);
             return `<figure style="margin:0">
-              <img src="${prevEsc(im.src)}" alt="${prevEsc(im.alt||'')}" style="width:100%;height:140px;object-fit:cover;object-position:${prevEsc(im.focus||'50% 50%')};border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+              <img src="${prevEsc(previewSrc(im.src))}" alt="${prevEsc(im.alt||'')}" style="width:100%;height:140px;object-fit:cover;object-position:${prevEsc(im.focus||'50% 50%')};border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
               ${cap ? `<figcaption style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">${prevEsc(cap)}</figcaption>` : ''}
             </figure>`;
           }).join('')}
