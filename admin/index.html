@@ -161,7 +161,7 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--bg); }
     .tag {
-      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      display: inline-block; padding: 2px 10px; border-radius: 20px; white-space: nowrap;
       font-size: 11px; font-weight: 600; background: var(--accent-lt); color: var(--accent);
     }
     .tag-event { background: rgba(37,99,235,0.1); color: #2563eb; }
@@ -337,7 +337,7 @@
       font-size: 14px; line-height: 1.7; color: var(--text); background: var(--card);
     }
     .rich-editor:empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; }
-    .rich-editor-title { min-height: auto; height: 40px; padding: 8px 12px; white-space: nowrap; overflow: hidden; font-size: 15px; font-weight: 600; }
+    .rich-editor-title { min-height: 40px; padding: 8px 12px; white-space: normal; overflow-wrap: break-word; font-size: 15px; font-weight: 600; }
     .cat-add-btn { padding: 0 14px; height: 38px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .cat-add-btn:hover { opacity: 0.88; }
     /* Inbox */
@@ -571,7 +571,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-brand-name">CCCWA Admin</div>
+        <div class="sidebar-brand-name" data-i18n="brand.name">CCCWA Admin</div>
         <div class="sidebar-brand-sub" data-i18n="brand.sub">Content Manager</div>
       </div>
       <nav class="sidebar-nav">
@@ -589,7 +589,7 @@
         </div>
         <div class="nav-item" onclick="showPanel('inbox',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <span>Inbox</span>
+          <span data-i18n="nav.inbox">Inbox</span>
           <span class="inbox-badge" id="inbox-badge" style="display:none">0</span>
         </div>
         <div class="nav-item" onclick="showPanel('publish',this)">
@@ -656,7 +656,7 @@
         <div class="topbar">
           <span class="topbar-title" data-i18n="nav.news">News Articles</span>
           <div class="topbar-controls">
-            <button id="sync-btn" class="btn-secondary" onclick="syncFromFiles()" style="margin-right:8px">⟳ Sync</button>
+            <button id="sync-btn" class="btn-secondary" onclick="syncFromFiles()" style="margin-right:8px" data-i18n="sync.btn">⟳ Sync</button>
             <button class="btn-primary" onclick="openNewsModal()" data-i18n="news.add">+ New Article</button>
             <div class="lang-toggle">
               <button class="lang-opt active" id="news-en" onclick="setLang('en')">EN</button>
@@ -670,7 +670,7 @@
         </div>
         <div class="panel-body">
           <div style="margin-bottom:14px">
-            <input type="text" id="news-search" class="form-input" placeholder="Search articles by title or category..." oninput="renderNewsTable()" style="max-width:340px">
+            <input type="text" id="news-search" class="form-input" data-i18n-placeholder="news.search" placeholder="Search articles by title or category..." oninput="renderNewsTable()" style="max-width:340px">
           </div>
           <div class="content-card">
             <table>
@@ -707,7 +707,7 @@
         </div>
         <div class="panel-body">
           <div style="margin-bottom:14px">
-            <input type="text" id="events-search" class="form-input" placeholder="Search events by title or location..." oninput="renderEventsTable()" style="max-width:340px">
+            <input type="text" id="events-search" class="form-input" data-i18n-placeholder="events.search" placeholder="Search events by title or location..." oninput="renderEventsTable()" style="max-width:340px">
           </div>
           <div class="content-card">
             <table>
@@ -1200,6 +1200,12 @@ const L = {
     'confirm.del.article':'Delete this article?','confirm.del.event':'Delete this event?',
     'alert.title':'Please enter an English title.',
     'dash.unsaved.yes':'Yes — export to publish','dash.unsaved.no':'None',
+    'brand.name':'CCCWA Admin',
+    'nav.inbox':'Inbox',
+    'sync.btn':'⟳ Sync','sync.ing':'⟳ Syncing…','sync.doing':'Syncing…',
+    'sync.ok':'Synced ✓ — showing latest saved content','sync.fail':'Sync failed: ',
+    'news.search':'Search articles by title or category...',
+    'events.search':'Search events by title or location...',
   },
   zh: {
     'login.sub':'内容管理系统','login.label':'密码','login.btn':'登录','login.err':'密码错误，请重试。',
@@ -1237,6 +1243,12 @@ const L = {
     'confirm.del.article':'确认删除此文章？','confirm.del.event':'确认删除此活动？',
     'alert.title':'请输入英文标题。',
     'dash.unsaved.yes':'有更改 — 导出以发布','dash.unsaved.no':'无',
+    'brand.name':'CCCWA 管理后台',
+    'nav.inbox':'收件箱',
+    'sync.btn':'⟳ 同步','sync.ing':'⟳ 同步中…','sync.doing':'同步中…',
+    'sync.ok':'同步完成 ✓ — 已显示最新保存的内容','sync.fail':'同步失败：',
+    'news.search':'按标题或分类搜索文章…',
+    'events.search':'按标题或地点搜索活动…',
   }
 };
 
@@ -1262,6 +1274,10 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n-opt]').forEach(el => {
     const v = T(el.getAttribute('data-i18n-opt'));
     if (v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const v = T(el.getAttribute('data-i18n-placeholder'));
+    if (v) el.placeholder = v;
   });
   // Placeholders
   document.getElementById('pw').placeholder = lang === 'zh' ? '请输入管理员密码' : 'Enter admin password';
@@ -2072,8 +2088,8 @@ async function publishToSite() {
 ================================================================ */
 async function syncFromFiles(silent) {
   const syncBtn = document.getElementById('sync-btn');
-  if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = '⟳ Syncing…'; }
-  if (!silent) toast('Syncing…');
+  if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = T('sync.ing'); }
+  if (!silent) toast(T('sync.doing'));
 
   try {
     const [newsRes, eventsRes] = await Promise.all([
@@ -2092,11 +2108,11 @@ async function syncFromFiles(silent) {
     dirty = false;
     localStorage.setItem(DIRTY_KEY, 'false');
     renderAll();
-    if (!silent) toast('Synced ✓ — showing latest saved content');
+    if (!silent) toast(T('sync.ok'));
   } catch (e) {
-    if (!silent) toast('Sync failed: ' + e.message);
+    if (!silent) toast(T('sync.fail') + e.message);
   } finally {
-    if (syncBtn) { syncBtn.disabled = false; syncBtn.textContent = '⟳ Sync'; }
+    if (syncBtn) { syncBtn.disabled = false; syncBtn.textContent = T('sync.btn'); }
   }
 }
 
