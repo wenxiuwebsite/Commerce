@@ -790,7 +790,15 @@
               </div>
             </div>
             <button class="pub-save-btn" onclick="saveNetlifySettings()">Save &amp; Connect</button>
-            <div class="pub-hint" style="margin-top:10px">To receive email alerts for new submissions: Netlify dashboard → Forms → <em>your form</em> → Form notifications.</div>
+
+            <hr class="pub-divider" style="margin:18px 0">
+            <div class="form-label" style="margin-bottom:5px">Email Notifications</div>
+            <div id="email-notif-status" style="font-size:12px;color:var(--muted);margin-bottom:10px">Connect Netlify above first.</div>
+            <div class="pub-token-row">
+              <input type="email" class="pub-field" id="notif-email-input" placeholder="you@example.com">
+              <button class="pub-save-btn" onclick="saveEmailNotification()">Enable</button>
+            </div>
+            <div class="pub-hint" style="margin-top:6px">Sends an email to this address whenever someone submits the Contact or Membership form on the site.</div>
           </div>
 
           <div class="inbox-status-bar" id="inbox-status-bar" style="display:none"></div>
@@ -2850,6 +2858,81 @@ function updateInboxSettings() {
   }
   const siteIdInput = document.getElementById('netlify-site-id-input');
   if (siteIdInput && !siteIdInput.value && hasSiteId) siteIdInput.value = getNetlifySiteId();
+  loadEmailNotification();
+}
+
+/* ================================================================
+   EMAIL NOTIFICATIONS — uses the same Netlify token/site connection
+   as the Inbox to create a site-level "email on form submission"
+   hook via Netlify's Hooks API, so submissions get emailed out
+   without anyone touching the Netlify dashboard directly.
+================================================================ */
+let currentEmailHookId = null;
+
+async function loadEmailNotification() {
+  const statusEl = document.getElementById('email-notif-status');
+  if (!statusEl) return;
+  const token = getNetlifyToken(), siteId = getNetlifySiteId();
+  if (!token || !siteId) { statusEl.textContent = 'Connect Netlify above first.'; currentEmailHookId = null; return; }
+  statusEl.textContent = 'Checking…';
+  try {
+    const res = await fetch(`https://api.netlify.com/api/v1/hooks?site_id=${siteId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const hooks = await res.json();
+    const hook = (Array.isArray(hooks) ? hooks : []).find(h => h.type === 'email' && h.event === 'submission_created');
+    if (hook) {
+      currentEmailHookId = hook.id;
+      statusEl.innerHTML = `<span class="inbox-conn-ok">Enabled</span> — sending to ${esc((hook.data && hook.data.email) || '(unknown)')} ` +
+        `<button type="button" onclick="removeEmailNotification()" style="margin-left:8px;background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit">Remove</button>`;
+    } else {
+      currentEmailHookId = null;
+      statusEl.textContent = 'Not set up yet — enter an email above and click Enable.';
+    }
+  } catch (e) {
+    currentEmailHookId = null;
+    statusEl.textContent = 'Could not check status: ' + e.message;
+  }
+}
+
+async function saveEmailNotification() {
+  const token = getNetlifyToken(), siteId = getNetlifySiteId();
+  const email = document.getElementById('notif-email-input').value.trim();
+  if (!token || !siteId) { toast('Connect Netlify (token + Site ID) above first'); return; }
+  if (!email) { toast('Enter an email address'); return; }
+  try {
+    const res = await fetch(`https://api.netlify.com/api/v1/hooks?site_id=${siteId}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ site_id: siteId, type: 'email', event: 'submission_created', data: { email } })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.message || `HTTP ${res.status}`);
+    toast('Email notifications enabled for ' + email);
+    document.getElementById('notif-email-input').value = '';
+    loadEmailNotification();
+  } catch (e) {
+    toast('Failed: ' + e.message);
+  }
+}
+
+async function removeEmailNotification() {
+  const token = getNetlifyToken();
+  if (!currentEmailHookId || !token) return;
+  if (!confirm('Stop email notifications for new submissions?')) return;
+  try {
+    const res = await fetch(`https://api.netlify.com/api/v1/hooks/${currentEmailHookId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
+    toast('Email notifications turned off');
+    currentEmailHookId = null;
+    loadEmailNotification();
+  } catch (e) {
+    toast('Failed: ' + e.message);
+  }
 }
 
 function getReadIds() {
