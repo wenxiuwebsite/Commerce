@@ -596,6 +596,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
           <span data-i18n="nav.publish">Publish</span>
         </div>
+        <div class="nav-item" onclick="showPanel('help',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span data-i18n="nav.help">Help</span>
+        </div>
       </nav>
       <div class="sidebar-foot">
         <button class="logout-btn" onclick="doLogout()">
@@ -800,6 +804,96 @@
           <div id="inbox-list">
             <div class="inbox-empty">Enter your Netlify token and Site ID above to load form submissions.</div>
           </div>
+        </div>
+      </div>
+
+      <!-- HELP -->
+      <div id="panel-help" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title" data-i18n="nav.help">Help</span>
+          <div class="topbar-controls">
+            <div class="lang-toggle">
+              <button class="lang-opt active" id="help-en" onclick="setLang('en')">EN</button>
+              <button class="lang-opt" id="help-zh" onclick="setLang('zh')">中文</button>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()">
+              <svg id="icon-moon-5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg id="icon-sun-5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" style="max-width:760px">
+
+          <h3 style="font-size:15px;margin-bottom:4px">Signing In</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:16px">There are two ways in — use whichever one you were given.</p>
+          <div class="publish-steps" style="margin-top:0;margin-bottom:32px">
+            <div class="step">
+              <div class="step-num">A</div>
+              <div>
+                <div class="step-title">Shared Password</div>
+                <div class="step-desc">A single password shared by all staff, entered under <strong>Password</strong> on the sign-in screen. Quick, but not tied to your identity — publishing this way saves drafts locally and needs a manual export/push to go live. Ask whoever manages the site for the current password.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">B</div>
+              <div>
+                <div class="step-title">Netlify Identity (recommended)</div>
+                <div class="step-desc">A real per-person account, entered under <strong>Netlify Identity Email/Password</strong>. Publishing this way goes live immediately&nbsp;&mdash; no extra steps. You need to be invited first (see "Setting Up a New Login" below). Forgot your password? Click <strong>Forgot password?</strong> on the sign-in screen and check your email.</div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="font-size:15px;margin-bottom:4px">Publishing a News Article</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:16px">Same idea for Events, under the Events tab.</p>
+          <div class="publish-steps" style="margin-top:0;margin-bottom:32px">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div><div class="step-title">Open the editor</div><div class="step-desc">Click <strong>News Articles</strong> in the sidebar, then <strong>+ New Article</strong> (or <strong>Edit</strong> on an existing one).</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div><div class="step-title">Fill in the basics</div><div class="step-desc">At minimum: <strong>Publish Date</strong>, <strong>Category</strong>, and <strong>Title (Chinese)</strong> — the English title is optional but recommended. Leave <strong>Summary</strong> blank to auto-generate one from the body.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div><div class="step-title">Add a featured image</div><div class="step-desc">Click <strong>Upload</strong> next to Featured Image. It appears on the news list and at the top of the article.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div><div class="step-title">Build the article body</div><div class="step-desc">Use <strong>+ Text Block</strong> for writing (with a bold/italic/heading/list/link toolbar) and <strong>+ Image Block</strong> for photos with their own alignment, size, and caption. Reorder blocks with the ▲/▼ arrows.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">5</div>
+              <div><div class="step-title">Preview, then save</div><div class="step-desc">Click <strong>Preview</strong> any time to see how it will actually look. When ready, click <strong>Save Article</strong>.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">6</div>
+              <div><div class="step-title">Publish</div><div class="step-desc">Go to <strong>Publish</strong> in the sidebar and click <strong>Publish to Website</strong>. If you're signed in with Netlify Identity, this goes live right away. On the shared password, this saves locally — see the Publish panel for how to get it live.</div></div>
+            </div>
+          </div>
+
+          <h3 style="font-size:15px;margin-bottom:4px">Setting Up a New Login (Netlify Identity)</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:16px">For whoever manages the Netlify account — do this once per new staff member.</p>
+          <div class="publish-steps" style="margin-top:0">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div><div class="step-title">Open Netlify's dashboard</div><div class="step-desc">Go to app.netlify.com, select this site, then <strong>Site configuration → Identity → Users</strong>.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div><div class="step-title">Invite the person</div><div class="step-desc">Click <strong>Invite users</strong> and enter their email address. Netlify emails them an invite link.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div><div class="step-title">They click the link</div><div class="step-desc">It opens this admin panel with a <strong>Set Your Password</strong> screen. They pick a password, and they're logged straight in.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div><div class="step-title">Done</div><div class="step-desc">From then on, they sign in with their email + that password under <strong>Netlify Identity Email/Password</strong> on the sign-in screen — no need to be re-invited.</div></div>
+            </div>
+          </div>
+          <div class="form-hint" style="margin-top:16px">If an invite link ever seems "broken" (no set-password form appears), the token has likely expired or was already used once before — delete the pending user under Identity → Users and send a fresh invite.</div>
+
         </div>
       </div>
 
@@ -1073,7 +1167,7 @@ const L = {
   en: {
     'login.sub':'Content Management System','login.label':'Password','login.btn':'Sign In','login.err':'Incorrect password. Try again.',
     'brand.sub':'Content Manager',
-    'nav.dashboard':'Dashboard','nav.news':'News Articles','nav.events':'Events','nav.publish':'Publish','nav.signout':'Sign Out',
+    'nav.dashboard':'Dashboard','nav.news':'News Articles','nav.events':'Events','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
     'dash.stat.news':'News Articles','dash.stat.events':'Upcoming Events','dash.stat.unsaved':'Unsaved Changes',
     'dash.recent':'Recent Articles','dash.col.category':'Category','dash.col.date':'Date',
     'news.add':'+ New Article','news.col.title':'Title','news.col.category':'Category','news.col.date':'Date','news.col.page':'Article Page','news.col.actions':'Actions',
@@ -1110,7 +1204,7 @@ const L = {
   zh: {
     'login.sub':'内容管理系统','login.label':'密码','login.btn':'登录','login.err':'密码错误，请重试。',
     'brand.sub':'内容管理',
-    'nav.dashboard':'概览','nav.news':'新闻文章','nav.events':'活动','nav.publish':'发布','nav.signout':'退出登录',
+    'nav.dashboard':'概览','nav.news':'新闻文章','nav.events':'活动','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
     'dash.stat.news':'新闻文章','dash.stat.events':'即将举办活动','dash.stat.unsaved':'未发布更改',
     'dash.recent':'近期文章','dash.col.category':'分类','dash.col.date':'日期',
     'news.add':'+ 新增文章','news.col.title':'标题','news.col.category':'分类','news.col.date':'日期','news.col.page':'文章页面','news.col.actions':'操作',
@@ -1157,11 +1251,11 @@ function applyTranslations() {
     if (v) el.textContent = v;
   });
   // Lang buttons
-  ['login-en','app-en','news-en','ev-en','pub-en'].forEach(id => {
+  ['login-en','app-en','news-en','ev-en','pub-en','help-en'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', lang === 'en');
   });
-  ['login-zh','app-zh','news-zh','ev-zh','pub-zh'].forEach(id => {
+  ['login-zh','app-zh','news-zh','ev-zh','pub-zh','help-zh'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', lang === 'zh');
   });
@@ -1188,7 +1282,7 @@ function setLang(l) {
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', theme);
   const isDark = theme === 'dark';
-  ['', '-2', '-3', '-4', '-p'].forEach(sfx => {
+  ['', '-2', '-3', '-4', '-5', '-p'].forEach(sfx => {
     const m = document.getElementById('icon-moon' + sfx);
     const s = document.getElementById('icon-sun'  + sfx);
     if (m) m.style.display = isDark ? 'none' : 'block';
