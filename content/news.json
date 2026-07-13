@@ -1,6 +1,38 @@
 {
   "items": [
     {
+      "id": "test",
+      "date": "2026-07-13",
+      "category_en": "Announcement",
+      "category_zh": "公告",
+      "title_en": "test",
+      "title_zh": "test",
+      "summary_en": "test",
+      "summary_zh": "test",
+      "cover_image": "",
+      "cover_focus": "50% 50%",
+      "body_en": "test\n\ntest",
+      "body_zh": "test\n\ntest",
+      "body_images": [
+        {
+          "src": "/assets/uploads/news/1783929484095-images.jfif",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100",
+          "after_paragraph": 1
+        }
+      ],
+      "body_galleries": [],
+      "external_link": "",
+      "external_link_label_en": "",
+      "external_link_label_zh": ""
+    },
+    {
       "id": "immigration-assets",
       "date": "2020-08-24",
       "category_en": "Announcement",
