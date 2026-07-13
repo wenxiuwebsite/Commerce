@@ -1698,9 +1698,15 @@ function catTag(cat_en, cat_zh) {
   return `<span class="tag ${cls}">${esc(label)}</span>`;
 }
 
+function isUpcomingEvent(ev) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const d = new Date(ev.date + 'T00:00:00');
+  return !isNaN(d) && d >= today;
+}
+
 function renderDashboard() {
   document.getElementById('stat-news').textContent = data.news.length;
-  document.getElementById('stat-events').textContent = data.events.length;
+  document.getElementById('stat-events').textContent = data.events.filter(isUpcomingEvent).length;
   const tbody = document.getElementById('dash-news-rows');
   const sorted = [...data.news].sort((a, b) => new Date(b.date) - new Date(a.date));
   tbody.innerHTML = sorted.slice(0, 5).map(n => `
