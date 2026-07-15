@@ -677,7 +677,8 @@
           <span class="topbar-title" data-i18n="nav.news">News Articles</span>
           <div class="topbar-controls">
             <button id="sync-btn" class="btn-secondary" onclick="syncFromFiles()" style="margin-right:8px" data-i18n="sync.btn">⟳ Sync</button>
-            <button class="btn-primary" onclick="openNewsModal()" data-i18n="news.add">+ New Article</button>
+            <button class="btn-primary" onclick="openNewsModal()" style="margin-right:8px" data-i18n="news.add">+ New Article</button>
+            <button class="btn-primary" onclick="openNewsModal(undefined, true)" data-i18n="news.add.event">+ New Event</button>
             <div class="lang-toggle">
               <button class="lang-opt active" id="news-en" onclick="setLang('en')">EN</button>
               <button class="lang-opt" id="news-zh" onclick="setLang('zh')">中文</button>
@@ -962,7 +963,7 @@
 <div class="modal-backdrop" id="news-modal" style="display:none" onclick="if(event.target===this)closeNewsModal()">
   <div class="modal-box">
     <div class="modal-head">
-      <h3 id="news-modal-title" data-i18n="modal.news.add">Add News Article</h3>
+      <h3 id="news-modal-title">Add News Article</h3>
       <button class="modal-close" onclick="closeNewsModal()">&#215;</button>
     </div>
     <div class="modal-body">
@@ -1234,7 +1235,7 @@ const L = {
     'nav.dashboard':'Dashboard','nav.news':'Event','nav.events':'Events','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
     'dash.stat.news':'Event Articles','dash.stat.events':'Upcoming Events','dash.stat.unsaved':'Unsaved Changes',
     'dash.recent':'Recent Articles','dash.col.category':'Category','dash.col.date':'Date',
-    'news.add':'+ New Article','news.col.title':'Title','news.col.category':'Category','news.col.date':'Date','news.col.page':'Article Page','news.col.actions':'Actions',
+    'news.add':'+ New Article','news.add.event':'+ New Event','news.col.title':'Title','news.col.category':'Category','news.col.date':'Date','news.col.page':'Article Page','news.col.actions':'Actions',
     'news.empty':'No articles yet. Click + New Article to add one.',
     'events.add':'+ New Event','events.col.date':'Date','events.col.event':'Event','events.col.location':'Location','events.col.time':'Time','events.col.actions':'Actions',
     'events.empty':'No events yet. Click + New Event to add one.',
@@ -1278,7 +1279,7 @@ const L = {
     'nav.dashboard':'概览','nav.news':'活动','nav.events':'活动日历','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
     'dash.stat.news':'活动文章','dash.stat.events':'即将举办活动','dash.stat.unsaved':'未发布更改',
     'dash.recent':'近期文章','dash.col.category':'分类','dash.col.date':'日期',
-    'news.add':'+ 新增文章','news.col.title':'标题','news.col.category':'分类','news.col.date':'日期','news.col.page':'文章页面','news.col.actions':'操作',
+    'news.add':'+ 新增文章','news.add.event':'+ 新增活动','news.col.title':'标题','news.col.category':'分类','news.col.date':'日期','news.col.page':'文章页面','news.col.actions':'操作',
     'news.empty':'暂无文章，点击"+ 新增文章"添加。',
     'events.add':'+ 新增活动','events.col.date':'日期','events.col.event':'活动','events.col.location':'地点','events.col.time':'时间','events.col.actions':'操作',
     'events.empty':'暂无活动，点击"+ 新增活动"添加。',
@@ -1947,15 +1948,16 @@ function addCategory() {
 /* ================================================================
    NEWS CRUD
 ================================================================ */
-function openNewsModal(idx) {
+function openNewsModal(idx, presetEvent) {
   editingNewsId = idx !== undefined ? idx : null;
-  document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : T('modal.news.add');
+  document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : (presetEvent ? T('news.add.event') : T('modal.news.add'));
   const n = idx !== undefined ? data.news[idx] : {};
+  const eventCat = (data.categories || []).find(c => c.en.toLowerCase() === 'event');
   document.getElementById('n-id').value                     = n.id || '';
   document.getElementById('n-title-en').innerHTML           = n.title_en || '';
   document.getElementById('n-title-zh').innerHTML           = n.title_zh || '';
-  document.getElementById('n-category-en').value            = n.category_en || '';
-  document.getElementById('n-category-zh').value            = n.category_zh || '';
+  document.getElementById('n-category-en').value            = n.category_en || (presetEvent ? 'Event' : '');
+  document.getElementById('n-category-zh').value            = n.category_zh || (presetEvent ? (eventCat ? eventCat.zh : '活动') : '');
   document.getElementById('n-excerpt-en').innerHTML          = n.summary_en || '';
   document.getElementById('n-excerpt-zh').innerHTML          = n.summary_zh || '';
   renderCategoryDatalist();
