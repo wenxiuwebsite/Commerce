@@ -177,13 +177,13 @@
     "tier3_desc": "For community supporters — newsletter, select events, and community updates",
     "form_title": "Membership Inquiry",
     "form_sub": "Fill out the form below and our team will be in touch.",
-    "f_name": "Full Name *",
     "f_org": "Organization / Company",
     "f_email": "Email Address *",
     "f_phone": "Phone Number",
     "f_type": "Membership Type",
     "f_subject": "Subject",
     "f_message": "Tell us about your business",
+    "f_name_note": "* Please include your name in your message below.",
     "f_submit": "Submit Application",
     "contact_alt": "Prefer to reach us directly?"
   },
@@ -199,10 +199,10 @@
     "hours": "Monday – Friday: 9:00 AM – 5:00 PM",
     "form_title": "Send Us a Message",
     "form_sub": "We'll respond within 1-2 business days.",
-    "f_name": "Name *",
     "f_email": "Email *",
     "f_subject": "Subject",
     "f_message": "Message *",
+    "f_name_note": "* Please include your name in your message below.",
     "f_submit": "Send Message"
   },
   "footer": {

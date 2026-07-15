@@ -79,15 +79,9 @@
         </div>
         <form id="contactForm" name="contact" method="POST" data-netlify="true">
           <input type="hidden" name="form-name" value="contact">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div class="form-group">
-              <label data-i18n="contact.f_name">Name *</label>
-              <input type="text" name="name" required placeholder="Your name">
-            </div>
-            <div class="form-group">
-              <label data-i18n="contact.f_email">Email *</label>
-              <input type="email" name="email" required placeholder="your@email.com">
-            </div>
+          <div class="form-group">
+            <label data-i18n="contact.f_email">Email *</label>
+            <input type="email" name="email" required placeholder="your@email.com">
           </div>
           <div class="form-group">
             <label data-i18n="contact.f_subject">Subject</label>
@@ -95,6 +89,7 @@
           </div>
           <div class="form-group">
             <label data-i18n="contact.f_message">Message *</label>
+            <p style="font-size:12px;color:var(--text-secondary);margin:-6px 0 8px;" data-i18n="contact.f_name_note">* Please include your name in your message below.</p>
             <div class="rich-editor-wrap">
               <div class="rich-toolbar">
                 <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="richExec('bold')"><b>B</b></button>
@@ -139,6 +134,18 @@
     if (url) document.execCommand('createLink', false, url);
   }
 
+  // Converts the rich-text editor's HTML into readable plain text (so
+  // Netlify's email notification shows real line breaks/bullets instead
+  // of raw tags) while keeping the sender's paragraph/list structure.
+  function htmlToPlainText(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    div.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+    div.querySelectorAll('li').forEach(li => { li.prepend('- '); li.append('\n'); });
+    div.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, ul, ol').forEach(el => el.append('\n'));
+    return (div.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('contactForm');
     const btn  = form ? form.querySelector('button[type="submit"]') : null;
@@ -154,7 +161,7 @@
         return;
       }
       if (msgError) msgError.classList.remove('show');
-      if (msgEditor && msgField) msgField.value = msgEditor.innerHTML.trim();
+      if (msgEditor && msgField) msgField.value = htmlToPlainText(msgEditor.innerHTML);
       const origText = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
       try {
