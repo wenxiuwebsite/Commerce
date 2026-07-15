@@ -208,7 +208,7 @@
     .export-btn:hover { background: var(--accent-h); }
 
     /* Dashboard */
-    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    .dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 32px; }
     .dash-card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
       padding: 22px 24px; display: flex; align-items: center; gap: 16px;
@@ -583,7 +583,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span data-i18n="nav.news">News Articles</span>
         </div>
-        <div class="nav-item" onclick="showPanel('events',this)">
+        <div class="nav-item" id="nav-item-events" onclick="showPanel('events',this)" style="display:none">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span data-i18n="nav.events">Events</span>
         </div>
@@ -602,6 +602,10 @@
         </div>
       </nav>
       <div class="sidebar-foot">
+        <button class="logout-btn" id="toggle-events-btn" onclick="toggleEventsTab()" style="opacity:0.55">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="toggle-events-label">Show Events Tab</span>
+        </button>
         <button class="logout-btn" onclick="doLogout()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           <span data-i18n="nav.signout">Sign Out</span>
@@ -633,7 +637,7 @@
               <div class="dash-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
               <div><div class="dash-num" id="stat-news">0</div><div class="dash-lbl" data-i18n="dash.stat.news">News Articles</div></div>
             </div>
-            <div class="dash-card">
+            <div class="dash-card" id="dash-card-events" style="display:none">
               <div class="dash-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
               <div><div class="dash-num" id="stat-events">0</div><div class="dash-lbl" data-i18n="dash.stat.events">Upcoming Events</div></div>
             </div>
@@ -851,12 +855,11 @@
             </div>
           </div>
 
-          <h3 style="font-size:15px;margin-bottom:4px">Publishing a News Article</h3>
-          <p style="font-size:13px;color:var(--sub);margin-bottom:16px">Same idea for Events, under the Events tab.</p>
+          <h3 style="font-size:15px;margin-bottom:4px">Publishing an Event Article</h3>
           <div class="publish-steps" style="margin-top:0;margin-bottom:32px">
             <div class="step">
               <div class="step-num">1</div>
-              <div><div class="step-title">Open the editor</div><div class="step-desc">Click <strong>News Articles</strong> in the sidebar, then <strong>+ New Article</strong> (or <strong>Edit</strong> on an existing one).</div></div>
+              <div><div class="step-title">Open the editor</div><div class="step-desc">Click <strong>Event</strong> in the sidebar, then <strong>+ New Article</strong> (or <strong>Edit</strong> on an existing one).</div></div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
@@ -879,6 +882,36 @@
               <div><div class="step-title">Publish</div><div class="step-desc">Go to <strong>Publish</strong> in the sidebar and click <strong>Publish to Website</strong>. If you're signed in with Netlify Identity, this goes live right away. On the shared password, this saves locally — see the Publish panel for how to get it live.</div></div>
             </div>
           </div>
+
+          <h3 style="font-size:15px;margin-bottom:4px">Getting a Personal Access Token</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:16px">Needed once to connect the <strong>Inbox</strong> tab (so it can read Contact/Membership form submissions) and to enable email notifications for new submissions.</p>
+          <div class="publish-steps" style="margin-top:0;margin-bottom:32px">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div><div class="step-title">Log in to Netlify</div><div class="step-desc">Go to <strong>app.netlify.com</strong> and sign in with the account that manages this site.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div><div class="step-title">Open User settings</div><div class="step-desc">Click your avatar in the top-right corner, then <strong>User settings</strong>.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div><div class="step-title">Go to Personal access tokens</div><div class="step-desc">In the left sidebar, click <strong>Applications</strong>, then find the <strong>Personal access tokens</strong> section and click <strong>New access token</strong>.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div><div class="step-title">Name it and generate</div><div class="step-desc">Give it a description like "CCCWA Admin Inbox" and click <strong>Generate token</strong>.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">5</div>
+              <div><div class="step-title">Copy it immediately</div><div class="step-desc">Netlify shows the token only once. Copy it right away — if you lose it, you'll need to generate a new one.</div></div>
+            </div>
+            <div class="step">
+              <div class="step-num">6</div>
+              <div><div class="step-title">Paste it into the Inbox tab</div><div class="step-desc">Back in this admin panel, go to <strong>Inbox</strong>, paste the token into <strong>Personal Access Token</strong>, also fill in the <strong>Site ID</strong> (Netlify → Site configuration → General → Site details), then click <strong>Save &amp; Connect</strong>.</div></div>
+            </div>
+          </div>
+          <div class="form-hint" style="margin-top:0;margin-bottom:32px">Treat this token like a password — anyone with it can access your Netlify account's data. It's stored only in your browser's local storage, never sent anywhere except Netlify's API.</div>
 
           <h3 style="font-size:15px;margin-bottom:4px">Setting Up a New Login (Netlify Identity)</h3>
           <p style="font-size:13px;color:var(--sub);margin-bottom:16px">For whoever manages the Netlify account — do this once per new staff member.</p>
@@ -1003,7 +1036,7 @@
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.category.en">Category (English)</label>
           <div style="display:flex;gap:8px;align-items:center">
-            <input class="form-input" id="n-category-en" list="cat-en-list" placeholder="e.g. Announcement" style="flex:1" oninput="onCategoryEnInput(this.value)">
+            <input class="form-input" id="n-category-en" list="cat-en-list" placeholder="e.g. News" style="flex:1" oninput="onCategoryEnInput(this.value)">
             <datalist id="cat-en-list"></datalist>
             <button type="button" class="cat-add-btn" onclick="addCategory()" title="Save as a reusable category">+ Save</button>
           </div>
@@ -1175,8 +1208,8 @@ const L = {
   en: {
     'login.sub':'Content Management System','login.label':'Password','login.btn':'Sign In','login.err':'Incorrect password. Try again.',
     'brand.sub':'Content Manager',
-    'nav.dashboard':'Dashboard','nav.news':'News Articles','nav.events':'Events','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
-    'dash.stat.news':'News Articles','dash.stat.events':'Upcoming Events','dash.stat.unsaved':'Unsaved Changes',
+    'nav.dashboard':'Dashboard','nav.news':'Event','nav.events':'Events','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
+    'dash.stat.news':'Event Articles','dash.stat.events':'Upcoming Events','dash.stat.unsaved':'Unsaved Changes',
     'dash.recent':'Recent Articles','dash.col.category':'Category','dash.col.date':'Date',
     'news.add':'+ New Article','news.col.title':'Title','news.col.category':'Category','news.col.date':'Date','news.col.page':'Article Page','news.col.actions':'Actions',
     'news.empty':'No articles yet. Click + New Article to add one.',
@@ -1201,7 +1234,7 @@ const L = {
     'modal.events.sec.reg':'Registration','modal.events.reg.url':'Register URL',
     'btn.cancel':'Cancel','btn.save.article':'Save Article','btn.save.event':'Save Event',
     'btn.edit':'Edit','btn.delete':'Delete',
-    'cat.announcement':'Announcement','cat.community':'Community','cat.event':'Event',
+    'cat.news':'News','cat.event':'Event',
     'toast.article.saved':'Article saved','toast.article.deleted':'Article deleted',
     'toast.event.saved':'Event saved','toast.event.deleted':'Event deleted',
     'toast.exported':'data.js downloaded — place it in the content/ folder',
@@ -1214,12 +1247,13 @@ const L = {
     'sync.ok':'Synced ✓ — showing latest saved content','sync.fail':'Sync failed: ',
     'news.search':'Search articles by title or category...',
     'events.search':'Search events by title or location...',
+    'toggle.events.show':'Show Events Tab','toggle.events.hide':'Hide Events Tab',
   },
   zh: {
     'login.sub':'内容管理系统','login.label':'密码','login.btn':'登录','login.err':'密码错误，请重试。',
     'brand.sub':'内容管理',
-    'nav.dashboard':'概览','nav.news':'新闻文章','nav.events':'活动','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
-    'dash.stat.news':'新闻文章','dash.stat.events':'即将举办活动','dash.stat.unsaved':'未发布更改',
+    'nav.dashboard':'概览','nav.news':'活动','nav.events':'活动日历','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
+    'dash.stat.news':'活动文章','dash.stat.events':'即将举办活动','dash.stat.unsaved':'未发布更改',
     'dash.recent':'近期文章','dash.col.category':'分类','dash.col.date':'日期',
     'news.add':'+ 新增文章','news.col.title':'标题','news.col.category':'分类','news.col.date':'日期','news.col.page':'文章页面','news.col.actions':'操作',
     'news.empty':'暂无文章，点击"+ 新增文章"添加。',
@@ -1244,7 +1278,7 @@ const L = {
     'modal.events.sec.reg':'报名','modal.events.reg.url':'报名链接',
     'btn.cancel':'取消','btn.save.article':'保存文章','btn.save.event':'保存活动',
     'btn.edit':'编辑','btn.delete':'删除',
-    'cat.announcement':'公告','cat.community':'社区','cat.event':'活动',
+    'cat.news':'新闻','cat.event':'活动',
     'toast.article.saved':'文章已保存','toast.article.deleted':'文章已删除',
     'toast.event.saved':'活动已保存','toast.event.deleted':'活动已删除',
     'toast.exported':'data.js 已下载，请放入 content/ 文件夹',
@@ -1257,6 +1291,7 @@ const L = {
     'sync.ok':'同步完成 ✓ — 已显示最新保存的内容','sync.fail':'同步失败：',
     'news.search':'按标题或分类搜索文章…',
     'events.search':'按标题或地点搜索活动…',
+    'toggle.events.show':'显示活动日历标签','toggle.events.hide':'隐藏活动日历标签',
   }
 };
 
@@ -1289,6 +1324,7 @@ function applyTranslations() {
   });
   // Placeholders
   document.getElementById('pw').placeholder = lang === 'zh' ? '请输入管理员密码' : 'Enter admin password';
+  applyEventsTabVisibility();
 }
 
 function setLang(l) {
@@ -1490,9 +1526,8 @@ const LOCAL_API = 'http://localhost:8081/api/v1';
 // load resolves, or if fetching the real files ever fails.
 const DEFAULT_DATA = {
   categories: [
-    { en: 'Announcement', zh: '公告' },
-    { en: 'Community',    zh: '社区' },
-    { en: 'Event',        zh: '活动' }
+    { en: 'Event', zh: '活动' },
+    { en: 'News',  zh: '新闻' }
   ],
   news: [],
   events: []
@@ -1682,6 +1717,34 @@ function showPanel(name, el) {
 }
 
 /* ================================================================
+   EVENTS TAB TOGGLE — the public Events page/nav link is hidden by
+   default (superseded by the renamed "Event" News tab). This lets
+   staff temporarily unhide the Events tab here in the admin so they
+   can still view/edit old event data. Admin-only; does not affect
+   what site visitors see.
+================================================================ */
+const EVENTS_TAB_KEY = 'cccwa_admin_showEventsTab';
+
+function applyEventsTabVisibility() {
+  const show = localStorage.getItem(EVENTS_TAB_KEY) === 'true';
+  const navItem = document.getElementById('nav-item-events');
+  const dashCard = document.getElementById('dash-card-events');
+  if (navItem) navItem.style.display = show ? 'flex' : 'none';
+  if (dashCard) dashCard.style.display = show ? 'flex' : 'none';
+  const label = document.getElementById('toggle-events-label');
+  if (label) label.textContent = T(show ? 'toggle.events.hide' : 'toggle.events.show');
+  if (!show && document.getElementById('panel-events')?.style.display !== 'none') {
+    showPanel('dashboard', document.querySelector('.nav-item'));
+  }
+}
+
+function toggleEventsTab() {
+  const show = localStorage.getItem(EVENTS_TAB_KEY) === 'true';
+  localStorage.setItem(EVENTS_TAB_KEY, (!show).toString());
+  applyEventsTabVisibility();
+}
+
+/* ================================================================
    RENDER
 ================================================================ */
 function renderAll() {
@@ -1700,7 +1763,7 @@ function updateDirtyIndicator() {
 }
 
 function catTag(cat_en, cat_zh) {
-  const cls = cat_en === 'Event' ? 'tag-event' : cat_en === 'Community' ? 'tag-community' : '';
+  const cls = cat_en === 'Event' ? 'tag-event' : cat_en === 'News' ? 'tag-community' : '';
   const zhFallback = (data.categories || []).find(c => c.en === cat_en)?.zh || cat_en;
   const label = lang === 'zh' ? (cat_zh || zhFallback) : cat_en;
   return `<span class="tag ${cls}">${esc(label)}</span>`;
@@ -1801,6 +1864,39 @@ function stripHtml(html) {
   return tmp.textContent || tmp.innerText || '';
 }
 
+// Inbox messages come from PUBLIC, unauthenticated form submissions — the
+// rich-text message box on contact.html/join.html only ever produces a
+// narrow set of tags via execCommand, but anyone can POST arbitrary HTML
+// straight to the Netlify Forms endpoint, bypassing that editor entirely.
+// Strip everything to an allowlist before ever rendering it as innerHTML.
+const INBOX_HTML_ALLOWED_TAGS = new Set(['B','STRONG','I','EM','U','P','BR','UL','OL','LI','H2','H3','A']);
+function sanitizeInboxHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = String(html || '');
+  (function clean(node) {
+    [...node.childNodes].forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        if (!INBOX_HTML_ALLOWED_TAGS.has(child.tagName)) {
+          child.replaceWith(document.createTextNode(child.textContent));
+          return;
+        }
+        const safeHref = child.tagName === 'A' && /^(https?:|mailto:)/i.test(child.getAttribute('href') || '')
+          ? child.getAttribute('href') : null;
+        [...child.attributes].forEach(attr => child.removeAttribute(attr.name));
+        if (safeHref) {
+          child.setAttribute('href', safeHref);
+          child.setAttribute('target', '_blank');
+          child.setAttribute('rel', 'noopener noreferrer');
+        }
+        clean(child);
+      } else if (child.nodeType !== Node.TEXT_NODE) {
+        child.remove();
+      }
+    });
+  })(tmp);
+  return tmp.innerHTML;
+}
+
 function renderCategoryDatalist() {
   const dl = document.getElementById('cat-en-list');
   if (!dl) return;
@@ -1872,7 +1968,7 @@ function closeNewsModal() {
 }
 
 function saveNews() {
-  const cat   = document.getElementById('n-category-en').value.trim() || 'Announcement';
+  const cat   = document.getElementById('n-category-en').value.trim() || 'News';
   const catZhInput = document.getElementById('n-category-zh').value.trim();
   const catZh = catZhInput || (data.categories || []).find(c => c.en === cat)?.zh || cat;
   const id = document.getElementById('n-id').value.trim() || slugify(stripHtml(document.getElementById('n-title-en').innerHTML) || stripHtml(document.getElementById('n-title-zh').innerHTML)) || uid();
@@ -2696,7 +2792,7 @@ function renderPreview() {
   const titleEn = V('n-title-en');
   const titleZh = V('n-title-zh') || titleEn;
   const title = isZh ? titleZh : titleEn;
-  const catEn = document.getElementById('n-category-en')?.value.trim() || 'Announcement';
+  const catEn = document.getElementById('n-category-en')?.value.trim() || 'News';
   const catZhVal = document.getElementById('n-category-zh')?.value.trim() ||
     (data.categories || []).find(c => c.en === catEn)?.zh || catEn;
   const category = isZh ? catZhVal : catEn;
@@ -3056,7 +3152,7 @@ function renderInboxList() {
     const org     = esc(d.org || d.organization || d.company || '');
     const phone   = esc(d.phone || '');
     const memType = esc(d.type || '');
-    const message = esc(d.message || '');
+    const message = sanitizeInboxHtml(d.message || '');
     const subject = esc(d.subject || '');
     const date = new Date(s.created_at).toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'

@@ -20,8 +20,7 @@
     { href: 'mission.html',    label: 'Mission',    key: 'mission',    i18n: 'nav.mission' },
     { href: 'leadership.html', label: 'Leadership', key: 'leadership', i18n: 'nav.leadership' },
     { href: 'directory.html',  label: 'Directory',  key: 'directory',  i18n: 'nav.directory' },
-    { href: 'upcoming.html',   label: 'Events',     key: 'events',     i18n: 'nav.events' },
-    { href: 'news.html',       label: 'News',       key: 'news',       i18n: 'nav.news' },
+    { href: 'news.html',       label: 'Event',      key: 'news',       i18n: 'nav.news' },
     { href: 'contact.html',    label: 'Contact',    key: 'contact',    i18n: 'nav.contact' },
   ];
 
@@ -88,9 +87,8 @@
         <a href="join.html"       data-i18n="nav.join">Join Us</a>
       </div>
       <div class="footer-links">
-        <h4 data-i18n="footer.events_title">Events &amp; News</h4>
-        <a href="upcoming.html" data-i18n="nav.events">Upcoming Events</a>
-        <a href="news.html"     data-i18n="nav.news">News Updates</a>
+        <h4 data-i18n="footer.events_title">Event</h4>
+        <a href="news.html" data-i18n="nav.news">Event</a>
       </div>
       <div class="footer-contact">
         <h4 data-i18n="nav.contact">Contact</h4>

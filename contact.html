@@ -95,7 +95,27 @@
           </div>
           <div class="form-group">
             <label data-i18n="contact.f_message">Message *</label>
-            <textarea name="message" rows="6" required placeholder="Your message..."></textarea>
+            <div class="rich-editor-wrap">
+              <div class="rich-toolbar">
+                <button type="button" class="rich-btn" title="Bold" onmousedown="event.preventDefault()" onclick="richExec('bold')"><b>B</b></button>
+                <button type="button" class="rich-btn" title="Italic" onmousedown="event.preventDefault()" onclick="richExec('italic')"><i>I</i></button>
+                <button type="button" class="rich-btn" title="Underline" onmousedown="event.preventDefault()" onclick="richExec('underline')"><u>U</u></button>
+                <span class="rich-sep"></span>
+                <button type="button" class="rich-btn" title="Heading 2" onmousedown="event.preventDefault()" onclick="richExec('formatBlock','&lt;h2&gt;')">H2</button>
+                <button type="button" class="rich-btn" title="Heading 3" onmousedown="event.preventDefault()" onclick="richExec('formatBlock','&lt;h3&gt;')">H3</button>
+                <button type="button" class="rich-btn" title="Paragraph" onmousedown="event.preventDefault()" onclick="richExec('formatBlock','&lt;p&gt;')">¶</button>
+                <span class="rich-sep"></span>
+                <button type="button" class="rich-btn" title="Bullet list" onmousedown="event.preventDefault()" onclick="richExec('insertUnorderedList')">• List</button>
+                <button type="button" class="rich-btn" title="Numbered list" onmousedown="event.preventDefault()" onclick="richExec('insertOrderedList')">1. List</button>
+                <span class="rich-sep"></span>
+                <button type="button" class="rich-btn" title="Link" onmousedown="event.preventDefault()" onclick="richInsertLink()">Link</button>
+                <span class="rich-sep"></span>
+                <button type="button" class="rich-btn" title="Clear formatting" onmousedown="event.preventDefault()" onclick="richExec('removeFormat')">Clear</button>
+              </div>
+              <div class="rich-editor" id="contact-message-editor" contenteditable="true" data-ph="Your message..."></div>
+            </div>
+            <input type="hidden" name="message" id="contact-message-field">
+            <div class="form-hint-error" id="contact-message-error">Please enter a message.</div>
           </div>
           <button type="submit" class="btn btn-primary" style="width:100%;" data-i18n="contact.f_submit">Send Message</button>
         </form>
@@ -107,12 +127,34 @@
 <div id="footer-ph"></div>
 <script src="js/layout.js"></script>
 <script>
+  function richExec(cmd, val) {
+    const ed = document.getElementById('contact-message-editor');
+    ed.focus();
+    document.execCommand(cmd, false, val || null);
+  }
+  function richInsertLink() {
+    const ed = document.getElementById('contact-message-editor');
+    ed.focus();
+    const url = prompt('Enter URL (e.g. https://example.com):');
+    if (url) document.execCommand('createLink', false, url);
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('contactForm');
     const btn  = form ? form.querySelector('button[type="submit"]') : null;
+    const msgEditor = document.getElementById('contact-message-editor');
+    const msgField  = document.getElementById('contact-message-field');
+    const msgError  = document.getElementById('contact-message-error');
     if (!form) return;
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
+      if (msgEditor && !msgEditor.textContent.trim()) {
+        msgError.classList.add('show');
+        msgEditor.focus();
+        return;
+      }
+      if (msgError) msgError.classList.remove('show');
+      if (msgEditor && msgField) msgField.value = msgEditor.innerHTML.trim();
       const origText = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
       try {
