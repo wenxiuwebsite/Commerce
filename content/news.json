@@ -1,6 +1,39 @@
 {
   "items": [
     {
+      "id": "testevent",
+      "date": "2026-07-19",
+      "category_en": "Event",
+      "category_zh": "活动",
+      "title_en": "testevent",
+      "title_zh": "testevent",
+      "summary_en": "",
+      "summary_zh": "",
+      "cover_image": "",
+      "cover_focus": "50% 50%",
+      "body_en": "test,&nbsp;<strong><a href=\"https://commerce.ccc-wa.org/contact.html\">Register</a></strong>",
+      "body_zh": "test, <strong><a href=\"https://commerce.ccc-wa.org/contact.html\" style=\"color: rgb(2, 48, 32);\">Register</a></strong>",
+      "body_images": [
+        {
+          "src": "/assets/uploads/news/1784089981525-Congressional-App-Challenge-Coalition-Vertical-2.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "50",
+          "after_paragraph": 1
+        }
+      ],
+      "body_galleries": [],
+      "external_link": "",
+      "external_link_label_en": "",
+      "external_link_label_zh": "",
+      "register_url": ""
+    },
+    {
       "id": "test",
       "date": "2026-07-13",
       "category_en": "News",
