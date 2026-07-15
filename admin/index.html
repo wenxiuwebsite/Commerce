@@ -343,25 +343,40 @@
     /* Inbox */
     .inbox-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 6px; margin-left: auto; line-height: 1.5; }
     .inbox-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
-    .inbox-msg { border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 12px; background: var(--card); }
+    .inbox-msg { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; background: var(--card); }
     .inbox-msg.unread { border-left: 3px solid var(--accent); }
-    .inbox-msg-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
-    .inbox-msg-name { font-weight: 700; font-size: 15px; color: var(--text); }
-    .inbox-msg-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: var(--accent-lt); color: var(--accent); padding: 2px 8px; border-radius: 10px; }
-    .inbox-msg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .inbox-msg-date { margin-left: auto; font-size: 12px; color: var(--muted); }
-    .inbox-msg-meta { font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.6; }
-    .inbox-msg-body { font-size: 14px; color: var(--sub); line-height: 1.7; padding: 12px 14px; background: var(--bg); border-radius: 7px; }
-    .inbox-msg-foot { display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); align-items: center; }
-    .inbox-read-btn { font-size: 12px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); cursor: pointer; }
+    .inbox-msg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .inbox-msg-name { font-weight: 700; font-size: 13px; color: var(--text); }
+    .inbox-msg-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: var(--accent-lt); color: var(--accent); padding: 1px 7px; border-radius: 10px; }
+    .inbox-msg-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .inbox-msg-date { margin-left: auto; font-size: 11px; color: var(--muted); }
+    .inbox-msg-meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
+    .inbox-msg-body-wrap { position: relative; }
+    .inbox-msg-body { font-size: 13px; color: var(--sub); line-height: 1.55; padding: 8px 10px; background: var(--bg); border-radius: 6px; }
+    .inbox-msg-body.collapsed { max-height: 42px; overflow: hidden; }
+    .inbox-msg-body.collapsed::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 24px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      border-radius: 0 0 6px 6px; pointer-events: none;
+    }
+    .inbox-readmore-btn { display: none; font-size: 11px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; padding: 4px 0 0; font-family: inherit; }
+    .inbox-readmore-btn.show { display: inline-block; }
+    .inbox-msg-foot { display: flex; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); align-items: center; }
+    .inbox-read-btn { font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); cursor: pointer; }
     .inbox-read-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .inbox-reply-a { font-size: 12px; padding: 5px 14px; border-radius: 6px; background: var(--accent); color: #fff; text-decoration: none; display: inline-block; }
+    .inbox-reply-a { font-size: 11px; padding: 4px 12px; border-radius: 6px; background: var(--accent); color: #fff; text-decoration: none; display: inline-block; }
+    .inbox-delete-btn { font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: none; color: var(--danger); cursor: pointer; margin-left: auto; font-family: inherit; }
+    .inbox-delete-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
     .inbox-settings-box { border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 22px; background: var(--bg); }
     .inbox-conn-ok { font-size: 12px; padding: 3px 10px; border-radius: 10px; background: rgba(22,163,74,0.1); color: #16a34a; font-weight: 600; }
     .inbox-filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .inbox-filter-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--bg); color: var(--muted); cursor: pointer; }
     .inbox-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .inbox-status-bar { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .inbox-pagination { display: flex; gap: 6px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .inbox-page-btn { min-width: 28px; padding: 5px 9px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--card); color: var(--text); cursor: pointer; }
+    .inbox-page-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .inbox-page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .rich-editor p { margin-bottom: 8px; }
     .rich-editor h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
     .rich-editor h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
@@ -2929,6 +2944,8 @@ function insertLink() {
 ================================================================ */
 let inboxSubmissions = [];
 let inboxFilter = 'all';
+let inboxPage = 1;
+const INBOX_PAGE_SIZE = 8;
 
 function getNetlifyToken()  { return localStorage.getItem('cccwa_netlify_token')   || ''; }
 function getNetlifySiteId() { return localStorage.getItem('cccwa_netlify_site_id') || ''; }
@@ -3126,9 +3143,60 @@ async function fetchInboxSubmissions() {
 
 function filterInbox(filter, btn) {
   inboxFilter = filter;
+  inboxPage = 1;
   document.querySelectorAll('.inbox-filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderInboxList();
+}
+
+function goInboxPage(p) {
+  inboxPage = p;
+  renderInboxList();
+  document.getElementById('inbox-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function deleteInboxSubmission(id, btnEl) {
+  if (!confirm('Delete this message? This cannot be undone.')) return;
+  const token = getNetlifyToken();
+  if (!token) { toast('Connect Netlify (token + Site ID) above first'); return; }
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Deleting…'; }
+  try {
+    const res = await fetch(`https://api.netlify.com/api/v1/submissions/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
+    inboxSubmissions = inboxSubmissions.filter(s => s.id !== id);
+    toast('Message deleted');
+    renderInboxList();
+    updateInboxBadge();
+    const statusEl = document.getElementById('inbox-status-bar');
+    if (statusEl) {
+      const read = getReadIds();
+      const unread = inboxSubmissions.filter(s => !read.has(s.id)).length;
+      statusEl.textContent = `${inboxSubmissions.length} message${inboxSubmissions.length !== 1 ? 's' : ''} · ${unread} unread`;
+    }
+  } catch (e) {
+    toast('Delete failed: ' + e.message);
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Delete'; }
+  }
+}
+
+function toggleInboxBody(id, btn) {
+  const body = document.getElementById('inbox-body-' + id);
+  if (!body) return;
+  const collapsed = body.classList.toggle('collapsed');
+  btn.textContent = collapsed ? 'Read more' : 'Show less';
+}
+
+// Collapsed bodies only need a "Read more" toggle if they're actually
+// clipping content — measure after render rather than guessing by length,
+// since the rich-text body can render at very different heights per item.
+function refreshInboxReadMoreButtons() {
+  document.querySelectorAll('.inbox-msg-body.collapsed').forEach(body => {
+    const btn = document.querySelector(`.inbox-readmore-btn[data-for="${body.id}"]`);
+    if (btn) btn.classList.toggle('show', body.scrollHeight > body.clientHeight + 4);
+  });
 }
 
 function renderInboxList() {
@@ -3144,7 +3212,17 @@ function renderInboxList() {
     return;
   }
 
-  listEl.innerHTML = subs.map(s => {
+  const totalPages = Math.max(1, Math.ceil(subs.length / INBOX_PAGE_SIZE));
+  if (inboxPage > totalPages) inboxPage = totalPages;
+  const pageSubs = subs.slice((inboxPage - 1) * INBOX_PAGE_SIZE, inboxPage * INBOX_PAGE_SIZE);
+
+  const pagerHtml = totalPages <= 1 ? '' : `<div class="inbox-pagination">${
+    Array.from({ length: totalPages }, (_, i) => i + 1).map(p =>
+      `<button class="inbox-page-btn${p === inboxPage ? ' active' : ''}" onclick="goInboxPage(${p})">${p}</button>`
+    ).join('')
+  }</div>`;
+
+  listEl.innerHTML = pageSubs.map(s => {
     const isUnread = !read.has(s.id);
     const d    = s.data || {};
     const name = esc(d.name || d.fullname || '(no name)');
@@ -3166,6 +3244,7 @@ function renderInboxList() {
       subject ? `Re: ${subject}` : ''
     ].filter(Boolean).join(' &nbsp;·&nbsp; ');
 
+    const bodyId = 'inbox-body-' + esc(s.id);
     return `<div class="inbox-msg ${isUnread ? 'unread' : ''}" id="inbox-msg-${esc(s.id)}">
       <div class="inbox-msg-head">
         <span class="inbox-msg-name">${name}</span>
@@ -3174,15 +3253,23 @@ function renderInboxList() {
         <span class="inbox-msg-date">${date}</span>
       </div>
       ${metaParts ? `<div class="inbox-msg-meta">${metaParts}</div>` : ''}
-      ${message ? `<div class="inbox-msg-body">${message}</div>` : ''}
+      ${message ? `
+        <div class="inbox-msg-body-wrap">
+          <div class="inbox-msg-body collapsed" id="${bodyId}">${message}</div>
+        </div>
+        <button class="inbox-readmore-btn" data-for="${bodyId}" onclick="toggleInboxBody('${esc(s.id)}',this)">Read more</button>
+      ` : ''}
       <div class="inbox-msg-foot">
         ${isUnread
           ? `<button class="inbox-read-btn" onclick="markRead('${esc(s.id)}',this)">Mark as Read</button>`
           : `<span style="font-size:12px;color:var(--muted)">Read</span>`}
         ${email ? `<a class="inbox-reply-a" href="mailto:${email}?subject=Re: CCCWA Inquiry">Reply</a>` : ''}
+        <button class="inbox-delete-btn" onclick="deleteInboxSubmission('${esc(s.id)}',this)">Delete</button>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + pagerHtml;
+
+  requestAnimationFrame(refreshInboxReadMoreButtons);
 }
 
 // Init
