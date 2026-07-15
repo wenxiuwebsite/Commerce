@@ -1,21 +1,21 @@
 {
   "items": [
     {
-      "id": "a",
-      "date": "",
+      "id": "test",
+      "date": "2026-07-13",
       "category_en": "News",
       "category_zh": "新闻",
-      "title_en": "a",
-      "title_zh": "",
-      "summary_en": "a",
-      "summary_zh": "",
+      "title_en": "test",
+      "title_zh": "test",
+      "summary_en": "test",
+      "summary_zh": "test",
       "cover_image": "",
       "cover_focus": "50% 50%",
-      "body_en": "",
-      "body_zh": "",
+      "body_en": "test\n\ntest",
+      "body_zh": "test\n\ntest",
       "body_images": [
         {
-          "src": "/assets/uploads/news/1783659160167-OIP.jpg",
+          "src": "/assets/uploads/news/1783929484095-images.jfif",
           "alt": "",
           "caption_en": "",
           "caption_zh": "",
@@ -24,7 +24,7 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
-          "after_paragraph": 0
+          "after_paragraph": 1
         }
       ],
       "body_galleries": [],
