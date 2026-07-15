@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CCCWA Admin</title>
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
@@ -1091,6 +1092,13 @@
           <span class="form-hint">Shown at the bottom of the article (EN / ZH).</span>
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Register URL <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+          <input class="form-input" id="n-register-url" placeholder="https://... or contact.html">
+          <span class="form-hint">Only shown when Category (English) is "Event" — adds a Register button at the bottom of the article. Leave blank to link to the Contact page.</span>
+        </div>
+      </div>
       <div class="form-section">Article Content Blocks</div>
       <div id="blocks-list"></div>
     </div>
@@ -1957,6 +1965,7 @@ function openNewsModal(idx) {
   document.getElementById('n-external-link').value            = n.external_link || '';
   document.getElementById('n-external-link-label-en').value   = n.external_link_label_en || '';
   document.getElementById('n-external-link-label-zh').value   = n.external_link_label_zh || '';
+  document.getElementById('n-register-url').value             = n.register_url || '';
   // Featured image preview — cover_image is always a real, directly-servable
   // path now (e.g. /assets/uploads/news/x.jpg), no base64 special-casing needed.
   const prev = document.getElementById('n-img-preview');
@@ -2004,7 +2013,8 @@ function saveNews() {
     body_galleries: bodyParts.body_galleries,
     external_link: document.getElementById('n-external-link').value.trim(),
     external_link_label_en: document.getElementById('n-external-link-label-en').value.trim(),
-    external_link_label_zh: document.getElementById('n-external-link-label-zh').value.trim()
+    external_link_label_zh: document.getElementById('n-external-link-label-zh').value.trim(),
+    register_url: document.getElementById('n-register-url').value.trim()
   };
   if (!stripHtml(item.title_zh) && !stripHtml(item.title_en)) { alert(T('alert.title')); return; }
   if (editingNewsId !== null) data.news[editingNewsId] = item;
