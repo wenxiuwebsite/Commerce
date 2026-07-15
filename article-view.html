@@ -259,7 +259,10 @@
       insertBodyImages(bodyWrap, article.body_images);
       insertBodyGalleries(bodyWrap, article.body_galleries);
     } else if (summary) {
-      bodyWrap.innerHTML = '<p>' + C.escHtml(summary) + '</p>';
+      // Same authoring path as body (rich-text toolbar can embed raw HTML,
+      // e.g. a bold/linked "Register" run) — parse it the same way instead
+      // of escaping it into visible tag text.
+      bodyWrap.innerHTML = window.marked ? window.marked.parse(summary) : '<p>' + summary + '</p>';
     }
     root.appendChild(bodyWrap);
 
