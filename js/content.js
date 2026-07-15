@@ -38,8 +38,20 @@
     return list || [];
   }
 
+  // Body/summary text can legitimately contain raw HTML fragments (e.g. a
+  // bold/linked "Register" run inserted via the rich-text toolbar) mixed in
+  // with plain Markdown. Cards are text-only by design, so strip real tags
+  // via the browser's own tolerant parser before touching Markdown syntax —
+  // a regex that only deletes ">" characters mangles embedded HTML instead
+  // of removing it.
+  function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = String(html || '');
+    return tmp.textContent || tmp.innerText || '';
+  }
+
   function stripMarkdown(md) {
-    return String(md || '')
+    return stripHtml(md)
       .replace(/!\[.*?\]\(.*?\)/g, '')
       .replace(/\[(.*?)\]\(.*?\)/g, '$1')
       .replace(/[#*_>`]/g, '')
@@ -49,7 +61,7 @@
 
   function excerptFrom(item, zh) {
     const summary = zh ? item.summary_zh : item.summary_en;
-    if (summary) return summary;
+    if (summary) return stripHtml(summary).replace(/\s+/g, ' ').trim();
     const body = zh ? (item.body_zh || item.body_en) : (item.body_en || item.body_zh);
     const text = stripMarkdown(body);
     return text.length > 160 ? text.slice(0, 157) + '…' : text;
@@ -359,11 +371,85 @@
     wrap.innerHTML = upcoming.map(ev => eventItemHtml(ev, zh)).join('');
   }
 
+  /* ============================================================
+     LEADERSHIP PAGE (leadership.html): two grids split by "section"
+     ("executive" -> Board of Directors, "member" -> Member Orgs)
+     ============================================================ */
+  const LEADERSHIP_URL = 'content/leadership.json';
+
+  function leaderCardHtml(m, zh) {
+    const name = zh ? (m.name_zh || m.name_en) : (m.name_en || m.name_zh);
+    const role = zh ? (m.role_zh || m.role_en) : (m.role_en || m.role_zh);
+    const company = zh ? (m.company_zh || m.company_en) : (m.company_en || m.company_zh);
+    return '<div class="leader-card">' +
+      (role ? '<span class="leader-role">' + escHtml(role) + '</span>' : '') +
+      '<h3>' + escHtml(name || '') + '</h3>' +
+      (company ? '<p>' + escHtml(company) + '</p>' : '') +
+      '</div>';
+  }
+
+  function renderLeadershipPage(items) {
+    const zh = isZh();
+    const execGrid = document.getElementById('leadership-exec-grid');
+    const memberGrid = document.getElementById('leadership-member-grid');
+    const exec = items.filter(m => m.section !== 'member');
+    const members = items.filter(m => m.section === 'member');
+    if (execGrid) execGrid.innerHTML = exec.length ? exec.map(m => leaderCardHtml(m, zh)).join('') : emptyStateHtml(zh);
+    if (memberGrid) memberGrid.innerHTML = members.length ? members.map(m => leaderCardHtml(m, zh)).join('') : emptyStateHtml(zh);
+  }
+
+  function initLeadershipPage() {
+    const execGrid = document.getElementById('leadership-exec-grid');
+    const memberGrid = document.getElementById('leadership-member-grid');
+    if (!execGrid && !memberGrid) return;
+    fetchJSON(LEADERSHIP_URL).then(data => {
+      const items = ensureIds(data.items || []);
+      renderLeadershipPage(items);
+      new MutationObserver(() => renderLeadershipPage(items)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => {
+      if (execGrid) execGrid.innerHTML = errorStateHtml(isZh());
+    });
+  }
+
+  /* ============================================================
+     DIRECTORY PAGE (directory.html): single grid of member cards
+     ============================================================ */
+  const DIRECTORY_URL = 'content/directory.json';
+
+  function memberCardHtml(m, zh) {
+    const name = zh ? (m.name_zh || m.name_en) : (m.name_en || m.name_zh);
+    const category = zh ? (m.category_zh || m.category_en) : (m.category_en || m.category_zh);
+    return '<div class="member-card">' +
+      '<div class="member-logo">' + (m.logo ? '<img src="' + escHtml(m.logo) + '" alt="' + escHtml(name || '') + '">' : '') + '</div>' +
+      '<div class="member-info">' +
+      '<h4>' + escHtml(name || '') + '</h4>' +
+      (category ? '<p>' + escHtml(category) + '</p>' : '') +
+      '</div></div>';
+  }
+
+  function renderDirectoryPage(grid, items) {
+    const zh = isZh();
+    if (!items.length) { grid.innerHTML = emptyStateHtml(zh); return; }
+    grid.innerHTML = items.map(m => memberCardHtml(m, zh)).join('');
+  }
+
+  function initDirectoryPage() {
+    const grid = document.getElementById('directory-grid');
+    if (!grid) return;
+    fetchJSON(DIRECTORY_URL).then(data => {
+      const items = ensureIds(data.items || []);
+      renderDirectoryPage(grid, items);
+      new MutationObserver(() => renderDirectoryPage(grid, items)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => { grid.innerHTML = errorStateHtml(isZh()); });
+  }
+
   function boot() {
     initNewsPage();
     initHomePreview();
     initEventsList();
     initHomeEventsPreview();
+    initLeadershipPage();
+    initDirectoryPage();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

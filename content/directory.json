@@ -1,0 +1,84 @@
+{
+  "items": [
+    {
+      "id": "cai-cai-law",
+      "name_en": "Cai & Cai Law Office",
+      "name_zh": "",
+      "category_en": "Legal Services",
+      "category_zh": "法律服务",
+      "logo": "/images/dir-cai.jpg"
+    },
+    {
+      "id": "modern-land-usa",
+      "name_en": "Modern Land USA",
+      "name_zh": "",
+      "category_en": "Real Estate Development",
+      "category_zh": "房地产开发",
+      "logo": "/images/dir-modernland.jpg"
+    },
+    {
+      "id": "isoftstone",
+      "name_en": "iSoftStone",
+      "name_zh": "",
+      "category_en": "Technology & IT Services",
+      "category_zh": "科技与IT服务",
+      "logo": "/images/dir-isoftstone.jpg"
+    },
+    {
+      "id": "sysimmune",
+      "name_en": "SysImmune Inc.",
+      "name_zh": "",
+      "category_en": "Biopharmaceuticals",
+      "category_zh": "生物制药",
+      "logo": "/images/dir-systimmune.jpg"
+    },
+    {
+      "id": "meixin-finance",
+      "name_en": "Meixin Finance",
+      "name_zh": "",
+      "category_en": "Financial Services",
+      "category_zh": "金融服务",
+      "logo": "/images/dir-meixin.jpg"
+    },
+    {
+      "id": "mza-associates",
+      "name_en": "MZA & Associates",
+      "name_zh": "",
+      "category_en": "Consulting",
+      "category_zh": "咨询服务",
+      "logo": "/images/dir-mza.jpg"
+    },
+    {
+      "id": "create-world",
+      "name_en": "Create World",
+      "name_zh": "",
+      "category_en": "Media & Creative",
+      "category_zh": "媒体与创意",
+      "logo": "/images/dir-create-world.jpg"
+    },
+    {
+      "id": "sunshine-youth",
+      "name_en": "Sunshine Youth Education",
+      "name_zh": "",
+      "category_en": "Education & Culture",
+      "category_zh": "教育与文化",
+      "logo": "/images/dir-sunshine.png"
+    },
+    {
+      "id": "member1",
+      "name_en": "CCCWA Member",
+      "name_zh": "CCCWA会员",
+      "category_en": "Chamber Member",
+      "category_zh": "商会会员",
+      "logo": "/images/dir-member1.jpg"
+    },
+    {
+      "id": "member2",
+      "name_en": "CCCWA Member",
+      "name_zh": "CCCWA会员",
+      "category_en": "Chamber Member",
+      "category_zh": "商会会员",
+      "logo": "/images/dir-member2.jpg"
+    }
+  ]
+}

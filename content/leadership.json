@@ -1,0 +1,94 @@
+{
+  "items": [
+    {
+      "id": "jinjing-wu",
+      "section": "executive",
+      "name_en": "Jinjing Wu",
+      "name_zh": "",
+      "role_en": "President",
+      "role_zh": "会长",
+      "company_en": "Washington State Branch, China",
+      "company_zh": "华盛顿州分支机构"
+    },
+    {
+      "id": "lin-yuan",
+      "section": "executive",
+      "name_en": "Lin Yuan",
+      "name_zh": "",
+      "role_en": "Vice President",
+      "role_zh": "副会长",
+      "company_en": "Guangdong Zhonghuan Investment Co., Ltd.",
+      "company_zh": "广东中环投资有限公司"
+    },
+    {
+      "id": "cai-xia",
+      "section": "executive",
+      "name_en": "Cai Xia",
+      "name_zh": "",
+      "role_en": "General Legal Counsel",
+      "role_zh": "总法律顾问",
+      "company_en": "Cai & Cai Law Office",
+      "company_zh": "蔡氏律师事务所"
+    },
+    {
+      "id": "wa-branch-director",
+      "section": "executive",
+      "name_en": "Washington State Branch",
+      "name_zh": "华盛顿州分支机构",
+      "role_en": "Director Unit",
+      "role_zh": "董事",
+      "company_en": "Guangdong Zhonghuan Investment Co., Ltd.",
+      "company_zh": "广东中环投资有限公司"
+    },
+    {
+      "id": "modern-land-usa",
+      "section": "executive",
+      "name_en": "Modern Land USA",
+      "name_zh": "",
+      "role_en": "Director",
+      "role_zh": "董事",
+      "company_en": "Modern Land (USA) Co., Ltd.",
+      "company_zh": "美好置地（美国）有限公司"
+    },
+    {
+      "id": "isoftstone",
+      "section": "executive",
+      "name_en": "iSoftStone",
+      "name_zh": "",
+      "role_en": "Director",
+      "role_zh": "董事",
+      "company_en": "iSoftStone Information Technology",
+      "company_zh": "软通动力信息技术有限公司"
+    },
+    {
+      "id": "sysimmune",
+      "section": "member",
+      "name_en": "SysImmune Inc.",
+      "name_zh": "",
+      "role_en": "Member",
+      "role_zh": "会员",
+      "company_en": "Biopharmaceutical innovation company",
+      "company_zh": "生物制药创新企业"
+    },
+    {
+      "id": "mza-associates",
+      "section": "member",
+      "name_en": "MZA & Associates",
+      "name_zh": "",
+      "role_en": "Member",
+      "role_zh": "会员",
+      "company_en": "Professional consulting services",
+      "company_zh": "专业咨询服务机构"
+    },
+    {
+      "id": "sunshine-youth",
+      "section": "member",
+      "name_en": "Sunshine Youth Education",
+      "name_zh": "",
+      "role_en": "Member",
+      "role_zh": "会员",
+      "company_en": "Youth culture and education development",
+      "company_zh": "青少年文化与教育发展机构"
+    }
+  ]
+}

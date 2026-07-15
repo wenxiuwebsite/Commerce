@@ -143,6 +143,12 @@
       transition: background var(--t); font-family: inherit;
     }
     .btn-edit:hover { background: var(--accent-lt); }
+    .btn-move {
+      background: none; border: none; color: var(--muted); font-size: 12px;
+      cursor: pointer; padding: 4px 6px; border-radius: 4px; font-family: inherit; line-height: 1;
+    }
+    .btn-move:hover:not(:disabled) { background: var(--accent-lt); color: var(--accent); }
+    .btn-move:disabled { opacity: 0.25; cursor: default; }
 
     .panel-body { padding: 32px; }
 
@@ -601,6 +607,14 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span data-i18n="nav.events">Events</span>
         </div>
+        <div class="nav-item" onclick="showPanel('leadership',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span data-i18n="nav.leadership">Leadership</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('directory',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <span data-i18n="nav.directory">Directory</span>
+        </div>
         <div class="nav-item" onclick="showPanel('inbox',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <span data-i18n="nav.inbox">Inbox</span>
@@ -745,6 +759,79 @@
         </div>
       </div>
 
+      <!-- LEADERSHIP -->
+      <div id="panel-leadership" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title" data-i18n="nav.leadership">Leadership</span>
+          <div class="topbar-controls">
+            <button class="btn-primary" onclick="openLeadershipModal()" data-i18n="leadership.add">+ New Member</button>
+            <div class="lang-toggle">
+              <button class="lang-opt active" id="ld-en" onclick="setLang('en')">EN</button>
+              <button class="lang-opt" id="ld-zh" onclick="setLang('zh')">中文</button>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()">
+              <svg id="icon-moon-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg id="icon-sun-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div style="margin-bottom:14px">
+            <input type="text" id="leadership-search" class="form-input" data-i18n-placeholder="leadership.search" placeholder="Search by name, role, or company..." oninput="renderLeadershipTable()" style="max-width:340px">
+          </div>
+          <div class="content-card">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="leadership.col.name">Name</th>
+                  <th data-i18n="leadership.col.role">Role</th>
+                  <th data-i18n="leadership.col.company">Company</th>
+                  <th style="width:110px" data-i18n="leadership.col.section">Section</th>
+                  <th style="width:130px" data-i18n="leadership.col.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leadership-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIRECTORY -->
+      <div id="panel-directory" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title" data-i18n="nav.directory">Directory</span>
+          <div class="topbar-controls">
+            <button class="btn-primary" onclick="openDirectoryModal()" data-i18n="directory.add">+ New Company</button>
+            <div class="lang-toggle">
+              <button class="lang-opt active" id="dir-en" onclick="setLang('en')">EN</button>
+              <button class="lang-opt" id="dir-zh" onclick="setLang('zh')">中文</button>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()">
+              <svg id="icon-moon-7" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg id="icon-sun-7" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div style="margin-bottom:14px">
+            <input type="text" id="directory-search" class="form-input" data-i18n-placeholder="directory.search" placeholder="Search by company or category..." oninput="renderDirectoryTable()" style="max-width:340px">
+          </div>
+          <div class="content-card">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:60px"></th>
+                  <th data-i18n="directory.col.name">Company</th>
+                  <th data-i18n="directory.col.category">Category</th>
+                  <th style="width:130px" data-i18n="directory.col.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="directory-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- PUBLISH -->
       <div id="panel-publish" style="display:none">
         <div class="topbar">
@@ -774,7 +861,7 @@
             <hr class="pub-divider">
             <div class="pub-settings-label">Local Backend</div>
             <div id="pub-conn-status" style="font-size:12px;margin-bottom:12px;color:var(--muted)"></div>
-            <div class="pub-hint">Publishing writes straight to <code>content/news.json</code> and <code>content/events.json</code> via the local proxy. Run <code>npx decap-server</code> in a second terminal (see docs/SOP.md) — if it's not running, Publish will fail and tell you so.</div>
+            <div class="pub-hint">Publishing writes straight to <code>content/news.json</code>, <code>events.json</code>, <code>leadership.json</code> and <code>directory.json</code> via the local proxy. Run <code>npx decap-server</code> in a second terminal (see docs/SOP.md) — if it's not running, Publish will fail and tell you so.</div>
           </div>
         </div>
       </div>
@@ -1180,6 +1267,116 @@
   </div>
 </div>
 
+<!-- LEADERSHIP MODAL -->
+<div class="modal-backdrop" id="leadership-modal" style="display:none" onclick="if(event.target===this)closeLeadershipModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="leadership-modal-title">Add Member</h3>
+      <button class="modal-close" onclick="closeLeadershipModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ld-id">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.section">Section</label>
+          <select class="form-input" id="ld-section">
+            <option value="executive" data-i18n="leadership.exec_title">Board of Directors</option>
+            <option value="member" data-i18n="leadership.member_title">Member Organizations</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-section" data-i18n="modal.sec.en">English Content</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.name.en">Name (English)</label>
+          <input class="form-input" id="ld-name-en">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.role.en">Role (English)</label>
+          <input class="form-input" id="ld-role-en" placeholder="President, Director, Member...">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.company.en">Company (English)</label>
+          <input class="form-input" id="ld-company-en">
+        </div>
+      </div>
+      <div class="form-section" data-i18n="modal.sec.zh">Chinese Content</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.name.zh">Name (Chinese)</label>
+          <input class="form-input" id="ld-name-zh">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.role.zh">Role (Chinese)</label>
+          <input class="form-input" id="ld-role-zh">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.company.zh">Company (Chinese)</label>
+          <input class="form-input" id="ld-company-zh">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeLeadershipModal()" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn-primary" onclick="saveLeadership()" data-i18n="btn.save.leadership">Save Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTORY MODAL -->
+<div class="modal-backdrop" id="directory-modal" style="display:none" onclick="if(event.target===this)closeDirectoryModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="directory-modal-title">Add Company</h3>
+      <button class="modal-close" onclick="closeDirectoryModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="d-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.directory.name.en">Company Name (English)</label>
+          <input class="form-input" id="d-name-en">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.directory.name.zh">Company Name (Chinese)</label>
+          <input class="form-input" id="d-name-zh">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.directory.category.en">Category (English)</label>
+          <input class="form-input" id="d-category-en" placeholder="e.g. Legal Services">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.directory.category.zh">Category (Chinese)</label>
+          <input class="form-input" id="d-category-zh" placeholder="e.g. 法律服务">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.directory.logo">Logo</label>
+          <div class="img-upload-row">
+            <input class="form-input" id="d-logo" placeholder="/assets/uploads/directory/logo.png" style="flex:1">
+            <button type="button" class="img-file-btn" id="d-logo-upload-btn" onclick="document.getElementById('d-logo-file').click()">Upload</button>
+            <button type="button" class="img-file-btn" onclick="openMediaModal('directory-logo','assets/uploads/directory')">Browse</button>
+            <input type="file" id="d-logo-file" accept="image/*" style="display:none" onchange="handleDirectoryLogo(this)">
+            <img id="d-logo-preview" class="img-preview-thumb" alt="">
+          </div>
+          <span class="form-hint" data-i18n="modal.directory.logo.hint">Upload a file or enter a path. Leave blank if no logo.</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeDirectoryModal()" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn-primary" onclick="saveDirectory()" data-i18n="btn.save.directory">Save Company</button>
+    </div>
+  </div>
+</div>
+
 <!-- MEDIA LIBRARY -->
 <div class="modal-backdrop" id="media-modal" style="display:none" onclick="if(event.target===this)closeMediaModal()">
   <div class="modal-box" style="width:720px">
@@ -1226,13 +1423,18 @@ const L = {
   en: {
     'login.sub':'Content Management System','login.label':'Password','login.btn':'Sign In','login.err':'Incorrect password. Try again.',
     'brand.sub':'Content Manager',
-    'nav.dashboard':'Dashboard','nav.news':'Event','nav.events':'Events','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
+    'nav.dashboard':'Dashboard','nav.news':'Event','nav.events':'Events','nav.leadership':'Leadership','nav.directory':'Directory','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
     'dash.stat.news':'Event Articles','dash.stat.events':'Upcoming Events','dash.stat.unsaved':'Unsaved Changes',
     'dash.recent':'Recent Articles','dash.col.category':'Category','dash.col.date':'Date',
     'news.add':'+ New Article','news.add.event':'+ New Event','news.col.title':'Title','news.col.category':'Category','news.col.date':'Date','news.col.page':'Article Page','news.col.actions':'Actions',
     'news.empty':'No articles yet. Click + New Article to add one.',
     'events.add':'+ New Event','events.col.date':'Date','events.col.event':'Event','events.col.location':'Location','events.col.time':'Time','events.col.actions':'Actions',
     'events.empty':'No events yet. Click + New Event to add one.',
+    'leadership.add':'+ New Member','leadership.col.name':'Name','leadership.col.role':'Role','leadership.col.company':'Company','leadership.col.section':'Section','leadership.col.actions':'Actions',
+    'leadership.empty':'No members yet. Click + New Member to add one.','leadership.search':'Search by name, role, or company...',
+    'leadership.exec_title':'Board of Directors','leadership.member_title':'Member Organizations',
+    'directory.add':'+ New Company','directory.col.name':'Company','directory.col.category':'Category','directory.col.actions':'Actions',
+    'directory.empty':'No companies yet. Click + New Company to add one.','directory.search':'Search by company or category...',
     'publish.desc':'After making changes, export a data.js file and place it in the content/ folder of your site.',
     'publish.step1.title':'Export your content','publish.step1.desc':'Click the button below to download data.js. This file contains all your news and events.',
     'publish.step2.title':'Replace the content file','publish.step2.desc':'Place the downloaded data.js into the content/ folder of your website, replacing the existing file.',
@@ -1250,13 +1452,24 @@ const L = {
     'modal.events.title.en':'Title (English)','modal.events.location.en':'Location (English)','modal.events.time':'Time','modal.events.desc.en':'Description (English)',
     'modal.events.title.zh':'Title (Chinese)','modal.events.location.zh':'Location (Chinese)','modal.events.desc.zh':'Description (Chinese)',
     'modal.events.sec.reg':'Registration','modal.events.reg.url':'Register URL',
-    'btn.cancel':'Cancel','btn.save.article':'Save Article','btn.save.event':'Save Event',
+    'modal.leadership.add':'Add Member','modal.leadership.edit':'Edit Member','modal.leadership.section':'Section',
+    'modal.leadership.name.en':'Name (English)','modal.leadership.name.zh':'Name (Chinese)',
+    'modal.leadership.role.en':'Role (English)','modal.leadership.role.zh':'Role (Chinese)',
+    'modal.leadership.company.en':'Company (English)','modal.leadership.company.zh':'Company (Chinese)',
+    'modal.directory.add':'Add Company','modal.directory.edit':'Edit Company',
+    'modal.directory.name.en':'Company Name (English)','modal.directory.name.zh':'Company Name (Chinese)',
+    'modal.directory.category.en':'Category (English)','modal.directory.category.zh':'Category (Chinese)',
+    'modal.directory.logo':'Logo','modal.directory.logo.hint':'Upload a file or enter a path. Leave blank if no logo.',
+    'btn.cancel':'Cancel','btn.save.article':'Save Article','btn.save.event':'Save Event','btn.save.leadership':'Save Member','btn.save.directory':'Save Company',
     'btn.edit':'Edit','btn.delete':'Delete',
     'cat.news':'News','cat.event':'Event',
     'toast.article.saved':'Article saved','toast.article.deleted':'Article deleted',
     'toast.event.saved':'Event saved','toast.event.deleted':'Event deleted',
+    'toast.leadership.saved':'Member saved','toast.leadership.deleted':'Member deleted',
+    'toast.directory.saved':'Company saved','toast.directory.deleted':'Company deleted',
     'toast.exported':'data.js downloaded — place it in the content/ folder',
     'confirm.del.article':'Delete this article?','confirm.del.event':'Delete this event?',
+    'confirm.del.leadership':'Delete this member?','confirm.del.directory':'Delete this company?',
     'alert.title':'Please enter an English title.',
     'dash.unsaved.yes':'Yes — export to publish','dash.unsaved.no':'None',
     'brand.name':'CCCWA Admin',
@@ -1270,13 +1483,18 @@ const L = {
   zh: {
     'login.sub':'内容管理系统','login.label':'密码','login.btn':'登录','login.err':'密码错误，请重试。',
     'brand.sub':'内容管理',
-    'nav.dashboard':'概览','nav.news':'活动','nav.events':'活动日历','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
+    'nav.dashboard':'概览','nav.news':'活动','nav.events':'活动日历','nav.leadership':'领导团队','nav.directory':'会员名录','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
     'dash.stat.news':'活动文章','dash.stat.events':'即将举办活动','dash.stat.unsaved':'未发布更改',
     'dash.recent':'近期文章','dash.col.category':'分类','dash.col.date':'日期',
     'news.add':'+ 新增文章','news.add.event':'+ 新增活动','news.col.title':'标题','news.col.category':'分类','news.col.date':'日期','news.col.page':'文章页面','news.col.actions':'操作',
     'news.empty':'暂无文章，点击"+ 新增文章"添加。',
     'events.add':'+ 新增活动','events.col.date':'日期','events.col.event':'活动','events.col.location':'地点','events.col.time':'时间','events.col.actions':'操作',
     'events.empty':'暂无活动，点击"+ 新增活动"添加。',
+    'leadership.add':'+ 新增成员','leadership.col.name':'姓名','leadership.col.role':'职位','leadership.col.company':'所属机构','leadership.col.section':'分组','leadership.col.actions':'操作',
+    'leadership.empty':'暂无成员，点击"+ 新增成员"添加。','leadership.search':'按姓名、职位或机构搜索…',
+    'leadership.exec_title':'董事会','leadership.member_title':'会员机构',
+    'directory.add':'+ 新增企业','directory.col.name':'企业名称','directory.col.category':'类别','directory.col.actions':'操作',
+    'directory.empty':'暂无企业，点击"+ 新增企业"添加。','directory.search':'按企业名称或类别搜索…',
     'publish.desc':'完成修改后，导出 data.js 文件并放入网站的 content/ 文件夹即可。',
     'publish.step1.title':'导出内容','publish.step1.desc':'点击下方按钮下载 data.js，此文件包含全部新闻和活动数据。',
     'publish.step2.title':'替换内容文件','publish.step2.desc':'将下载的 data.js 放入网站的 content/ 文件夹，替换原有文件。',
@@ -1294,13 +1512,24 @@ const L = {
     'modal.events.title.en':'标题（英文）','modal.events.location.en':'地点（英文）','modal.events.time':'时间','modal.events.desc.en':'简介（英文）',
     'modal.events.title.zh':'标题（中文）','modal.events.location.zh':'地点（中文）','modal.events.desc.zh':'简介（中文）',
     'modal.events.sec.reg':'报名','modal.events.reg.url':'报名链接',
-    'btn.cancel':'取消','btn.save.article':'保存文章','btn.save.event':'保存活动',
+    'modal.leadership.add':'新增成员','modal.leadership.edit':'编辑成员','modal.leadership.section':'分组',
+    'modal.leadership.name.en':'姓名（英文）','modal.leadership.name.zh':'姓名（中文）',
+    'modal.leadership.role.en':'职位（英文）','modal.leadership.role.zh':'职位（中文）',
+    'modal.leadership.company.en':'所属机构（英文）','modal.leadership.company.zh':'所属机构（中文）',
+    'modal.directory.add':'新增企业','modal.directory.edit':'编辑企业',
+    'modal.directory.name.en':'企业名称（英文）','modal.directory.name.zh':'企业名称（中文）',
+    'modal.directory.category.en':'类别（英文）','modal.directory.category.zh':'类别（中文）',
+    'modal.directory.logo':'企业标志','modal.directory.logo.hint':'上传文件或输入路径，如无标志请留空。',
+    'btn.cancel':'取消','btn.save.article':'保存文章','btn.save.event':'保存活动','btn.save.leadership':'保存成员','btn.save.directory':'保存企业',
     'btn.edit':'编辑','btn.delete':'删除',
     'cat.news':'新闻','cat.event':'活动',
     'toast.article.saved':'文章已保存','toast.article.deleted':'文章已删除',
     'toast.event.saved':'活动已保存','toast.event.deleted':'活动已删除',
+    'toast.leadership.saved':'成员已保存','toast.leadership.deleted':'成员已删除',
+    'toast.directory.saved':'企业已保存','toast.directory.deleted':'企业已删除',
     'toast.exported':'data.js 已下载，请放入 content/ 文件夹',
     'confirm.del.article':'确认删除此文章？','confirm.del.event':'确认删除此活动？',
+    'confirm.del.leadership':'确认删除此成员？','confirm.del.directory':'确认删除此企业？',
     'alert.title':'请输入英文标题。',
     'dash.unsaved.yes':'有更改 — 导出以发布','dash.unsaved.no':'无',
     'brand.name':'CCCWA 管理后台',
@@ -1324,11 +1553,11 @@ function applyTranslations() {
     if (v) el.textContent = v;
   });
   // Lang buttons
-  ['login-en','app-en','news-en','ev-en','pub-en','help-en'].forEach(id => {
+  ['login-en','app-en','news-en','ev-en','ld-en','dir-en','pub-en','help-en'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', lang === 'en');
   });
-  ['login-zh','app-zh','news-zh','ev-zh','pub-zh','help-zh'].forEach(id => {
+  ['login-zh','app-zh','news-zh','ev-zh','ld-zh','dir-zh','pub-zh','help-zh'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', lang === 'zh');
   });
@@ -1360,7 +1589,7 @@ function setLang(l) {
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', theme);
   const isDark = theme === 'dark';
-  ['', '-2', '-3', '-4', '-5', '-p'].forEach(sfx => {
+  ['', '-2', '-3', '-4', '-5', '-6', '-7', '-p'].forEach(sfx => {
     const m = document.getElementById('icon-moon' + sfx);
     const s = document.getElementById('icon-sun'  + sfx);
     if (m) m.style.display = isDark ? 'none' : 'block';
@@ -1548,7 +1777,9 @@ const DEFAULT_DATA = {
     { en: 'News',  zh: '新闻' }
   ],
   news: [],
-  events: []
+  events: [],
+  leadership: [],
+  directory: []
 };
 
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -1563,6 +1794,8 @@ function loadData() {
   if (!data.categories) data.categories = DEFAULT_DATA.categories;
   if (!data.news) data.news = [];
   if (!data.events) data.events = [];
+  if (!data.leadership) data.leadership = [];
+  if (!data.directory) data.directory = [];
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
 }
 
@@ -1690,7 +1923,7 @@ function doLogin() {
     document.getElementById('app').style.display = 'block';
     loadData();
     renderAll();
-    syncFromFiles(true); // pull latest saved content/news.json + events.json in background
+    syncFromFiles(true); // pull latest saved content/*.json in background
   } else {
     document.getElementById('login-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -1707,6 +1940,10 @@ document.addEventListener('keydown', e => {
 });
 document.getElementById('news-modal').addEventListener('input',  () => { newsModalDirty = true; });
 document.getElementById('news-modal').addEventListener('change', () => { newsModalDirty = true; });
+document.getElementById('leadership-modal').addEventListener('input',  () => { leadershipModalDirty = true; });
+document.getElementById('leadership-modal').addEventListener('change', () => { leadershipModalDirty = true; });
+document.getElementById('directory-modal').addEventListener('input',  () => { directoryModalDirty = true; });
+document.getElementById('directory-modal').addEventListener('change', () => { directoryModalDirty = true; });
 
 function doLogout() {
   if (identityUser) {
@@ -1728,6 +1965,8 @@ function showPanel(name, el) {
   if (el) el.classList.add('active');
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
+  if (name === 'leadership') renderLeadershipTable();
+  if (name === 'directory') renderDirectoryTable();
   if (name === 'dashboard') renderDashboard();
   if (name === 'publish') updateLocalBackendStatus();
   if (name === 'inbox') { updateInboxSettings(); fetchInboxSubmissions(); }
@@ -1769,6 +2008,8 @@ function renderAll() {
   renderDashboard();
   renderNewsTable();
   renderEventsTable();
+  renderLeadershipTable();
+  renderDirectoryTable();
   updateDirtyIndicator();
   applyTranslations();
 }
@@ -2061,13 +2302,222 @@ function deleteEvent(idx) {
 }
 
 /* ================================================================
+   LEADERSHIP CRUD
+================================================================ */
+let editingLeadershipId = null;
+let leadershipModalDirty = false;
+
+function renderLeadershipTable() {
+  const tbody = document.getElementById('leadership-rows');
+  if (!tbody) return;
+  if (!data.leadership.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">${T('leadership.empty')}</td></tr>`;
+    return;
+  }
+  const q = (document.getElementById('leadership-search')?.value || '').trim().toLowerCase();
+  let rows = data.leadership.map((m, i) => ({ m, i }));
+  if (q) {
+    rows = rows.filter(({ m }) => [m.name_en, m.name_zh, m.role_en, m.role_zh, m.company_en, m.company_zh]
+      .some(v => (v || '').toLowerCase().includes(q)));
+  }
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No members match "${esc(q)}".</td></tr>`;
+    return;
+  }
+  // Reordering acts on section-relative neighbors (skipping past the other
+  // section) so "up"/"down" always visibly moves the person within their
+  // own public-site grid — and is hidden while search-filtered, since the
+  // move targets full-array positions that may not be visible in the filter.
+  tbody.innerHTML = rows.map(({ m, i }) => `
+    <tr>
+      <td><div class="cell-title">${esc(m.name_en)}</div><div class="cell-sub">${esc(m.name_zh)}</div></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.role_zh || m.role_en) : (m.role_en || m.role_zh))}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.company_zh || m.company_en) : (m.company_en || m.company_zh))}</td>
+      <td>${m.section === 'member' ? T('leadership.member_title') : T('leadership.exec_title')}</td>
+      <td>
+        ${q ? '' : `
+          <button class="btn-move" onclick="moveLeadership(${i},-1)" ${sectionNeighbor(data.leadership,i,-1)<0?'disabled':''} title="Move up">&#9650;</button>
+          <button class="btn-move" onclick="moveLeadership(${i},1)" ${sectionNeighbor(data.leadership,i,1)<0?'disabled':''} title="Move down">&#9660;</button>
+        `}
+        <button class="btn-edit" onclick="openLeadershipModal(${i})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteLeadership(${i})">${T('btn.delete')}</button>
+      </td>
+    </tr>`).join('');
+}
+
+// Finds the nearest neighbor in the given direction that shares the same
+// "section" as list[idx], skipping past items from the other section.
+// Returns -1 if there's no such neighbor (already first/last in section).
+function sectionNeighbor(list, idx, dir) {
+  let j = idx + dir;
+  while (j >= 0 && j < list.length && list[j].section !== list[idx].section) j += dir;
+  return (j >= 0 && j < list.length) ? j : -1;
+}
+
+function moveLeadership(idx, dir) {
+  const j = sectionNeighbor(data.leadership, idx, dir);
+  if (j < 0) return;
+  [data.leadership[idx], data.leadership[j]] = [data.leadership[j], data.leadership[idx]];
+  persistData(); renderLeadershipTable();
+}
+
+function openLeadershipModal(idx) {
+  editingLeadershipId = idx !== undefined ? idx : null;
+  document.getElementById('leadership-modal-title').textContent = idx !== undefined ? T('modal.leadership.edit') : T('modal.leadership.add');
+  const m = idx !== undefined ? data.leadership[idx] : {};
+  document.getElementById('ld-id').value        = m.id || '';
+  document.getElementById('ld-section').value   = m.section === 'member' ? 'member' : 'executive';
+  document.getElementById('ld-name-en').value    = m.name_en || '';
+  document.getElementById('ld-name-zh').value    = m.name_zh || '';
+  document.getElementById('ld-role-en').value    = m.role_en || '';
+  document.getElementById('ld-role-zh').value    = m.role_zh || '';
+  document.getElementById('ld-company-en').value = m.company_en || '';
+  document.getElementById('ld-company-zh').value = m.company_zh || '';
+  applyTranslations();
+  leadershipModalDirty = false;
+  document.getElementById('leadership-modal').style.display = 'flex';
+}
+
+function closeLeadershipModal() {
+  if (leadershipModalDirty && !confirm('You have unsaved changes. Are you sure you want to close?')) return;
+  document.getElementById('leadership-modal').style.display = 'none';
+}
+
+function saveLeadership() {
+  const nameEn = document.getElementById('ld-name-en').value.trim();
+  const nameZh = document.getElementById('ld-name-zh').value.trim();
+  const id = document.getElementById('ld-id').value.trim() || slugify(nameEn || nameZh) || uid();
+  const item = {
+    id,
+    section:    document.getElementById('ld-section').value,
+    name_en:    nameEn,
+    name_zh:    nameZh,
+    role_en:    document.getElementById('ld-role-en').value.trim(),
+    role_zh:    document.getElementById('ld-role-zh').value.trim(),
+    company_en: document.getElementById('ld-company-en').value.trim(),
+    company_zh: document.getElementById('ld-company-zh').value.trim()
+  };
+  if (!item.name_en && !item.name_zh) { alert(T('alert.title')); return; }
+  if (editingLeadershipId !== null) data.leadership[editingLeadershipId] = item;
+  else data.leadership.push(item);
+  leadershipModalDirty = false;
+  persistData(); renderLeadershipTable(); closeLeadershipModal();
+  toast(T('toast.leadership.saved'));
+}
+
+function deleteLeadership(idx) {
+  if (!confirm(T('confirm.del.leadership'))) return;
+  data.leadership.splice(idx, 1);
+  persistData(); renderLeadershipTable();
+  toast(T('toast.leadership.deleted'));
+}
+
+/* ================================================================
+   DIRECTORY CRUD
+================================================================ */
+let editingDirectoryId = null;
+let directoryModalDirty = false;
+
+function renderDirectoryTable() {
+  const tbody = document.getElementById('directory-rows');
+  if (!tbody) return;
+  if (!data.directory.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">${T('directory.empty')}</td></tr>`;
+    return;
+  }
+  const q = (document.getElementById('directory-search')?.value || '').trim().toLowerCase();
+  let rows = data.directory.map((m, i) => ({ m, i }));
+  if (q) {
+    rows = rows.filter(({ m }) => [m.name_en, m.name_zh, m.category_en, m.category_zh]
+      .some(v => (v || '').toLowerCase().includes(q)));
+  }
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">No companies match "${esc(q)}".</td></tr>`;
+    return;
+  }
+  const bldgIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+  tbody.innerHTML = rows.map(({ m, i }) => `
+    <tr>
+      <td>${m.logo ? `<img src="${esc(previewSrc(m.logo))}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${bldgIcon}</div>`}</td>
+      <td><div class="cell-title">${esc(m.name_en)}</div><div class="cell-sub">${esc(m.name_zh)}</div></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.category_zh || m.category_en) : (m.category_en || m.category_zh))}</td>
+      <td>
+        ${q ? '' : `
+          <button class="btn-move" onclick="moveDirectory(${i},-1)" ${i===0?'disabled':''} title="Move up">&#9650;</button>
+          <button class="btn-move" onclick="moveDirectory(${i},1)" ${i===data.directory.length-1?'disabled':''} title="Move down">&#9660;</button>
+        `}
+        <button class="btn-edit" onclick="openDirectoryModal(${i})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteDirectory(${i})">${T('btn.delete')}</button>
+      </td>
+    </tr>`).join('');
+}
+
+function moveDirectory(idx, dir) {
+  const list = data.directory;
+  const j = idx + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[idx], list[j]] = [list[j], list[idx]];
+  persistData(); renderDirectoryTable();
+}
+
+function openDirectoryModal(idx) {
+  editingDirectoryId = idx !== undefined ? idx : null;
+  document.getElementById('directory-modal-title').textContent = idx !== undefined ? T('modal.directory.edit') : T('modal.directory.add');
+  const m = idx !== undefined ? data.directory[idx] : {};
+  document.getElementById('d-id').value           = m.id || '';
+  document.getElementById('d-name-en').value      = m.name_en || '';
+  document.getElementById('d-name-zh').value      = m.name_zh || '';
+  document.getElementById('d-category-en').value  = m.category_en || '';
+  document.getElementById('d-category-zh').value  = m.category_zh || '';
+  document.getElementById('d-logo').value         = m.logo || '';
+  const prev = document.getElementById('d-logo-preview');
+  if (m.logo) { prev.src = previewSrc(m.logo); prev.style.display = 'block'; prev.onerror = () => { prev.style.display = 'none'; }; }
+  else { prev.src = ''; prev.style.display = 'none'; }
+  applyTranslations();
+  directoryModalDirty = false;
+  document.getElementById('directory-modal').style.display = 'flex';
+}
+
+function closeDirectoryModal() {
+  if (directoryModalDirty && !confirm('You have unsaved changes. Are you sure you want to close?')) return;
+  document.getElementById('directory-modal').style.display = 'none';
+}
+
+function saveDirectory() {
+  const nameEn = document.getElementById('d-name-en').value.trim();
+  const nameZh = document.getElementById('d-name-zh').value.trim();
+  const id = document.getElementById('d-id').value.trim() || slugify(nameEn || nameZh) || uid();
+  const item = {
+    id,
+    name_en:     nameEn,
+    name_zh:     nameZh,
+    category_en: document.getElementById('d-category-en').value.trim(),
+    category_zh: document.getElementById('d-category-zh').value.trim(),
+    logo:        document.getElementById('d-logo').value.trim()
+  };
+  if (!item.name_en && !item.name_zh) { alert(T('alert.title')); return; }
+  if (editingDirectoryId !== null) data.directory[editingDirectoryId] = item;
+  else data.directory.push(item);
+  directoryModalDirty = false;
+  persistData(); renderDirectoryTable(); closeDirectoryModal();
+  toast(T('toast.directory.saved'));
+}
+
+function deleteDirectory(idx) {
+  if (!confirm(T('confirm.del.directory'))) return;
+  data.directory.splice(idx, 1);
+  persistData(); renderDirectoryTable();
+  toast(T('toast.directory.deleted'));
+}
+
+/* ================================================================
    EXPORT & PUBLISH — writes straight to content/news.json and
    content/events.json via the local decap-server proxy (same file
    API previously used/validated for the Decap CMS setup), instead
    of the old GitHub Contents API + Personal Access Token.
 ================================================================ */
 function exportData() {
-  [['news.json', { items: data.news }], ['events.json', { items: data.events }]].forEach(([name, obj]) => {
+  [['news.json', { items: data.news }], ['events.json', { items: data.events }], ['leadership.json', { items: data.leadership }], ['directory.json', { items: data.directory }]].forEach(([name, obj]) => {
     const blob = new Blob([JSON.stringify(obj, null, 2) + '\n'], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2174,12 +2624,16 @@ async function publishToSite() {
     if (identityUser) {
       await putFileViaGitGateway('content/news.json', { items: data.news });
       await putFileViaGitGateway('content/events.json', { items: data.events });
+      await putFileViaGitGateway('content/leadership.json', { items: data.leadership });
+      await putFileViaGitGateway('content/directory.json', { items: data.directory });
       setPubStatus('ok', 'Published live via Git Gateway — Netlify is deploying now');
       toast('Published to the live site!');
     } else {
       await persistJsonFile('content/news.json', { items: data.news }, 'news');
       await persistJsonFile('content/events.json', { items: data.events }, 'events');
-      setPubStatus('ok', 'Published — saved to content/news.json and content/events.json (local only)');
+      await persistJsonFile('content/leadership.json', { items: data.leadership }, 'leadership');
+      await persistJsonFile('content/directory.json', { items: data.directory }, 'directory');
+      setPubStatus('ok', 'Published — saved to content/*.json (local only)');
       toast('Published locally!');
     }
     dirty = false;
@@ -2195,9 +2649,10 @@ async function publishToSite() {
 }
 
 /* ================================================================
-   SYNC — reload content/news.json + content/events.json from disk,
-   so this stays the shared source of truth (e.g. after someone else
-   published, or after pulling the latest from git).
+   SYNC — reload content/news.json, events.json, leadership.json and
+   directory.json from disk, so this stays the shared source of truth
+   (e.g. after someone else published, or after pulling the latest
+   from git).
 ================================================================ */
 async function syncFromFiles(silent) {
   const syncBtn = document.getElementById('sync-btn');
@@ -2205,16 +2660,22 @@ async function syncFromFiles(silent) {
   if (!silent) toast(T('sync.doing'));
 
   try {
-    const [newsRes, eventsRes] = await Promise.all([
+    const [newsRes, eventsRes, leadershipRes, directoryRes] = await Promise.all([
       fetch('../content/news.json?_=' + Date.now()),
-      fetch('../content/events.json?_=' + Date.now())
+      fetch('../content/events.json?_=' + Date.now()),
+      fetch('../content/leadership.json?_=' + Date.now()),
+      fetch('../content/directory.json?_=' + Date.now())
     ]);
-    if (!newsRes.ok || !eventsRes.ok) throw new Error('Could not load content files');
+    if (!newsRes.ok || !eventsRes.ok || !leadershipRes.ok || !directoryRes.ok) throw new Error('Could not load content files');
     const newsJson = await newsRes.json();
     const eventsJson = await eventsRes.json();
+    const leadershipJson = await leadershipRes.json();
+    const directoryJson = await directoryRes.json();
 
     data.news = newsJson.items || [];
     data.events = eventsJson.items || [];
+    data.leadership = leadershipJson.items || [];
+    data.directory = directoryJson.items || [];
     if (!data.categories) data.categories = DEFAULT_DATA.categories;
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -2308,18 +2769,18 @@ async function detectFaceFocus(src) {
 // Logged in via Netlify Identity (production/live site) -> commit the file
 // straight to GitHub through Git Gateway. Otherwise (local dev) -> the local
 // decap-server proxy, same as before.
-function uploadImageFile(file) {
-  return identityUser ? uploadImageFileGitGateway(file) : uploadImageFileLocal(file);
+function uploadImageFile(file, folder) {
+  return identityUser ? uploadImageFileGitGateway(file, folder) : uploadImageFileLocal(file, folder);
 }
 
-function uploadImageFileLocal(file) {
+function uploadImageFileLocal(file, folder) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async () => {
       try {
         const base64 = reader.result.split(',')[1];
         const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
-        const path = `assets/uploads/news/${Date.now()}-${safeName}`;
+        const path = `${folder || 'assets/uploads/news'}/${Date.now()}-${safeName}`;
         const res = await fetch(LOCAL_API, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2337,14 +2798,14 @@ function uploadImageFileLocal(file) {
   });
 }
 
-function uploadImageFileGitGateway(file) {
+function uploadImageFileGitGateway(file, folder) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async () => {
       try {
         const base64 = reader.result.split(',')[1];
         const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
-        const path = `assets/uploads/news/${Date.now()}-${safeName}`;
+        const path = `${folder || 'assets/uploads/news'}/${Date.now()}-${safeName}`;
         const jwt = await identityUser.jwt();
         const res = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}`, {
           method: 'PUT',
@@ -2365,7 +2826,8 @@ function uploadImageFileGitGateway(file) {
    MEDIA LIBRARY — browse and reuse images already uploaded under
    assets/uploads/news/, via decap-server's getMedia API.
 ================================================================ */
-let mediaModalTarget = null; // 'featured' or { block: i }
+let mediaModalTarget = null; // 'featured', 'directory-logo', or { block: i }
+let mediaModalFolder = 'assets/uploads/news';
 
 function mimeFromName(name) {
   const ext = (String(name || '').match(/\.[a-zA-Z0-9]+$/) || [''])[0].toLowerCase();
@@ -2373,10 +2835,10 @@ function mimeFromName(name) {
   return map[ext] || 'image/jpeg';
 }
 
-async function getMediaLocal() {
+async function getMediaLocal(folder) {
   const res = await fetch(LOCAL_API, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'getMedia', params: { branch: 'main', mediaFolder: 'assets/uploads/news' } })
+    body: JSON.stringify({ action: 'getMedia', params: { branch: 'main', mediaFolder: folder || 'assets/uploads/news' } })
   });
   const files = await res.json().catch(() => ([]));
   if (!res.ok) throw new Error((files && files.error) || `HTTP ${res.status}`);
@@ -2386,9 +2848,9 @@ async function getMediaLocal() {
   });
 }
 
-async function getMediaGitGateway() {
+async function getMediaGitGateway(folder) {
   const jwt = await identityUser.jwt();
-  const res = await fetch(`${GIT_GATEWAY_BASE}/contents/assets/uploads/news?ref=main`, {
+  const res = await fetch(`${GIT_GATEWAY_BASE}/contents/${folder || 'assets/uploads/news'}?ref=main`, {
     headers: { 'Authorization': `Bearer ${jwt}` }
   });
   if (res.status === 404) return []; // folder doesn't exist yet — no uploads yet
@@ -2399,13 +2861,14 @@ async function getMediaGitGateway() {
     .map(f => ({ name: f.name, path: f.path, src: f.download_url }));
 }
 
-async function openMediaModal(target) {
+async function openMediaModal(target, folder) {
   mediaModalTarget = target;
+  mediaModalFolder = folder || 'assets/uploads/news';
   const grid = document.getElementById('media-grid');
   grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">Loading…</div>';
   document.getElementById('media-modal').style.display = 'flex';
   try {
-    const files = identityUser ? await getMediaGitGateway() : await getMediaLocal();
+    const files = identityUser ? await getMediaGitGateway(mediaModalFolder) : await getMediaLocal(mediaModalFolder);
     if (!files.length) {
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">No images uploaded yet.</div>';
       return;
@@ -2459,6 +2922,11 @@ function selectMediaItem(path) {
       if (item) item.classList.add('open');
     }, 0);
     detectFaceFocus(p).then(focus => { if (currentBlocks[i] && currentBlocks[i].images[j]) currentBlocks[i].images[j].focus = focus; });
+  } else if (mediaModalTarget === 'directory-logo') {
+    document.getElementById('d-logo').value = p;
+    const prev = document.getElementById('d-logo-preview');
+    prev.src = p; prev.style.display = 'block';
+    directoryModalDirty = true;
   }
   closeMediaModal();
 }
@@ -2482,6 +2950,27 @@ async function handleFeaturedImg(input) {
       document.getElementById('n-image-focus').value = focus;
       prev.style.objectPosition = focus;
     });
+  } catch (e) {
+    alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
+  } finally {
+    btn.textContent = prevLabel; btn.disabled = false;
+    input.value = '';
+  }
+}
+
+async function handleDirectoryLogo(input) {
+  const file = input.files[0]; if (!file) return;
+  const btn = document.getElementById('d-logo-upload-btn');
+  const prevLabel = btn.textContent;
+  btn.textContent = 'Uploading…'; btn.disabled = true;
+  try {
+    const path = await uploadImageFile(file, 'assets/uploads/directory');
+    localImagePreviews[path] = URL.createObjectURL(file);
+    document.getElementById('d-logo').value = path;
+    const prev = document.getElementById('d-logo-preview');
+    prev.src = previewSrc(path);
+    prev.style.display = 'block';
+    directoryModalDirty = true;
   } catch (e) {
     alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
   } finally {
