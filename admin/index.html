@@ -339,8 +339,6 @@
     }
     .rich-editor:empty::before { content: attr(data-ph); color: var(--muted); pointer-events: none; }
     .rich-editor-title { min-height: 40px; padding: 8px 12px; white-space: normal; overflow-wrap: break-word; font-size: 15px; font-weight: 600; }
-    .cat-add-btn { padding: 0 14px; height: 38px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-    .cat-add-btn:hover { opacity: 0.88; }
     /* Inbox */
     .inbox-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 6px; margin-left: auto; line-height: 1.5; }
     .inbox-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
@@ -1051,23 +1049,19 @@
       <div class="form-section" data-i18n="modal.sec.details">Details</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.category.en">Category (English)</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input class="form-input" id="n-category-en" list="cat-en-list" placeholder="e.g. News" style="flex:1" oninput="onCategoryEnInput(this.value)">
-            <datalist id="cat-en-list"></datalist>
-            <button type="button" class="cat-add-btn" onclick="addCategory()" title="Save as a reusable category">+ Save</button>
-          </div>
+          <label class="form-label" data-i18n="modal.news.category">Category</label>
+          <select class="form-input" id="n-category-en" onchange="onCategoryEnChange()">
+            <option value="News" data-i18n="cat.news">News</option>
+            <option value="Event" data-i18n="cat.event">Event</option>
+          </select>
+          <input type="hidden" id="n-category-zh">
         </div>
-        <div class="form-group">
-          <label class="form-label" data-i18n="modal.news.category.zh">Category (Chinese)</label>
-          <input class="form-input" id="n-category-zh" placeholder="e.g. 公告">
-        </div>
-      </div>
-      <div class="form-row">
         <div class="form-group">
           <label class="form-label" data-i18n="modal.news.date.en">Publish Date</label>
           <input class="form-input" type="date" id="n-date">
         </div>
+      </div>
+      <div class="form-row full">
         <div class="form-group">
           <label class="form-label">External Link <span style="font-weight:400;color:var(--muted)">(e.g. WeChat original post, optional)</span></label>
           <input class="form-input" id="n-external-link" placeholder="https://...">
@@ -1246,7 +1240,7 @@ const L = {
     'publish.btn':'Download data.js',
     'modal.news.add':'Add News Article','modal.news.edit':'Edit Article',
     'modal.sec.en':'English Content','modal.sec.zh':'Chinese Content','modal.sec.details':'Details',
-    'modal.news.title.en':'Title (English)','modal.news.category':'Category','modal.news.category.en':'Category (English)','modal.news.category.zh':'Category (Chinese)','modal.news.excerpt.en':'Excerpt (English)',
+    'modal.news.title.en':'Title (English)','modal.news.category':'Category','modal.news.excerpt.en':'Excerpt (English)',
     'modal.news.title.zh':'Title (Chinese)','modal.news.excerpt.zh':'Excerpt (Chinese)',
     'modal.news.date.en':'Date (English)','modal.news.date.zh':'Date (Chinese)',
     'modal.news.image':'Image Path','modal.news.image.hint':'Leave blank if no image',
@@ -1290,7 +1284,7 @@ const L = {
     'publish.btn':'下载 data.js',
     'modal.news.add':'新增文章','modal.news.edit':'编辑文章',
     'modal.sec.en':'英文内容','modal.sec.zh':'中文内容','modal.sec.details':'详细信息',
-    'modal.news.title.en':'标题（英文）','modal.news.category':'分类','modal.news.category.en':'分类（英文）','modal.news.category.zh':'分类（中文）','modal.news.excerpt.en':'摘要（英文）',
+    'modal.news.title.en':'标题（英文）','modal.news.category':'分类','modal.news.excerpt.en':'摘要（英文）',
     'modal.news.title.zh':'标题（中文）','modal.news.excerpt.zh':'摘要（中文）',
     'modal.news.date.en':'日期（英文）','modal.news.date.zh':'日期（中文）',
     'modal.news.image':'图片路径','modal.news.image.hint':'如无图片请留空',
@@ -1921,28 +1915,12 @@ function sanitizeInboxHtml(html) {
   return tmp.innerHTML;
 }
 
-function renderCategoryDatalist() {
-  const dl = document.getElementById('cat-en-list');
-  if (!dl) return;
-  dl.innerHTML = (data.categories || []).map(c => `<option value="${esc(c.en)}">`).join('');
-}
-
-function onCategoryEnInput(val) {
-  const cat = (data.categories || []).find(c => c.en.toLowerCase() === val.toLowerCase());
-  if (cat) document.getElementById('n-category-zh').value = cat.zh;
-}
-
-function addCategory() {
-  const en = document.getElementById('n-category-en').value.trim();
-  const zh = document.getElementById('n-category-zh').value.trim();
-  if (!en) { alert('Enter an English category name first.'); return; }
-  if (!zh) { alert('Enter the Chinese name for this category.'); return; }
-  if (!data.categories) data.categories = [];
-  const exists = data.categories.find(c => c.en.toLowerCase() === en.toLowerCase());
-  if (exists) { exists.zh = zh; toast('Category updated'); }
-  else { data.categories.push({ en, zh }); toast('Category added: ' + en); }
-  persistData();
-  renderCategoryDatalist();
+// Category is a fixed News/Event choice (no free-text tags) — the hidden
+// n-category-zh field just mirrors the English select so downstream code
+// (save/preview/table) can keep reading a category_zh value.
+function onCategoryEnChange() {
+  const en = document.getElementById('n-category-en').value;
+  document.getElementById('n-category-zh').value = en === 'Event' ? '活动' : '新闻';
 }
 
 /* ================================================================
@@ -1952,15 +1930,13 @@ function openNewsModal(idx, presetEvent) {
   editingNewsId = idx !== undefined ? idx : null;
   document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : (presetEvent ? T('news.add.event') : T('modal.news.add'));
   const n = idx !== undefined ? data.news[idx] : {};
-  const eventCat = (data.categories || []).find(c => c.en.toLowerCase() === 'event');
   document.getElementById('n-id').value                     = n.id || '';
   document.getElementById('n-title-en').innerHTML           = n.title_en || '';
   document.getElementById('n-title-zh').innerHTML           = n.title_zh || '';
-  document.getElementById('n-category-en').value            = n.category_en || (presetEvent ? 'Event' : '');
-  document.getElementById('n-category-zh').value            = n.category_zh || (presetEvent ? (eventCat ? eventCat.zh : '活动') : '');
+  document.getElementById('n-category-en').value            = (n.category_en === 'Event' || presetEvent) ? 'Event' : 'News';
+  onCategoryEnChange();
   document.getElementById('n-excerpt-en').innerHTML          = n.summary_en || '';
   document.getElementById('n-excerpt-zh').innerHTML          = n.summary_zh || '';
-  renderCategoryDatalist();
   document.getElementById('n-date').value                    = n.date || '';
   document.getElementById('n-image').value                   = n.cover_image || '';
   document.getElementById('n-image-focus').value              = n.cover_focus || '50% 50%';
