@@ -364,6 +364,14 @@
     .inbox-row-subject { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .inbox-row-snippet { font-weight: 400; color: var(--muted); }
     .inbox-row-date { flex: 0 0 auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .inbox-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .inbox-row-action-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); cursor: pointer; padding: 0; font-family: inherit;
+    }
+    .inbox-row-action-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+    .inbox-row-action-delete:hover { border-color: var(--danger); color: var(--danger); background: rgba(220,38,38,0.1); }
     /* Detail view */
     .inbox-detail-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0 0 14px; font-family: inherit; }
     .inbox-detail-back:hover { color: var(--accent); }
@@ -886,7 +894,7 @@
             Refresh
           </button>
         </div>
-        <div class="pub-content">
+        <div class="panel-body">
           <div class="inbox-settings-box">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
               <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Netlify Forms Connection</span>
@@ -3689,6 +3697,15 @@ function inboxSnippetFor(s) {
   return esc(text.slice(0, 100));
 }
 
+function markRowRead(id) {
+  const read = getReadIds();
+  if (read.has(id)) return;
+  read.add(id);
+  localStorage.setItem('cccwa_inbox_read', JSON.stringify([...read]));
+  updateInboxBadge();
+  renderInboxList();
+}
+
 function openInboxMessage(id) {
   inboxOpenId = id;
   const read = getReadIds();
@@ -3709,7 +3726,7 @@ function renderInboxDetail(s) {
   const read = getReadIds();
   const isUnread = !read.has(s.id);
   const d    = s.data || {};
-  const name = esc(d.name || d.fullname || '(no name)');
+  const name = esc(d.name || d.fullname || d.email || 'Anonymous');
   const email   = esc(d.email || '');
   const org     = esc(d.org || d.organization || d.company || '');
   const phone   = esc(d.phone || '');
@@ -3791,7 +3808,7 @@ function renderInboxList() {
   const rowsHtml = pageSubs.map(s => {
     const isUnread = !read.has(s.id);
     const d = s.data || {};
-    const sender = esc(d.name || d.fullname || d.email || '(no name)');
+    const sender = esc(d.name || d.fullname || d.email || 'Anonymous');
     const date = new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     const tagLabel = s._formName === 'membership-inquiry' ? 'Membership' : 'Contact';
     const snippet = inboxSnippetFor(s);
@@ -3801,6 +3818,14 @@ function renderInboxList() {
       <span class="inbox-row-sender">${sender}</span>
       <span class="inbox-row-subject">${inboxSubjectFor(s)}${snippet ? ` <span class="inbox-row-snippet">— ${snippet}</span>` : ''}</span>
       <span class="inbox-row-date">${date}</span>
+      <span class="inbox-row-actions">
+        ${isUnread ? `<button class="inbox-row-action-btn" title="Mark as read" onclick="event.stopPropagation(); markRowRead('${esc(s.id)}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>` : ''}
+        <button class="inbox-row-action-btn inbox-row-action-delete" title="Delete" onclick="event.stopPropagation(); deleteInboxSubmission('${esc(s.id)}', this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </span>
     </div>`;
   }).join('');
 
