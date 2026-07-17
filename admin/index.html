@@ -364,9 +364,8 @@
     .inbox-row-subject { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .inbox-row-snippet { font-weight: 400; color: var(--muted); }
     .inbox-row-date { flex: 0 0 auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .inbox-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
     .inbox-row-action-btn {
-      display: inline-flex; align-items: center; justify-content: center;
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
       width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--border);
       background: var(--card); color: var(--muted); cursor: pointer; padding: 0; font-family: inherit;
     }
@@ -393,7 +392,7 @@
     .inbox-delete-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
     .inbox-settings-box { border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 22px; background: var(--bg); }
     .inbox-conn-ok { font-size: 12px; padding: 3px 10px; border-radius: 10px; background: rgba(22,163,74,0.1); color: #16a34a; font-weight: 600; }
-    .inbox-filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .inbox-filter-bar { display: flex; gap: 8px; margin-bottom: 16px; margin-left: 6px; flex-wrap: wrap; }
     .inbox-filter-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--bg); color: var(--muted); cursor: pointer; }
     .inbox-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .inbox-status-bar { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
@@ -3813,19 +3812,17 @@ function renderInboxList() {
     const tagLabel = s._formName === 'membership-inquiry' ? 'Membership' : 'Contact';
     const snippet = inboxSnippetFor(s);
     return `<div class="inbox-row ${isUnread ? 'unread' : ''}" id="inbox-row-${esc(s.id)}" onclick="openInboxMessage('${esc(s.id)}')">
+      <button class="inbox-row-action-btn inbox-row-action-delete" title="Delete" onclick="event.stopPropagation(); deleteInboxSubmission('${esc(s.id)}', this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button>
       <span class="inbox-row-dot${isUnread ? '' : ' hidden'}"></span>
       <span class="inbox-row-tag">${tagLabel}</span>
       <span class="inbox-row-sender">${sender}</span>
       <span class="inbox-row-subject">${inboxSubjectFor(s)}${snippet ? ` <span class="inbox-row-snippet">— ${snippet}</span>` : ''}</span>
       <span class="inbox-row-date">${date}</span>
-      <span class="inbox-row-actions">
-        ${isUnread ? `<button class="inbox-row-action-btn" title="Mark as read" onclick="event.stopPropagation(); markRowRead('${esc(s.id)}')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </button>` : ''}
-        <button class="inbox-row-action-btn inbox-row-action-delete" title="Delete" onclick="event.stopPropagation(); deleteInboxSubmission('${esc(s.id)}', this)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        </button>
-      </span>
+      ${isUnread ? `<button class="inbox-row-action-btn" title="Mark as read" onclick="event.stopPropagation(); markRowRead('${esc(s.id)}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>` : ''}
     </div>`;
   }).join('');
 
