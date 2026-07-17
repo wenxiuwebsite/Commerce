@@ -1,6 +1,10 @@
 {
   "footer_links": [
-    { "label_en": "Facebook", "label_zh": "Facebook", "url": "https://www.facebook.com/cccwa.org/" }
+    {
+      "label_en": "Facebook",
+      "label_zh": "Facebook",
+      "url": "https://www.facebook.com/cccwa.org/"
+    }
   ],
   "hero_title_en": "Building Bridges,\nStrengthening Community",
   "hero_title_zh": "搭建桥梁，\n凝聚社区力量",
