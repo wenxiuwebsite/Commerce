@@ -74,9 +74,8 @@
       <div class="footer-brand">
         <img src="images/logo.png" alt="CCCWA Logo" class="footer-logo-img">
         <p data-i18n="footer.tagline">Serving the Greater Seattle Chinese business community since 2016.</p>
-        <div class="social-links">
+        <div class="social-links" id="footer-links-extra">
           <a href="https://www.facebook.com/cccwa.org/" target="_blank" rel="noopener">Facebook</a>
-          <a href="http://www.ccc-wa.org" target="_blank" rel="noopener">Original Site</a>
         </div>
       </div>
       <div class="footer-links">
@@ -109,4 +108,23 @@
 
   const footerPH = document.getElementById('footer-ph');
   if (footerPH) footerPH.outerHTML = FOOTER;
+
+  // The footer's bottom link row (Facebook, etc.) is editable via the admin
+  // panel's Homepage tab. Static Facebook link above is the pre-JS fallback;
+  // this replaces it once content/homepage.json loads, so the row still
+  // works (just with the default link) if the fetch fails.
+  const linksExtra = document.getElementById('footer-links-extra');
+  if (linksExtra) {
+    const depth = location.pathname.includes('/admin/') ? '../' : '';
+    fetch(depth + 'content/homepage.json').then(r => r.ok ? r.json() : null).then(hp => {
+      if (!hp || !Array.isArray(hp.footer_links)) return;
+      const zh = (localStorage.getItem('lang') || 'en') === 'zh-cn';
+      linksExtra.innerHTML = hp.footer_links.map(l => {
+        const label = (zh ? l.label_zh : l.label_en) || l.label_en || l.label_zh || l.url;
+        const href = String(l.url || '#').replace(/"/g, '&quot;');
+        const text = String(label).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+      }).join('');
+    }).catch(() => {});
+  }
 })();

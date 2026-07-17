@@ -1,0 +1,111 @@
+{
+  "footer_links": [
+    { "label_en": "Facebook", "label_zh": "Facebook", "url": "https://www.facebook.com/cccwa.org/" }
+  ],
+  "hero_title_en": "Building Bridges,\nStrengthening Community",
+  "hero_title_zh": "搭建桥梁，\n凝聚社区力量",
+  "hero_subtitle_en": "The Chinese Chamber of Commerce in Washington State promotes investment, trade cooperation, and community development throughout the Greater Seattle area.",
+  "hero_subtitle_zh": "华盛顿州中国总商会致力于促进中美投资贸易合作，推动大西雅图地区华人商业社区的发展。",
+  "about_tag_en": "Who We Are",
+  "about_tag_zh": "关于我们",
+  "about_title_en": "About CCCWA",
+  "about_title_zh": "华盛顿州中国总商会",
+  "about_p1_en": "The Chinese Chamber of Commerce in Washington State (CCCWA) is a nonprofit corporation established pursuant to the Washington Nonprofit Corporation Act for mutual benefit.",
+  "about_p1_zh": "华盛顿州中国总商会（CCCWA）是依据华盛顿州非营利公司法成立的互惠性非营利公司。",
+  "about_p2_en": "We promote and facilitate investment and trade cooperation between China and the United States, working with organizations across Washington State on matters of mutual interest.",
+  "about_p2_zh": "我们积极推动中美两国之间的投资与贸易合作，并与华盛顿州各组织就共同关切事项展开协作。",
+  "programs": [
+    {
+      "id": "trade",
+      "icon": "trade",
+      "title_en": "Trade & Investment",
+      "title_zh": "贸易与投资",
+      "desc_en": "Facilitating US-China cross-border investment opportunities, business matchmaking, and trade consulting services.",
+      "desc_zh": "促进中美跨境投资机会，提供商业配对及贸易咨询服务。",
+      "link": "mission.html"
+    },
+    {
+      "id": "network",
+      "icon": "network",
+      "title_en": "Business Networking",
+      "title_zh": "商务社交",
+      "desc_en": "Regular networking events, business forums, and introductions connecting Chinese and American businesses.",
+      "desc_zh": "定期举办社交活动、商业论坛，促进中美企业之间的交流与合作。",
+      "link": "news.html"
+    },
+    {
+      "id": "culture",
+      "icon": "culture",
+      "title_en": "Cultural Exchange",
+      "title_zh": "文化交流",
+      "desc_en": "Promoting cultural understanding through events, exhibitions, and community programs celebrating Chinese heritage.",
+      "desc_zh": "通过活动、展览及社区项目，推动文化理解，弘扬中华文化。",
+      "link": "news.html"
+    },
+    {
+      "id": "legal",
+      "icon": "legal",
+      "title_en": "Legal & Consulting",
+      "title_zh": "法律与咨询",
+      "desc_en": "Access to legal advice, immigration consulting, and regulatory guidance for businesses entering the US market.",
+      "desc_zh": "为进入美国市场的企业提供法律建议、移民咨询及合规指导。",
+      "link": "contact.html"
+    },
+    {
+      "id": "media",
+      "icon": "media",
+      "title_en": "Media & PR",
+      "title_zh": "媒体与公关",
+      "desc_en": "Bilingual media outreach and communications services helping members reach Chinese and English-speaking audiences.",
+      "desc_zh": "提供双语媒体推广及传播服务，帮助会员触达中英文受众。",
+      "link": "contact.html"
+    },
+    {
+      "id": "health",
+      "icon": "health",
+      "title_en": "Community Outreach",
+      "title_zh": "社区外展",
+      "desc_en": "Support for Chinese-American residents including health resources, COVID-19 relief efforts, and community welfare programs.",
+      "desc_zh": "为华裔居民提供健康资源、新冠救助及社区福利项目支持。",
+      "link": "news.html"
+    }
+  ],
+  "latest_events_mode": "auto",
+  "latest_events_manual_ids": [],
+  "mission_hero_title_en": "Our Mission",
+  "mission_hero_title_zh": "我们的使命",
+  "mission_hero_sub_en": "The purpose and objectives that guide everything we do",
+  "mission_hero_sub_zh": "指引我们一切工作的宗旨与目标",
+  "mission_about_title_en": "About Us",
+  "mission_about_title_zh": "关于我们",
+  "mission_about_p1_en": "The Chinese Chamber of Commerce in Washington State (CCCWA) is a nonprofit corporation established pursuant to the Washington Nonprofit Corporation Act for mutual benefit.",
+  "mission_about_p1_zh": "华盛顿州中国总商会（CCCWA）是依据华盛顿州非营利公司法成立的互惠性非营利公司。",
+  "mission_objectives_title_en": "Our Objectives",
+  "mission_objectives_title_zh": "工作目标",
+  "mission_objectives": [
+    {
+      "en": "To represent Chinese enterprises and entrepreneurs in the State of Washington;",
+      "zh": "代表华盛顿州的中国企业及企业家；"
+    },
+    {
+      "en": "To provide forums in which Chinese businesses in the State of Washington can identify and discuss common interests regarding their commercial interests in the United States;",
+      "zh": "为华盛顿州的中国企业提供交流平台，就其在美商业利益的共同议题进行探讨；"
+    },
+    {
+      "en": "To work with other organizations in the State of Washington on matters of mutual interest and to enhance bilateral communication and collaboration between Chinese and American business communities;",
+      "zh": "与华盛顿州的其他组织就共同关切事项展开合作，加强中美商业社区的双边沟通与协作；"
+    },
+    {
+      "en": "To promote Chinese investment into and China-bound investment from the State of Washington and to develop and facilitate USA-China cross-border trade and commerce;",
+      "zh": "促进中国对华盛顿州的投资及华盛顿州对华投资，推动中美跨境贸易与商务合作；"
+    },
+    {
+      "en": "To do all other lawful things as may be incidental or conducive to the attainment of the foregoing objectives.",
+      "zh": "依法开展所有有助于实现上述目标的相关活动。"
+    }
+  ],
+  "mission_values_title_en": "Our Values",
+  "mission_values_title_zh": "我们的价值观",
+  "mission_values_p_en": "CCCWA is committed to integrity, inclusiveness, and excellence in serving its members and the broader community. We believe that strong business communities are built on trust, collaboration, and mutual respect across cultural boundaries.",
+  "mission_values_p_zh": "CCCWA坚守诚信、包容与卓越的理念，服务会员与广大社区。我们相信，强大的商业社区建立于信任、协作与跨文化相互尊重之上。"
+}

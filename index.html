@@ -18,8 +18,8 @@
   <div class="hero-bg" style="background-image:url('images/seattle-bg.jpg');"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1 data-i18n="hero.title">Building Bridges,<br>Strengthening Community</h1>
-    <p data-i18n="hero.subtitle">The Chinese Chamber of Commerce in Washington State promotes investment, trade cooperation, and community development throughout the Greater Seattle area.</p>
+    <h1 id="hp-hero-title" data-i18n="hero.title">Building Bridges,<br>Strengthening Community</h1>
+    <p id="hp-hero-subtitle" data-i18n="hero.subtitle">The Chinese Chamber of Commerce in Washington State promotes investment, trade cooperation, and community development throughout the Greater Seattle area.</p>
     <div class="hero-actions">
       <a href="mission.html" class="btn btn-primary" data-i18n="hero.cta_about">About CCCWA</a>
       <a href="contact.html" class="btn btn-outline"  data-i18n="hero.cta_contact">Contact Us</a>
@@ -55,10 +55,10 @@
   <div class="container">
     <div class="about-grid">
       <div class="about-text">
-        <span class="section-tag" data-i18n="about.tag">Who We Are</span>
-        <h2 style="font-size:clamp(1.75rem,3vw,2.4rem);font-weight:700;margin:10px 0 20px;" data-i18n="about.title">About CCCWA</h2>
-        <p data-i18n="about.p1">The Chinese Chamber of Commerce in Washington State (CCCWA) is a nonprofit corporation established pursuant to the Washington Nonprofit Corporation Act for mutual benefit.</p>
-        <p data-i18n="about.p2">We promote and facilitate investment and trade cooperation between China and the United States, working with organizations across Washington State on matters of mutual interest.</p>
+        <span class="section-tag" id="hp-about-tag" data-i18n="about.tag">Who We Are</span>
+        <h2 style="font-size:clamp(1.75rem,3vw,2.4rem);font-weight:700;margin:10px 0 20px;" id="hp-about-title" data-i18n="about.title">About CCCWA</h2>
+        <p id="hp-about-p1" data-i18n="about.p1">The Chinese Chamber of Commerce in Washington State (CCCWA) is a nonprofit corporation established pursuant to the Washington Nonprofit Corporation Act for mutual benefit.</p>
+        <p id="hp-about-p2" data-i18n="about.p2">We promote and facilitate investment and trade cooperation between China and the United States, working with organizations across Washington State on matters of mutual interest.</p>
         <div class="about-values">
           <div class="value">
             <div class="value-icon-wrap">
@@ -112,75 +112,12 @@
 <section class="section bg-alt">
   <div class="container">
     <div class="section-header">
-      <span class="section-tag" data-i18n="programs.tag">What We Offer</span>
-      <h2 data-i18n="programs.title">Programs &amp; Services</h2>
-      <p data-i18n="programs.subtitle">Connecting businesses and communities across Washington State</p>
+      <span class="section-tag" id="hp-programs-tag" data-i18n="programs.tag">What We Offer</span>
+      <h2 id="hp-programs-title" data-i18n="programs.title">Programs &amp; Services</h2>
+      <p id="hp-programs-subtitle" data-i18n="programs.subtitle">Connecting businesses and communities across Washington State</p>
     </div>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-          </svg>
-        </div>
-        <h3 data-i18n="programs.trade_title">Trade &amp; Investment</h3>
-        <p data-i18n="programs.trade_desc">Facilitating US-China cross-border investment opportunities, business matchmaking, and trade consulting services.</p>
-        <a href="mission.html" class="feature-link" data-i18n="programs.learn_more">Learn More</a>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </div>
-        <h3 data-i18n="programs.network_title">Business Networking</h3>
-        <p data-i18n="programs.network_desc">Regular networking events, business forums, and introductions connecting Chinese and American businesses.</p>
-        <a href="news.html" class="feature-link" data-i18n="programs.learn_more">Learn More</a>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-        </div>
-        <h3 data-i18n="programs.culture_title">Cultural Exchange</h3>
-        <p data-i18n="programs.culture_desc">Promoting cultural understanding through events, exhibitions, and community programs celebrating Chinese heritage.</p>
-        <a href="news.html" class="feature-link" data-i18n="programs.learn_more">Learn More</a>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-          </svg>
-        </div>
-        <h3 data-i18n="programs.legal_title">Legal &amp; Consulting</h3>
-        <p data-i18n="programs.legal_desc">Access to legal advice, immigration consulting, and regulatory guidance for businesses entering the US market.</p>
-        <a href="contact.html" class="feature-link" data-i18n="programs.learn_more">Learn More</a>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.1 13.62a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 2.84h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 10a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-          </svg>
-        </div>
-        <h3 data-i18n="programs.media_title">Media &amp; PR</h3>
-        <p data-i18n="programs.media_desc">Bilingual media outreach and communications services helping members reach Chinese and English-speaking audiences.</p>
-        <a href="contact.html" class="feature-link" data-i18n="programs.learn_more">Learn More</a>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-        </div>
-        <h3 data-i18n="programs.health_title">Community Outreach</h3>
-        <p data-i18n="programs.health_desc">Support for Chinese-American residents including health resources, COVID-19 relief efforts, and community welfare programs.</p>
-        <a href="news.html" class="feature-link" data-i18n="programs.learn_more">Learn More</a>
-      </div>
-    </div>
+    <!-- Populated by js/content.js from content/homepage.json (programs list) -->
+    <div class="feature-grid" id="hp-programs-grid"></div>
   </div>
 </section>
 

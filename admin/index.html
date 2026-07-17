@@ -269,6 +269,15 @@
     }
     .form-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
+    /* Homepage & Mission content panel */
+    .hp-section-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .hp-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 8px; }
+    .hp-program-row, .hp-objective-row {
+      border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; background: var(--card);
+    }
+    .hp-program-row-head, .hp-objective-row-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .hp-program-row-num, .hp-objective-row-num { font-size: 11px; font-weight: 700; color: var(--muted); flex: 1; }
+
     /* Article preview overlay */
     .preview-backdrop {
       position: fixed; inset: 0; z-index: 300; display: none;
@@ -374,6 +383,19 @@
     /* Detail view */
     .inbox-detail-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0 0 14px; font-family: inherit; }
     .inbox-detail-back:hover { color: var(--accent); }
+    .email-notif-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); margin-bottom: 6px; }
+    .email-notif-row:last-child { margin-bottom: 0; }
+    .email-notif-row-email { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .email-notif-remove { font-size: 11px; color: var(--danger); background: none; border: none; cursor: pointer; text-decoration: underline; font-family: inherit; padding: 0; flex-shrink: 0; }
+    .trash-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; background: var(--card); }
+    .trash-row-type { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: var(--accent-lt); color: var(--accent); padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+    .trash-row-title { flex: 1; min-width: 0; font-size: 13px; color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .trash-row-meta { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+    .trash-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .trash-restore-btn { font-size: 11px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); cursor: pointer; font-family: inherit; }
+    .trash-restore-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .trash-perm-delete-btn { font-size: 11px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: none; color: var(--danger); cursor: pointer; font-family: inherit; }
+    .trash-perm-delete-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
     .inbox-msg { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--card); }
     .inbox-msg.unread { border-left: 3px solid var(--accent); }
     .inbox-msg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
@@ -382,8 +404,8 @@
     .inbox-msg-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
     .inbox-msg-date { margin-left: auto; font-size: 11px; color: var(--muted); }
     .inbox-msg-subject { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    .inbox-msg-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
-    .inbox-msg-body { font-size: 13px; color: var(--sub); line-height: 1.6; padding: 10px 12px; background: var(--bg); border-radius: 6px; }
+    .inbox-msg-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; overflow-wrap: break-word; word-break: break-word; }
+    .inbox-msg-body { font-size: 13px; color: var(--sub); line-height: 1.6; padding: 10px 12px; background: var(--bg); border-radius: 6px; overflow-wrap: break-word; word-break: break-word; }
     .inbox-msg-foot { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); align-items: center; }
     .inbox-read-btn { font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); cursor: pointer; }
     .inbox-read-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -617,6 +639,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
           <span data-i18n="nav.dashboard">Dashboard</span>
         </div>
+        <div class="nav-item" onclick="showPanel('homepage',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span data-i18n="nav.homepage">Homepage</span>
+        </div>
         <div class="nav-item" onclick="showPanel('news',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span data-i18n="nav.news">News Articles</span>
@@ -637,6 +663,11 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <span data-i18n="nav.inbox">Inbox</span>
           <span class="inbox-badge" id="inbox-badge" style="display:none">0</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('trash',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          <span data-i18n="nav.trash">Trash</span>
+          <span class="inbox-badge" id="trash-badge" style="display:none">0</span>
         </div>
         <div class="nav-item" onclick="showPanel('publish',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
@@ -698,6 +729,166 @@
               <tbody id="dash-news-rows"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- HOMEPAGE & MISSION CONTENT -->
+      <div id="panel-homepage" style="display:none">
+        <div class="topbar">
+          <h2 data-i18n="nav.homepage">Homepage</h2>
+          <button class="pub-save-btn" onclick="saveHomepageContent()" data-i18n="homepage.save">Save Changes</button>
+        </div>
+        <div class="panel-body" style="max-width:860px">
+
+          <h3 class="hp-section-title" data-i18n="homepage.hero">Hero Section</h3>
+          <div class="hp-field-grid">
+            <div class="form-group">
+              <div class="form-label">Title (English)</div>
+              <textarea class="form-textarea" id="hp-f-hero-title-en" style="min-height:60px"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">标题 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-hero-title-zh" style="min-height:60px"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Subtitle (English)</div>
+              <textarea class="form-textarea" id="hp-f-hero-subtitle-en"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">副标题 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-hero-subtitle-zh"></textarea>
+            </div>
+          </div>
+
+          <hr class="pub-divider">
+          <h3 class="hp-section-title" data-i18n="homepage.about">About Section</h3>
+          <div class="hp-field-grid">
+            <div class="form-group">
+              <div class="form-label">Tag (English)</div>
+              <input class="form-input" id="hp-f-about-tag-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">标签 (中文)</div>
+              <input class="form-input" id="hp-f-about-tag-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Title (English)</div>
+              <input class="form-input" id="hp-f-about-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">标题 (中文)</div>
+              <input class="form-input" id="hp-f-about-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Paragraph 1 (English)</div>
+              <textarea class="form-textarea" id="hp-f-about-p1-en"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">段落一 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-about-p1-zh"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Paragraph 2 (English)</div>
+              <textarea class="form-textarea" id="hp-f-about-p2-en"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">段落二 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-about-p2-zh"></textarea>
+            </div>
+          </div>
+
+          <hr class="pub-divider">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <h3 class="hp-section-title" style="margin-bottom:0" data-i18n="homepage.footerlinks">Footer Links</h3>
+            <button class="btn-outline" onclick="addFooterLink()">+ Add Link</button>
+          </div>
+          <p class="pub-hint" style="margin:6px 0 14px" data-i18n="homepage.footerlinks.hint">Shown at the bottom of every page (next to the logo). Add social links, a members-only page, or any other URL.</p>
+          <div id="hp-footerlinks-list"></div>
+
+          <hr class="pub-divider">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <h3 class="hp-section-title" style="margin-bottom:0" data-i18n="homepage.programs">Programs &amp; Services</h3>
+            <button class="btn-outline" onclick="addProgram()">+ Add Program</button>
+          </div>
+          <p class="pub-hint" style="margin:6px 0 14px" data-i18n="homepage.programs.hint">Shown as cards on the homepage. Add, remove, or reorder as needed.</p>
+          <div id="hp-programs-list"></div>
+
+          <hr class="pub-divider">
+          <h3 class="hp-section-title" data-i18n="homepage.latest">Latest News on Homepage</h3>
+          <p class="pub-hint" style="margin-bottom:10px" data-i18n="homepage.latest.hint">By default the 3 most recent news posts show automatically. Switch to Manual to hand-pick which posts appear instead.</p>
+          <div style="display:flex;gap:16px;margin-bottom:12px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+              <input type="radio" name="hp-events-mode" value="auto" onchange="setLatestEventsMode('auto')"> <span data-i18n="homepage.latest.auto">Automatic (most recent 3)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+              <input type="radio" name="hp-events-mode" value="manual" onchange="setLatestEventsMode('manual')"> <span data-i18n="homepage.latest.manual">Manual selection</span>
+            </label>
+          </div>
+          <div id="hp-manual-picker" style="display:none"></div>
+
+          <hr class="pub-divider">
+          <h3 class="hp-section-title" data-i18n="homepage.mission">Mission Page</h3>
+          <div class="hp-field-grid">
+            <div class="form-group">
+              <div class="form-label">Hero Title (English)</div>
+              <input class="form-input" id="hp-f-ms-hero-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">主标题 (中文)</div>
+              <input class="form-input" id="hp-f-ms-hero-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Hero Subtitle (English)</div>
+              <input class="form-input" id="hp-f-ms-hero-sub-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">副标题 (中文)</div>
+              <input class="form-input" id="hp-f-ms-hero-sub-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">"About Us" Title (English)</div>
+              <input class="form-input" id="hp-f-ms-about-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">"关于我们"标题 (中文)</div>
+              <input class="form-input" id="hp-f-ms-about-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">About Paragraph (English)</div>
+              <textarea class="form-textarea" id="hp-f-ms-about-p1-en"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">关于段落 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-ms-about-p1-zh"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
+            <div class="form-label" style="font-size:12px">Objectives List</div>
+            <button class="btn-outline" onclick="addMissionObjective()">+ Add Objective</button>
+          </div>
+          <div id="hp-objectives-list" style="margin-top:8px"></div>
+
+          <div class="hp-field-grid" style="margin-top:18px">
+            <div class="form-group">
+              <div class="form-label">Values Title (English)</div>
+              <input class="form-input" id="hp-f-ms-values-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">价值观标题 (中文)</div>
+              <input class="form-input" id="hp-f-ms-values-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Values Paragraph (English)</div>
+              <textarea class="form-textarea" id="hp-f-ms-values-p-en"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">价值观段落 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-ms-values-p-zh"></textarea>
+            </div>
+          </div>
+
+          <button class="pub-save-btn" style="margin-top:24px" onclick="saveHomepageContent()" data-i18n="homepage.save">Save Changes</button>
         </div>
       </div>
 
@@ -918,9 +1109,10 @@
             <hr class="pub-divider" style="margin:18px 0">
             <div class="form-label" style="margin-bottom:5px">Email Notifications</div>
             <div id="email-notif-status" style="font-size:12px;color:var(--muted);margin-bottom:10px">Connect Netlify above first.</div>
+            <div id="email-notif-list" style="display:none;margin-bottom:10px"></div>
             <div class="pub-token-row">
-              <input type="email" class="pub-field" id="notif-email-input" placeholder="you@example.com">
-              <button class="pub-save-btn" onclick="saveEmailNotification()">Enable</button>
+              <input type="email" class="pub-field" id="notif-email-input" placeholder="another@email.com">
+              <button class="pub-save-btn" onclick="saveEmailNotification()">Add</button>
             </div>
             <div class="pub-hint" style="margin-top:6px">Sends an email to this address whenever someone submits the Contact or Membership form on the site.</div>
           </div>
@@ -936,6 +1128,21 @@
           <div id="inbox-list">
             <div class="inbox-empty">Enter your Netlify token and Site ID above to load form submissions.</div>
           </div>
+        </div>
+      </div>
+
+      <!-- TRASH -->
+      <div id="panel-trash" style="display:none">
+        <div class="topbar">
+          <h2 data-i18n="nav.trash">Trash</h2>
+          <button class="btn-outline" id="empty-trash-btn" onclick="emptyTrash()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            <span data-i18n="trash.empty">Empty Trash</span>
+          </button>
+        </div>
+        <div class="panel-body">
+          <p style="font-size:13px;color:var(--sub);margin-bottom:16px" data-i18n="trash.hint">Deleted news articles, events, and inbox messages land here first. Restore them or delete permanently — trashed news/events aren't published until you delete them permanently or restore and re-publish.</p>
+          <div id="trash-list"></div>
         </div>
       </div>
 
@@ -1054,6 +1261,39 @@
             </div>
           </div>
           <div class="form-hint" style="margin-top:16px">If an invite link ever seems "broken" (no set-password form appears), the token has likely expired or was already used once before — delete the pending user under Identity → Users and send a fresh invite.</div>
+
+          <hr class="pub-divider" style="margin:32px 0">
+          <h2 style="font-size:17px;margin-bottom:6px">What's New: Inbox, Trash &amp; Homepage Editing</h2>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:24px">A reference for the newer features added to this admin panel — what each one does and how it fits together.</p>
+
+          <h3 style="font-size:15px;margin-bottom:4px">Inbox</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:8px">The Inbox tab shows Contact/Membership form submissions as a thin, Gmail-style list — sender, subject, and a message preview on one line, with a date/time on the right.</p>
+          <ul style="font-size:13px;color:var(--sub);margin:0 0 24px 20px;line-height:1.9">
+            <li>Click a row to open the full message. Opening it automatically marks it read.</li>
+            <li>Each row has a trash-can button on the far left (delete without opening) and a checkmark on the right (mark read without opening).</li>
+            <li>Multiple notification emails can be connected at once under the Netlify Forms Connection box — add as many as you want, each shown in its own row with its own Remove button.</li>
+            <li>The "Show raw data" link inside an open message reveals exactly what Netlify received for that submission — useful if a field (like email or subject) doesn't look right, since it shows the raw values Netlify actually stored.</li>
+          </ul>
+
+          <h3 style="font-size:15px;margin-bottom:4px">Trash</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:8px">Deleting a news article, event, or inbox message no longer removes it right away — it moves to the Trash tab first, so mistakes are recoverable.</p>
+          <ul style="font-size:13px;color:var(--sub);margin:0 0 24px 20px;line-height:1.9">
+            <li><strong>News/Events:</strong> a trashed item is dropped from what gets published, but stays recoverable in Trash until you either <strong>Restore</strong> it or <strong>Delete Permanently</strong>.</li>
+            <li><strong>Inbox messages:</strong> trashing one only hides it locally — Netlify still has it. <strong>Restore</strong> brings it back to the Inbox; <strong>Delete Permanently</strong> is the step that actually removes it from Netlify for good (needs your Netlify token connected).</li>
+            <li><strong>Empty Trash</strong> permanently deletes everything currently in Trash in one go — use it carefully, since that step can't be undone.</li>
+          </ul>
+
+          <h3 style="font-size:15px;margin-bottom:4px">Homepage &amp; Mission Content</h3>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:8px">The <strong>Homepage</strong> tab (next to Dashboard) makes the site's core wording editable — no code required. It's saved through the same Save → Publish flow as News/Events, backed by <code>content/homepage.json</code>.</p>
+          <ul style="font-size:13px;color:var(--sub);margin:0 0 12px 20px;line-height:1.9">
+            <li><strong>Hero Section:</strong> the big title and subtitle at the very top of the homepage.</li>
+            <li><strong>About Section:</strong> the "Who We Are" tag, title, and both paragraphs on the homepage.</li>
+            <li><strong>Footer Links:</strong> the link row at the bottom of every page next to the logo (Facebook, etc.) — add, remove, or reorder any number of links. The old "Original Site" link was removed from here.</li>
+            <li><strong>Programs &amp; Services:</strong> the 6 cards on the homepage — add a new one, remove one, reorder them, and edit each card's icon, title, description, and link.</li>
+            <li><strong>Latest News on Homepage:</strong> defaults to Automatic (always shows the 3 newest posts). Switch to Manual to hand-pick specific posts and their order instead — useful for pinning something important above newer posts.</li>
+            <li><strong>Mission Page:</strong> the hero title/subtitle, "About Us" text, the numbered Objectives list (add/remove/reorder), and the Values text on the separate Mission page.</li>
+          </ul>
+          <div class="form-hint">Remember to click <strong>Save Changes</strong> at the top or bottom of the Homepage tab first, then <strong>Publish</strong> from the sidebar to make edits live — saving alone only stores the draft in this browser.</div>
 
         </div>
       </div>
@@ -1492,6 +1732,13 @@ const L = {
     'dash.unsaved.yes':'Yes — export to publish','dash.unsaved.no':'None',
     'brand.name':'CCCWA Admin',
     'nav.inbox':'Inbox',
+    'nav.homepage':'Homepage','homepage.save':'Save Changes','homepage.hero':'Hero Section','homepage.about':'About Section',
+    'homepage.programs':'Programs & Services','homepage.programs.hint':'Shown as cards on the homepage. Add, remove, or reorder as needed.',
+    'homepage.latest':'Latest News on Homepage','homepage.latest.hint':'By default the 3 most recent news posts show automatically. Switch to Manual to hand-pick which posts appear instead.',
+    'homepage.latest.auto':'Automatic (most recent 3)','homepage.latest.manual':'Manual selection','homepage.mission':'Mission Page',
+    'homepage.footerlinks':'Footer Links','homepage.footerlinks.hint':'Shown at the bottom of every page (next to the logo). Add social links, a members-only page, or any other URL.',
+    'nav.trash':'Trash','trash.empty':'Empty Trash',
+    'trash.hint':"Deleted news articles, events, and inbox messages land here first. Restore them or delete permanently — trashed news/events aren't published until you delete them permanently or restore and re-publish.",
     'sync.btn':'⟳ Sync','sync.ing':'⟳ Syncing…','sync.doing':'Syncing…',
     'sync.ok':'Synced ✓ — showing latest saved content','sync.fail':'Sync failed: ',
     'news.search':'Search articles by title or category...',
@@ -1552,6 +1799,13 @@ const L = {
     'dash.unsaved.yes':'有更改 — 导出以发布','dash.unsaved.no':'无',
     'brand.name':'CCCWA 管理后台',
     'nav.inbox':'收件箱',
+    'nav.homepage':'首页内容','homepage.save':'保存更改','homepage.hero':'主视觉区','homepage.about':'关于我们板块',
+    'homepage.programs':'项目与服务','homepage.programs.hint':'以卡片形式展示在首页。可根据需要添加、删除或调整顺序。',
+    'homepage.latest':'首页最新动态','homepage.latest.hint':'默认自动显示最近3篇文章。切换为手动可自行选择显示的文章。',
+    'homepage.latest.auto':'自动（最新3篇）','homepage.latest.manual':'手动选择','homepage.mission':'使命页面',
+    'homepage.footerlinks':'页脚链接','homepage.footerlinks.hint':'显示在每个页面底部（Logo旁边）。可添加社交媒体链接、会员专属页面或任何其他网址。',
+    'nav.trash':'回收站','trash.empty':'清空回收站',
+    'trash.hint':'已删除的新闻、活动和收件箱消息会先进入这里。您可以恢复或永久删除——已删除的新闻/活动在您永久删除或恢复并重新发布之前不会显示在网站上。',
     'sync.btn':'⟳ 同步','sync.ing':'⟳ 同步中…','sync.doing':'同步中…',
     'sync.ok':'同步完成 ✓ — 已显示最新保存的内容','sync.fail':'同步失败：',
     'news.search':'按标题或分类搜索文章…',
@@ -1797,7 +2051,9 @@ const DEFAULT_DATA = {
   news: [],
   events: [],
   leadership: [],
-  directory: []
+  directory: [],
+  trash: [],
+  homepage: null
 };
 
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -1814,7 +2070,19 @@ function loadData() {
   if (!data.events) data.events = [];
   if (!data.leadership) data.leadership = [];
   if (!data.directory) data.directory = [];
+  if (!data.trash) data.trash = [];
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
+}
+
+// content/homepage.json isn't in DEFAULT_DATA (nothing sensible to default
+// to client-side) — it's always loaded fresh from disk in syncFromFiles,
+// same as news/events/leadership/directory.
+async function ensureHomepageLoaded() {
+  if (data.homepage) return;
+  try {
+    const res = await fetch('../content/homepage.json?_=' + Date.now());
+    if (res.ok) data.homepage = await res.json();
+  } catch (e) { /* panel will just show blank fields until sync succeeds */ }
 }
 
 function persistData() {
@@ -1981,6 +2249,7 @@ function showPanel(name, el) {
   document.getElementById('panel-' + name).style.display = 'block';
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
+  if (name === 'homepage') ensureHomepageLoaded().then(renderHomepageForm);
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
   if (name === 'leadership') renderLeadershipTable();
@@ -1988,6 +2257,10 @@ function showPanel(name, el) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'publish') updateLocalBackendStatus();
   if (name === 'inbox') { updateInboxSettings(); fetchInboxSubmissions(); }
+  if (name === 'trash') {
+    if (getNetlifyToken() && getNetlifySiteId()) fetchInboxSubmissions().then(renderTrashList);
+    else renderTrashList();
+  }
   applyTranslations();
 }
 
@@ -2029,6 +2302,7 @@ function renderAll() {
   renderLeadershipTable();
   renderDirectoryTable();
   updateDirtyIndicator();
+  updateTrashBadge();
   applyTranslations();
 }
 
@@ -2262,9 +2536,10 @@ function saveNews() {
 }
 
 function deleteNews(idx) {
-  if (!confirm(T('confirm.del.article'))) return;
-  data.news.splice(idx, 1);
-  persistData(); renderNewsTable(); renderDashboard();
+  const [item] = data.news.splice(idx, 1);
+  if (!item) return;
+  data.trash.push({ type: 'news', item, deletedAt: new Date().toISOString() });
+  persistData(); renderNewsTable(); renderDashboard(); updateTrashBadge();
   toast(T('toast.article.deleted'));
 }
 
@@ -2313,10 +2588,307 @@ function saveEvent() {
 }
 
 function deleteEvent(idx) {
-  if (!confirm(T('confirm.del.event'))) return;
-  data.events.splice(idx, 1);
-  persistData(); renderEventsTable(); renderDashboard();
+  const [item] = data.events.splice(idx, 1);
+  if (!item) return;
+  data.trash.push({ type: 'event', item, deletedAt: new Date().toISOString() });
+  persistData(); renderEventsTable(); renderDashboard(); updateTrashBadge();
   toast(T('toast.event.deleted'));
+}
+
+/* ================================================================
+   HOMEPAGE & MISSION CONTENT
+   Backed by data.homepage (loaded fresh from content/homepage.json
+   via syncFromFiles/ensureHomepageLoaded), published the same way
+   as news/events. Programs and Mission Objectives are simple
+   reorderable arrays, same pattern as moveLeadership.
+================================================================ */
+const PROGRAM_ICON_OPTIONS = ['trade', 'network', 'culture', 'legal', 'media', 'health', 'star'];
+
+function renderHomepageForm() {
+  const hp = data.homepage;
+  const list = document.getElementById('hp-programs-list');
+  if (!hp) {
+    if (list) list.innerHTML = '<div class="inbox-empty">Loading homepage content…</div>';
+    return;
+  }
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('hp-f-hero-title-en', hp.hero_title_en); set('hp-f-hero-title-zh', hp.hero_title_zh);
+  set('hp-f-hero-subtitle-en', hp.hero_subtitle_en); set('hp-f-hero-subtitle-zh', hp.hero_subtitle_zh);
+  set('hp-f-about-tag-en', hp.about_tag_en); set('hp-f-about-tag-zh', hp.about_tag_zh);
+  set('hp-f-about-title-en', hp.about_title_en); set('hp-f-about-title-zh', hp.about_title_zh);
+  set('hp-f-about-p1-en', hp.about_p1_en); set('hp-f-about-p1-zh', hp.about_p1_zh);
+  set('hp-f-about-p2-en', hp.about_p2_en); set('hp-f-about-p2-zh', hp.about_p2_zh);
+  set('hp-f-ms-hero-title-en', hp.mission_hero_title_en); set('hp-f-ms-hero-title-zh', hp.mission_hero_title_zh);
+  set('hp-f-ms-hero-sub-en', hp.mission_hero_sub_en); set('hp-f-ms-hero-sub-zh', hp.mission_hero_sub_zh);
+  set('hp-f-ms-about-title-en', hp.mission_about_title_en); set('hp-f-ms-about-title-zh', hp.mission_about_title_zh);
+  set('hp-f-ms-about-p1-en', hp.mission_about_p1_en); set('hp-f-ms-about-p1-zh', hp.mission_about_p1_zh);
+  set('hp-f-ms-values-title-en', hp.mission_values_title_en); set('hp-f-ms-values-title-zh', hp.mission_values_title_zh);
+  set('hp-f-ms-values-p-en', hp.mission_values_p_en); set('hp-f-ms-values-p-zh', hp.mission_values_p_zh);
+
+  document.querySelectorAll('input[name="hp-events-mode"]').forEach(r => { r.checked = r.value === (hp.latest_events_mode || 'auto'); });
+  document.getElementById('hp-manual-picker').style.display = hp.latest_events_mode === 'manual' ? 'block' : 'none';
+
+  renderFooterLinksList();
+  renderProgramsList();
+  renderManualPicker();
+  renderObjectivesList();
+}
+
+function renderFooterLinksList() {
+  const list = document.getElementById('hp-footerlinks-list');
+  if (!list || !data.homepage) return;
+  const links = data.homepage.footer_links || [];
+  if (!links.length) { list.innerHTML = '<div class="inbox-empty">No footer links yet — click "+ Add Link".</div>'; return; }
+  list.innerHTML = links.map((l, i) => `
+    <div class="hp-program-row">
+      <div class="hp-program-row-head">
+        <span class="hp-program-row-num">#${i + 1}</span>
+        <button class="btn-move" onclick="moveFooterLink(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
+        <button class="btn-move" onclick="moveFooterLink(${i},1)" ${i === links.length - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
+        <button class="btn-danger" style="margin-left:auto" onclick="removeFooterLink(${i})">Remove</button>
+      </div>
+      <div class="hp-field-grid">
+        <div class="form-group">
+          <div class="form-label">Label (English)</div>
+          <input class="form-input" value="${esc(l.label_en || '')}" onchange="updateFooterLinkField(${i},'label_en',this.value)">
+        </div>
+        <div class="form-group">
+          <div class="form-label">标签 (中文)</div>
+          <input class="form-input" value="${esc(l.label_zh || '')}" onchange="updateFooterLinkField(${i},'label_zh',this.value)">
+        </div>
+        <div class="form-group" style="grid-column:1 / -1">
+          <div class="form-label">URL</div>
+          <input class="form-input" value="${esc(l.url || '')}" placeholder="https://…" onchange="updateFooterLinkField(${i},'url',this.value)">
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateFooterLinkField(idx, field, value) {
+  if (!data.homepage || !data.homepage.footer_links[idx]) return;
+  data.homepage.footer_links[idx][field] = value;
+  markHomepageDirty();
+}
+
+function addFooterLink() {
+  if (!data.homepage) return;
+  if (!data.homepage.footer_links) data.homepage.footer_links = [];
+  data.homepage.footer_links.push({ label_en: '', label_zh: '', url: 'https://' });
+  markHomepageDirty();
+  renderFooterLinksList();
+}
+
+function removeFooterLink(idx) {
+  if (!data.homepage) return;
+  if (!confirm('Remove this footer link?')) return;
+  data.homepage.footer_links.splice(idx, 1);
+  markHomepageDirty();
+  renderFooterLinksList();
+}
+
+function moveFooterLink(idx, dir) {
+  const arr = data.homepage.footer_links;
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  markHomepageDirty();
+  renderFooterLinksList();
+}
+
+function renderProgramsList() {
+  const list = document.getElementById('hp-programs-list');
+  if (!list || !data.homepage) return;
+  const programs = data.homepage.programs || [];
+  if (!programs.length) { list.innerHTML = '<div class="inbox-empty">No programs yet — click "+ Add Program".</div>'; return; }
+  list.innerHTML = programs.map((p, i) => `
+    <div class="hp-program-row">
+      <div class="hp-program-row-head">
+        <span class="hp-program-row-num">#${i + 1}</span>
+        <button class="btn-move" onclick="moveProgram(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
+        <button class="btn-move" onclick="moveProgram(${i},1)" ${i === programs.length - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
+        <button class="btn-danger" style="margin-left:auto" onclick="removeProgram(${i})">Remove</button>
+      </div>
+      <div class="hp-field-grid">
+        <div class="form-group">
+          <div class="form-label">Icon</div>
+          <select class="form-select" onchange="updateProgramField(${i},'icon',this.value)">
+            ${PROGRAM_ICON_OPTIONS.map(k => `<option value="${k}" ${p.icon === k ? 'selected' : ''}>${k}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Link (e.g. contact.html)</div>
+          <input class="form-input" value="${esc(p.link || '')}" onchange="updateProgramField(${i},'link',this.value)">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Title (English)</div>
+          <input class="form-input" value="${esc(p.title_en || '')}" onchange="updateProgramField(${i},'title_en',this.value)">
+        </div>
+        <div class="form-group">
+          <div class="form-label">标题 (中文)</div>
+          <input class="form-input" value="${esc(p.title_zh || '')}" onchange="updateProgramField(${i},'title_zh',this.value)">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Description (English)</div>
+          <textarea class="form-textarea" style="min-height:60px" onchange="updateProgramField(${i},'desc_en',this.value)">${esc(p.desc_en || '')}</textarea>
+        </div>
+        <div class="form-group">
+          <div class="form-label">描述 (中文)</div>
+          <textarea class="form-textarea" style="min-height:60px" onchange="updateProgramField(${i},'desc_zh',this.value)">${esc(p.desc_zh || '')}</textarea>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateProgramField(idx, field, value) {
+  if (!data.homepage || !data.homepage.programs[idx]) return;
+  data.homepage.programs[idx][field] = value;
+  markHomepageDirty();
+}
+
+function addProgram() {
+  if (!data.homepage) return;
+  data.homepage.programs.push({ id: uid(), icon: 'star', title_en: '', title_zh: '', desc_en: '', desc_zh: '', link: 'contact.html' });
+  markHomepageDirty();
+  renderProgramsList();
+}
+
+function removeProgram(idx) {
+  if (!data.homepage) return;
+  if (!confirm('Remove this program card?')) return;
+  data.homepage.programs.splice(idx, 1);
+  markHomepageDirty();
+  renderProgramsList();
+}
+
+function moveProgram(idx, dir) {
+  const arr = data.homepage.programs;
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  markHomepageDirty();
+  renderProgramsList();
+}
+
+function setLatestEventsMode(mode) {
+  if (!data.homepage) return;
+  data.homepage.latest_events_mode = mode;
+  document.getElementById('hp-manual-picker').style.display = mode === 'manual' ? 'block' : 'none';
+  markHomepageDirty();
+  renderManualPicker();
+}
+
+// Manual picker lists all published news items with a checkbox; the order
+// checked (tracked in latest_events_manual_ids) is the order shown on the
+// homepage, same convention as ordered lists elsewhere in this admin.
+function renderManualPicker() {
+  const wrap = document.getElementById('hp-manual-picker');
+  if (!wrap || !data.homepage) return;
+  if (data.homepage.latest_events_mode !== 'manual') { wrap.innerHTML = ''; return; }
+  const selected = data.homepage.latest_events_manual_ids || [];
+  const items = [...data.news].sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (!items.length) { wrap.innerHTML = '<div class="inbox-empty">No news posts to pick from yet.</div>'; return; }
+  wrap.innerHTML = `<div class="pub-hint" style="margin-bottom:8px">Picked ${selected.length}/3 — check up to 3, in the order you want them to appear.</div>` +
+    items.map(n => {
+      const checked = selected.includes(n.id);
+      const disable = !checked && selected.length >= 3;
+      return `<label style="display:flex;align-items:center;gap:8px;padding:7px 4px;font-size:13px;border-bottom:1px solid var(--border);cursor:${disable ? 'default' : 'pointer'};opacity:${disable ? 0.5 : 1}">
+        <input type="checkbox" ${checked ? 'checked' : ''} ${disable ? 'disabled' : ''} onchange="toggleManualEvent('${esc(n.id)}',this.checked)">
+        <span style="flex:1">${esc(n.title_en || n.title_zh || '(untitled)')}</span>
+        <span style="color:var(--muted);font-size:11px">${esc(n.date || '')}</span>
+      </label>`;
+    }).join('');
+}
+
+function toggleManualEvent(id, checked) {
+  if (!data.homepage) return;
+  let selected = data.homepage.latest_events_manual_ids || [];
+  if (checked) { if (!selected.includes(id) && selected.length < 3) selected.push(id); }
+  else { selected = selected.filter(x => x !== id); }
+  data.homepage.latest_events_manual_ids = selected;
+  markHomepageDirty();
+  renderManualPicker();
+}
+
+function renderObjectivesList() {
+  const list = document.getElementById('hp-objectives-list');
+  if (!list || !data.homepage) return;
+  const objs = data.homepage.mission_objectives || [];
+  if (!objs.length) { list.innerHTML = '<div class="inbox-empty">No objectives yet.</div>'; return; }
+  list.innerHTML = objs.map((o, i) => `
+    <div class="hp-objective-row">
+      <div class="hp-objective-row-head">
+        <span class="hp-objective-row-num">#${i + 1}</span>
+        <button class="btn-move" onclick="moveMissionObjective(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
+        <button class="btn-move" onclick="moveMissionObjective(${i},1)" ${i === objs.length - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
+        <button class="btn-danger" style="margin-left:auto" onclick="removeMissionObjective(${i})">Remove</button>
+      </div>
+      <div class="hp-field-grid">
+        <div class="form-group">
+          <div class="form-label">English</div>
+          <textarea class="form-textarea" style="min-height:50px" onchange="updateMissionObjective(${i},'en',this.value)">${esc(o.en || '')}</textarea>
+        </div>
+        <div class="form-group">
+          <div class="form-label">中文</div>
+          <textarea class="form-textarea" style="min-height:50px" onchange="updateMissionObjective(${i},'zh',this.value)">${esc(o.zh || '')}</textarea>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateMissionObjective(idx, field, value) {
+  if (!data.homepage || !data.homepage.mission_objectives[idx]) return;
+  data.homepage.mission_objectives[idx][field] = value;
+  markHomepageDirty();
+}
+
+function addMissionObjective() {
+  if (!data.homepage) return;
+  data.homepage.mission_objectives.push({ en: '', zh: '' });
+  markHomepageDirty();
+  renderObjectivesList();
+}
+
+function removeMissionObjective(idx) {
+  if (!data.homepage) return;
+  if (!confirm('Remove this objective?')) return;
+  data.homepage.mission_objectives.splice(idx, 1);
+  markHomepageDirty();
+  renderObjectivesList();
+}
+
+function moveMissionObjective(idx, dir) {
+  const arr = data.homepage.mission_objectives;
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  markHomepageDirty();
+  renderObjectivesList();
+}
+
+function markHomepageDirty() {
+  dirty = true;
+  localStorage.setItem(DIRTY_KEY, 'true');
+  updateDirtyIndicator();
+}
+
+function saveHomepageContent() {
+  const hp = data.homepage;
+  if (!hp) { toast('Still loading — try again in a moment'); return; }
+  const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  hp.hero_title_en = get('hp-f-hero-title-en'); hp.hero_title_zh = get('hp-f-hero-title-zh');
+  hp.hero_subtitle_en = get('hp-f-hero-subtitle-en'); hp.hero_subtitle_zh = get('hp-f-hero-subtitle-zh');
+  hp.about_tag_en = get('hp-f-about-tag-en'); hp.about_tag_zh = get('hp-f-about-tag-zh');
+  hp.about_title_en = get('hp-f-about-title-en'); hp.about_title_zh = get('hp-f-about-title-zh');
+  hp.about_p1_en = get('hp-f-about-p1-en'); hp.about_p1_zh = get('hp-f-about-p1-zh');
+  hp.about_p2_en = get('hp-f-about-p2-en'); hp.about_p2_zh = get('hp-f-about-p2-zh');
+  hp.mission_hero_title_en = get('hp-f-ms-hero-title-en'); hp.mission_hero_title_zh = get('hp-f-ms-hero-title-zh');
+  hp.mission_hero_sub_en = get('hp-f-ms-hero-sub-en'); hp.mission_hero_sub_zh = get('hp-f-ms-hero-sub-zh');
+  hp.mission_about_title_en = get('hp-f-ms-about-title-en'); hp.mission_about_title_zh = get('hp-f-ms-about-title-zh');
+  hp.mission_about_p1_en = get('hp-f-ms-about-p1-en'); hp.mission_about_p1_zh = get('hp-f-ms-about-p1-zh');
+  hp.mission_values_title_en = get('hp-f-ms-values-title-en'); hp.mission_values_title_zh = get('hp-f-ms-values-title-zh');
+  hp.mission_values_p_en = get('hp-f-ms-values-p-en'); hp.mission_values_p_zh = get('hp-f-ms-values-p-zh');
+  persistData();
+  toast('Homepage content saved — click Publish to make it live');
 }
 
 /* ================================================================
@@ -2535,7 +3107,9 @@ function deleteDirectory(idx) {
    of the old GitHub Contents API + Personal Access Token.
 ================================================================ */
 function exportData() {
-  [['news.json', { items: data.news }], ['events.json', { items: data.events }], ['leadership.json', { items: data.leadership }], ['directory.json', { items: data.directory }]].forEach(([name, obj]) => {
+  const files = [['news.json', { items: data.news }], ['events.json', { items: data.events }], ['leadership.json', { items: data.leadership }], ['directory.json', { items: data.directory }]];
+  if (data.homepage) files.push(['homepage.json', data.homepage]);
+  files.forEach(([name, obj]) => {
     const blob = new Blob([JSON.stringify(obj, null, 2) + '\n'], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2644,6 +3218,7 @@ async function publishToSite() {
       await putFileViaGitGateway('content/events.json', { items: data.events });
       await putFileViaGitGateway('content/leadership.json', { items: data.leadership });
       await putFileViaGitGateway('content/directory.json', { items: data.directory });
+      if (data.homepage) await putFileViaGitGateway('content/homepage.json', data.homepage);
       setPubStatus('ok', 'Published live via Git Gateway — Netlify is deploying now');
       toast('Published to the live site!');
     } else {
@@ -2651,6 +3226,7 @@ async function publishToSite() {
       await persistJsonFile('content/events.json', { items: data.events }, 'events');
       await persistJsonFile('content/leadership.json', { items: data.leadership }, 'leadership');
       await persistJsonFile('content/directory.json', { items: data.directory }, 'directory');
+      if (data.homepage) await persistJsonFile('content/homepage.json', data.homepage, 'homepage');
       setPubStatus('ok', 'Published — saved to content/*.json (local only)');
       toast('Published locally!');
     }
@@ -2678,22 +3254,25 @@ async function syncFromFiles(silent) {
   if (!silent) toast(T('sync.doing'));
 
   try {
-    const [newsRes, eventsRes, leadershipRes, directoryRes] = await Promise.all([
+    const [newsRes, eventsRes, leadershipRes, directoryRes, homepageRes] = await Promise.all([
       fetch('../content/news.json?_=' + Date.now()),
       fetch('../content/events.json?_=' + Date.now()),
       fetch('../content/leadership.json?_=' + Date.now()),
-      fetch('../content/directory.json?_=' + Date.now())
+      fetch('../content/directory.json?_=' + Date.now()),
+      fetch('../content/homepage.json?_=' + Date.now())
     ]);
-    if (!newsRes.ok || !eventsRes.ok || !leadershipRes.ok || !directoryRes.ok) throw new Error('Could not load content files');
+    if (!newsRes.ok || !eventsRes.ok || !leadershipRes.ok || !directoryRes.ok || !homepageRes.ok) throw new Error('Could not load content files');
     const newsJson = await newsRes.json();
     const eventsJson = await eventsRes.json();
     const leadershipJson = await leadershipRes.json();
     const directoryJson = await directoryRes.json();
+    const homepageJson = await homepageRes.json();
 
     data.news = newsJson.items || [];
     data.events = eventsJson.items || [];
     data.leadership = leadershipJson.items || [];
     data.directory = directoryJson.items || [];
+    data.homepage = homepageJson;
     if (!data.categories) data.categories = DEFAULT_DATA.categories;
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -3476,13 +4055,19 @@ function updateInboxSettings() {
    hook via Netlify's Hooks API, so submissions get emailed out
    without anyone touching the Netlify dashboard directly.
 ================================================================ */
-let currentEmailHookId = null;
+let currentEmailHooks = [];
 
 async function loadEmailNotification() {
   const statusEl = document.getElementById('email-notif-status');
+  const listEl = document.getElementById('email-notif-list');
   if (!statusEl) return;
   const token = getNetlifyToken(), siteId = getNetlifySiteId();
-  if (!token || !siteId) { statusEl.textContent = 'Connect Netlify above first.'; currentEmailHookId = null; return; }
+  if (!token || !siteId) {
+    statusEl.textContent = 'Connect Netlify above first.';
+    if (listEl) listEl.style.display = 'none';
+    currentEmailHooks = [];
+    return;
+  }
   statusEl.textContent = 'Checking…';
   try {
     const res = await fetch(`https://api.netlify.com/api/v1/hooks?site_id=${siteId}`, {
@@ -3490,26 +4075,45 @@ async function loadEmailNotification() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const hooks = await res.json();
-    const hook = (Array.isArray(hooks) ? hooks : []).find(h => h.type === 'email' && h.event === 'submission_created');
-    if (hook) {
-      currentEmailHookId = hook.id;
-      statusEl.innerHTML = `<span class="inbox-conn-ok">Enabled</span> — sending to ${esc((hook.data && hook.data.email) || '(unknown)')} ` +
-        `<button type="button" onclick="removeEmailNotification()" style="margin-left:8px;background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit">Remove</button>`;
-    } else {
-      currentEmailHookId = null;
-      statusEl.textContent = 'Not set up yet — enter an email above and click Enable.';
-    }
+    currentEmailHooks = (Array.isArray(hooks) ? hooks : [])
+      .filter(h => h.type === 'email' && h.event === 'submission_created');
+    renderEmailNotificationList();
   } catch (e) {
-    currentEmailHookId = null;
+    currentEmailHooks = [];
+    if (listEl) listEl.style.display = 'none';
     statusEl.textContent = 'Could not check status: ' + e.message;
   }
 }
 
+function renderEmailNotificationList() {
+  const statusEl = document.getElementById('email-notif-status');
+  const listEl = document.getElementById('email-notif-list');
+  if (!statusEl || !listEl) return;
+  if (!currentEmailHooks.length) {
+    statusEl.textContent = 'Not set up yet — enter an email above and click Add.';
+    listEl.style.display = 'none';
+    listEl.innerHTML = '';
+    return;
+  }
+  statusEl.innerHTML = `<span class="inbox-conn-ok">Enabled</span> — sending to ${currentEmailHooks.length} address${currentEmailHooks.length !== 1 ? 'es' : ''}`;
+  listEl.style.display = 'block';
+  listEl.innerHTML = currentEmailHooks.map(hook => {
+    const email = esc((hook.data && hook.data.email) || '(unknown)');
+    return `<div class="email-notif-row">
+      <span class="email-notif-row-email">${email}</span>
+      <button type="button" class="email-notif-remove" onclick="removeEmailNotification('${esc(hook.id)}','${email}')">Remove</button>
+    </div>`;
+  }).join('');
+}
+
 async function saveEmailNotification() {
   const token = getNetlifyToken(), siteId = getNetlifySiteId();
-  const email = document.getElementById('notif-email-input').value.trim();
+  const input = document.getElementById('notif-email-input');
+  const email = input.value.trim();
   if (!token || !siteId) { toast('Connect Netlify (token + Site ID) above first'); return; }
   if (!email) { toast('Enter an email address'); return; }
+  const already = currentEmailHooks.some(h => (h.data && h.data.email || '').toLowerCase() === email.toLowerCase());
+  if (already) { toast(email + ' is already connected'); return; }
   try {
     const res = await fetch(`https://api.netlify.com/api/v1/hooks?site_id=${siteId}`, {
       method: 'POST',
@@ -3519,26 +4123,26 @@ async function saveEmailNotification() {
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json.message || `HTTP ${res.status}`);
     toast('Email notifications enabled for ' + email);
-    document.getElementById('notif-email-input').value = '';
+    input.value = '';
     loadEmailNotification();
   } catch (e) {
     toast('Failed: ' + e.message);
   }
 }
 
-async function removeEmailNotification() {
+async function removeEmailNotification(hookId, email) {
   const token = getNetlifyToken();
-  if (!currentEmailHookId || !token) return;
-  if (!confirm('Stop email notifications for new submissions?')) return;
+  if (!hookId || !token) return;
+  if (!confirm('Stop email notifications for ' + email + '?')) return;
   try {
-    const res = await fetch(`https://api.netlify.com/api/v1/hooks/${currentEmailHookId}`, {
+    const res = await fetch(`https://api.netlify.com/api/v1/hooks/${hookId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
-    toast('Email notifications turned off');
-    currentEmailHookId = null;
-    loadEmailNotification();
+    toast('Removed ' + email);
+    currentEmailHooks = currentEmailHooks.filter(h => h.id !== hookId);
+    renderEmailNotificationList();
   } catch (e) {
     toast('Failed: ' + e.message);
   }
@@ -3572,9 +4176,10 @@ function markAllRead() {
 }
 
 function updateInboxBadge() {
-  const read   = getReadIds();
-  const unread = inboxSubmissions.filter(s => !read.has(s.id)).length;
-  const badge  = document.getElementById('inbox-badge');
+  const read    = getReadIds();
+  const trashed = getInboxTrashIds();
+  const unread  = inboxSubmissions.filter(s => !read.has(s.id) && !trashed.has(s.id)).length;
+  const badge   = document.getElementById('inbox-badge');
   if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? 'inline' : 'none'; }
   const label  = document.getElementById('inbox-unread-label');
   if (label) label.textContent = unread > 0 ? `— ${unread} unread` : '';
@@ -3651,8 +4256,40 @@ function goInboxPage(p) {
   document.getElementById('inbox-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-async function deleteInboxSubmission(id, btnEl) {
-  if (!confirm('Delete this message? This cannot be undone.')) return;
+const INBOX_TRASH_KEY = 'cccwa_inbox_trash';
+function getInboxTrashIds() {
+  try { return new Set(JSON.parse(localStorage.getItem(INBOX_TRASH_KEY) || '[]')); }
+  catch(e) { return new Set(); }
+}
+function setInboxTrashIds(set) { localStorage.setItem(INBOX_TRASH_KEY, JSON.stringify([...set])); }
+
+// "Delete" on an inbox message only trashes it locally — Netlify's
+// submission is left alone until Trash does the real DELETE, so the
+// action is reversible from Trash in the meantime.
+function trashInboxSubmission(id) {
+  const trashed = getInboxTrashIds();
+  trashed.add(id);
+  setInboxTrashIds(trashed);
+  if (inboxOpenId === id) inboxOpenId = null;
+  toast('Message moved to trash');
+  renderInboxList();
+  updateInboxBadge();
+  updateTrashBadge();
+}
+
+function restoreInboxSubmission(id) {
+  const trashed = getInboxTrashIds();
+  trashed.delete(id);
+  setInboxTrashIds(trashed);
+  toast('Message restored');
+  renderInboxList();
+  updateInboxBadge();
+  updateTrashBadge();
+  renderTrashList();
+}
+
+async function permanentlyDeleteInboxSubmission(id, btnEl) {
+  if (!confirm('Permanently delete this message? This cannot be undone.')) return;
   const token = getNetlifyToken();
   if (!token) { toast('Connect Netlify (token + Site ID) above first'); return; }
   if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Deleting…'; }
@@ -3663,30 +4300,54 @@ async function deleteInboxSubmission(id, btnEl) {
     });
     if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
     inboxSubmissions = inboxSubmissions.filter(s => s.id !== id);
-    if (inboxOpenId === id) inboxOpenId = null;
-    toast('Message deleted');
+    const trashed = getInboxTrashIds();
+    trashed.delete(id);
+    setInboxTrashIds(trashed);
+    toast('Message permanently deleted');
     renderInboxList();
     updateInboxBadge();
+    updateTrashBadge();
+    renderTrashList();
     const statusEl = document.getElementById('inbox-status-bar');
     if (statusEl) {
       const read = getReadIds();
-      const unread = inboxSubmissions.filter(s => !read.has(s.id)).length;
+      const unread = inboxSubmissions.filter(s => !read.has(s.id) && !trashed.has(s.id)).length;
       statusEl.textContent = `${inboxSubmissions.length} message${inboxSubmissions.length !== 1 ? 's' : ''} · ${unread} unread`;
     }
   } catch (e) {
     toast('Delete failed: ' + e.message);
-    if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Delete'; }
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Delete Permanently'; }
   }
+}
+
+// Netlify's submission JSON keeps form fields in `data`, but also mirrors
+// a few (email, name) at the top level, and field names have occasionally
+// drifted (case, aliases) across form edits — check every place a field's
+// value could actually be sitting before giving up on it.
+function inboxPick(s, keys) {
+  const d = s.data || {};
+  for (const k of keys) {
+    if (d[k] != null && String(d[k]).trim()) return String(d[k]).trim();
+  }
+  for (const k of keys) {
+    if (s[k] != null && String(s[k]).trim()) return String(s[k]).trim();
+  }
+  const wanted = keys.map(k => k.toLowerCase());
+  for (const dk of Object.keys(d)) {
+    if (wanted.includes(dk.toLowerCase()) && String(d[dk]).trim()) return String(d[dk]).trim();
+  }
+  return '';
 }
 
 // Derives a Gmail-style subject line for submissions that have no explicit
 // "subject" field (the membership form doesn't collect one).
 function inboxSubjectFor(s) {
-  const d = s.data || {};
-  if (d.subject) return esc(d.subject);
+  const subject = inboxPick(s, ['subject']);
+  if (subject) return esc(subject);
   if (s._formName === 'membership-inquiry') {
-    const memType = d.type ? d.type.charAt(0).toUpperCase() + d.type.slice(1) : '';
-    return esc((memType ? memType + ' ' : '') + 'Membership Inquiry');
+    const memType = inboxPick(s, ['type']);
+    const label = memType ? memType.charAt(0).toUpperCase() + memType.slice(1) : '';
+    return esc((label ? label + ' ' : '') + 'Membership Inquiry');
   }
   return 'Contact Form Message';
 }
@@ -3725,11 +4386,12 @@ function renderInboxDetail(s) {
   const read = getReadIds();
   const isUnread = !read.has(s.id);
   const d    = s.data || {};
-  const name = esc(d.name || d.fullname || d.email || 'Anonymous');
-  const email   = esc(d.email || '');
-  const org     = esc(d.org || d.organization || d.company || '');
-  const phone   = esc(d.phone || '');
-  const memType = esc(d.type || '');
+  const rawEmail = inboxPick(s, ['email']);
+  const email   = esc(rawEmail);
+  const name = esc(inboxPick(s, ['name', 'fullname']) || rawEmail || 'Anonymous');
+  const org     = esc(inboxPick(s, ['org', 'organization', 'company']));
+  const phone   = esc(inboxPick(s, ['phone']));
+  const memType = esc(inboxPick(s, ['type']));
   const message = sanitizeInboxHtml(d.message || '');
   const date = new Date(s.created_at).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -3762,14 +4424,25 @@ function renderInboxDetail(s) {
           ? `<button class="inbox-read-btn" onclick="markRead('${esc(s.id)}',this)">Mark as Read</button>`
           : `<span style="font-size:12px;color:var(--muted)">Read</span>`}
         ${email ? `<a class="inbox-reply-a" href="mailto:${email}?subject=Re: CCCWA Inquiry">Reply</a>` : ''}
-        <button class="inbox-delete-btn" onclick="deleteInboxSubmission('${esc(s.id)}',this)">Delete</button>
+        <button class="inbox-delete-btn" onclick="trashInboxSubmission('${esc(s.id)}')">Delete</button>
+        <button class="inbox-raw-toggle" onclick="toggleInboxRaw('${esc(s.id)}',this)" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline">Show raw data</button>
       </div>
+      <pre id="inbox-raw-${esc(s.id)}" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:11px;line-height:1.5;overflow-x:auto;white-space:pre-wrap;word-break:break-word;color:var(--muted)">${esc(JSON.stringify(s, null, 2))}</pre>
     </div>`;
+}
+
+function toggleInboxRaw(id, btn) {
+  const pre = document.getElementById('inbox-raw-' + id);
+  if (!pre) return;
+  const show = pre.style.display === 'none';
+  pre.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? 'Hide raw data' : 'Show raw data';
 }
 
 function renderInboxList() {
   const read = getReadIds();
-  let subs = inboxSubmissions;
+  const trashed = getInboxTrashIds();
+  let subs = inboxSubmissions.filter(s => !trashed.has(s.id));
   if (inboxFilter === 'unread')              subs = subs.filter(s => !read.has(s.id));
   if (inboxFilter === 'membership-inquiry')  subs = subs.filter(s => s._formName === 'membership-inquiry');
   if (inboxFilter === 'contact')             subs = subs.filter(s => s._formName === 'contact');
@@ -3806,15 +4479,11 @@ function renderInboxList() {
 
   const rowsHtml = pageSubs.map(s => {
     const isUnread = !read.has(s.id);
-    const d = s.data || {};
-    const sender = esc(d.name || d.fullname || d.email || 'Anonymous');
-    const date = new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const sender = esc(inboxPick(s, ['name', 'fullname']) || inboxPick(s, ['email']) || 'Anonymous');
+    const date = new Date(s.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     const tagLabel = s._formName === 'membership-inquiry' ? 'Membership' : 'Contact';
     const snippet = inboxSnippetFor(s);
     return `<div class="inbox-row ${isUnread ? 'unread' : ''}" id="inbox-row-${esc(s.id)}" onclick="openInboxMessage('${esc(s.id)}')">
-      <button class="inbox-row-action-btn inbox-row-action-delete" title="Delete" onclick="event.stopPropagation(); deleteInboxSubmission('${esc(s.id)}', this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      </button>
       <span class="inbox-row-dot${isUnread ? '' : ' hidden'}"></span>
       <span class="inbox-row-tag">${tagLabel}</span>
       <span class="inbox-row-sender">${sender}</span>
@@ -3823,10 +4492,123 @@ function renderInboxList() {
       ${isUnread ? `<button class="inbox-row-action-btn" title="Mark as read" onclick="event.stopPropagation(); markRowRead('${esc(s.id)}')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </button>` : ''}
+      <button class="inbox-row-action-btn inbox-row-action-delete" title="Delete" onclick="event.stopPropagation(); trashInboxSubmission('${esc(s.id)}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button>
     </div>`;
   }).join('');
 
   listEl.innerHTML = `<div class="inbox-rows">${rowsHtml}</div>` + pagerHtml;
+}
+
+/* ================================================================
+   TRASH — deleted news articles, events, and inbox messages land
+   here before actually going away. News/Event entries just sit in
+   data.trash (never published, since exportData() only reads
+   data.news/data.events); inbox entries stay live on Netlify until
+   permanently deleted from here.
+================================================================ */
+function updateTrashBadge() {
+  const count = data.trash.length + getInboxTrashIds().size;
+  const badge = document.getElementById('trash-badge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline' : 'none'; }
+}
+
+function renderTrashList() {
+  const listEl = document.getElementById('trash-list');
+  if (!listEl) return;
+  const inboxTrashIds = getInboxTrashIds();
+  const inboxTrashedSubs = inboxSubmissions.filter(s => inboxTrashIds.has(s.id));
+
+  const rows = [];
+
+  data.trash.forEach((entry, idx) => {
+    const title = esc(entry.item.title_en || entry.item.title_zh || '(untitled)');
+    const deletedDate = new Date(entry.deletedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    rows.push(`<div class="trash-row">
+      <span class="trash-row-type">${entry.type === 'news' ? 'News' : 'Event'}</span>
+      <span class="trash-row-title">${title}</span>
+      <span class="trash-row-meta">Deleted ${deletedDate}</span>
+      <span class="trash-row-actions">
+        <button class="trash-restore-btn" onclick="restoreTrashItem(${idx})">Restore</button>
+        <button class="trash-perm-delete-btn" onclick="permanentlyDeleteTrashItem(${idx})">Delete Permanently</button>
+      </span>
+    </div>`);
+  });
+
+  inboxTrashedSubs.forEach(s => {
+    const sender = esc(inboxPick(s, ['name', 'fullname']) || inboxPick(s, ['email']) || 'Anonymous');
+    const subject = inboxSubjectFor(s);
+    const date = new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    rows.push(`<div class="trash-row">
+      <span class="trash-row-type">${s._formName === 'membership-inquiry' ? 'Membership' : 'Contact'}</span>
+      <span class="trash-row-title">${sender} — ${subject}</span>
+      <span class="trash-row-meta">Deleted ${date}</span>
+      <span class="trash-row-actions">
+        <button class="trash-restore-btn" onclick="restoreInboxSubmission('${esc(s.id)}')">Restore</button>
+        <button class="trash-perm-delete-btn" onclick="permanentlyDeleteInboxSubmission('${esc(s.id)}', this)">Delete Permanently</button>
+      </span>
+    </div>`);
+  });
+
+  if (!rows.length) {
+    listEl.innerHTML = `<div class="inbox-empty">Trash is empty.</div>`;
+    return;
+  }
+  listEl.innerHTML = rows.join('');
+}
+
+function restoreTrashItem(idx) {
+  const entry = data.trash[idx];
+  if (!entry) return;
+  if (entry.type === 'news') data.news.unshift(entry.item);
+  else if (entry.type === 'event') data.events.push(entry.item);
+  data.trash.splice(idx, 1);
+  persistData();
+  renderNewsTable(); renderEventsTable(); renderDashboard();
+  updateTrashBadge();
+  renderTrashList();
+  toast('Restored');
+}
+
+function permanentlyDeleteTrashItem(idx) {
+  if (!confirm('Permanently delete this item? This cannot be undone.')) return;
+  data.trash.splice(idx, 1);
+  persistData();
+  updateTrashBadge();
+  renderTrashList();
+  toast('Permanently deleted');
+}
+
+async function emptyTrash() {
+  const inboxTrashIds = getInboxTrashIds();
+  if (!data.trash.length && !inboxTrashIds.size) { toast('Trash is already empty'); return; }
+  const token = getNetlifyToken();
+  if (inboxTrashIds.size && !token) {
+    toast('Connect Netlify above to permanently delete trashed messages');
+    return;
+  }
+  if (!confirm('Permanently delete everything in Trash? This cannot be undone.')) return;
+
+  data.trash = [];
+  persistData();
+
+  for (const id of inboxTrashIds) {
+    try {
+      await fetch(`https://api.netlify.com/api/v1/submissions/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (e) { /* best-effort — orphaned submissions can be cleared on next Empty Trash */ }
+  }
+  inboxSubmissions = inboxSubmissions.filter(s => !inboxTrashIds.has(s.id));
+  setInboxTrashIds(new Set());
+
+  renderNewsTable(); renderEventsTable(); renderDashboard();
+  renderInboxList(); updateInboxBadge();
+  updateTrashBadge();
+  renderTrashList();
+  toast('Trash emptied');
 }
 
 // Init

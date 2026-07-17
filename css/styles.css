@@ -759,7 +759,7 @@ img { max-width: 100%; display: block; }
 .rich-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
 .rich-btn { background: none; border: none; cursor: pointer; padding: 4px 9px; border-radius: 4px; font-size: 12px; font-weight: 700; color: var(--text-secondary); font-family: inherit; line-height: 1.4; transition: all var(--t); }
 .rich-btn:hover { background: var(--border); color: var(--text-primary); }
-.rich-editor { min-height: 130px; padding: 10px 14px; outline: none; cursor: text; font-size: 14px; line-height: 1.7; color: var(--text-primary); }
+.rich-editor { min-height: 130px; padding: 10px 14px; outline: none; cursor: text; font-size: 14px; line-height: 1.7; color: var(--text-primary); overflow-wrap: break-word; word-break: break-word; }
 .rich-editor:empty::before { content: attr(data-ph); color: var(--text-secondary); opacity: 0.75; pointer-events: none; }
 .rich-editor p { margin-bottom: 8px; }
 .rich-editor h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }

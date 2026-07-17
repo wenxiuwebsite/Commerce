@@ -7,6 +7,7 @@
 (function () {
   const NEWS_URL = 'content/news.json';
   const EVENTS_URL = 'content/events.json';
+  const HOMEPAGE_URL = 'content/homepage.json';
   const PAGE_SIZE = 15;
 
   function isZh() { return (localStorage.getItem('lang') || 'en') === 'zh-cn'; }
@@ -280,17 +281,30 @@
   function initHomePreview() {
     const wrap = document.querySelector('.home-news-preview');
     if (!wrap) return;
-    fetchJSON(NEWS_URL).then(data => {
+    Promise.all([fetchJSON(NEWS_URL), fetchJSON(HOMEPAGE_URL).catch(() => null)]).then(([data, hp]) => {
       const items = ensureIds(data.items || []);
-      renderHomePreview(wrap, items);
-      new MutationObserver(() => renderHomePreview(wrap, items)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      renderHomePreview(wrap, items, hp);
+      new MutationObserver(() => renderHomePreview(wrap, items, hp)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
     }).catch(() => { wrap.innerHTML = errorStateHtml(isZh()); });
   }
 
-  function renderHomePreview(wrap, items) {
+  // Auto mode (default) shows the 3 most recent posts. Manual mode lets
+  // staff pin specific posts, in the order they picked them, via the
+  // admin panel — falls back to auto if the pinned IDs don't resolve to
+  // anything (e.g. the posts were since deleted).
+  function pickHomePreviewItems(items, hp) {
+    if (hp && hp.latest_events_mode === 'manual' && Array.isArray(hp.latest_events_manual_ids) && hp.latest_events_manual_ids.length) {
+      const byId = new Map(items.map(n => [n.id, n]));
+      const picked = hp.latest_events_manual_ids.map(id => byId.get(id)).filter(Boolean).slice(0, 3);
+      if (picked.length) return picked;
+    }
+    return [...items].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+  }
+
+  function renderHomePreview(wrap, items, hp) {
     const zh = isZh();
     if (!items.length) { wrap.innerHTML = emptyStateHtml(zh); return; }
-    const sorted = [...items].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+    const sorted = pickHomePreviewItems(items, hp);
     wrap.innerHTML = sorted.map((n, i) => {
       const title = zh ? (n.title_zh || n.title_en) : (n.title_en || n.title_zh);
       const category = zh ? n.category_zh : n.category_en;
@@ -443,6 +457,92 @@
     }).catch(() => { grid.innerHTML = errorStateHtml(isZh()); });
   }
 
+  /* ============================================================
+     HOME PAGE CMS CONTENT (index.html): hero/about text + the
+     Programs & Services grid — all editable via admin, backed by
+     content/homepage.json. Preset icon set so admin only needs to
+     pick a name, not manage SVG markup.
+     ============================================================ */
+  const PROGRAM_ICONS = {
+    trade: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    network: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    culture: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+    legal: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+    media: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.1 13.62a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 2.84h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 10a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    health: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'
+  };
+  window.CCCWA_PROGRAM_ICONS = PROGRAM_ICONS;
+
+  function setTextIfPresent(id, text) {
+    const el = document.getElementById(id);
+    if (el && text) el.textContent = text;
+  }
+
+  function programCardHtml(p, zh) {
+    const title = zh ? (p.title_zh || p.title_en) : (p.title_en || p.title_zh);
+    const desc = zh ? (p.desc_zh || p.desc_en) : (p.desc_en || p.desc_zh);
+    const icon = PROGRAM_ICONS[p.icon] || PROGRAM_ICONS.star;
+    const link = p.link || 'contact.html';
+    return '<div class="feature-card">' +
+      '<div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + icon + '</svg></div>' +
+      '<h3>' + escHtml(title || '') + '</h3>' +
+      '<p>' + escHtml(desc || '') + '</p>' +
+      '<a href="' + escHtml(link) + '" class="feature-link">' + (zh ? '了解更多' : 'Learn More') + '</a>' +
+      '</div>';
+  }
+
+  function renderHomepageContent(hp) {
+    const zh = isZh();
+    setTextIfPresent('hp-hero-title', zh ? hp.hero_title_zh : hp.hero_title_en);
+    setTextIfPresent('hp-hero-subtitle', zh ? hp.hero_subtitle_zh : hp.hero_subtitle_en);
+    setTextIfPresent('hp-about-tag', zh ? hp.about_tag_zh : hp.about_tag_en);
+    setTextIfPresent('hp-about-title', zh ? hp.about_title_zh : hp.about_title_en);
+    setTextIfPresent('hp-about-p1', zh ? hp.about_p1_zh : hp.about_p1_en);
+    setTextIfPresent('hp-about-p2', zh ? hp.about_p2_zh : hp.about_p2_en);
+    const grid = document.getElementById('hp-programs-grid');
+    if (grid && Array.isArray(hp.programs)) {
+      grid.innerHTML = hp.programs.length
+        ? hp.programs.map(p => programCardHtml(p, zh)).join('')
+        : emptyStateHtml(zh);
+    }
+  }
+
+  function initHomepageContent() {
+    if (!document.getElementById('hp-hero-title')) return; // not on the home page
+    fetchJSON(HOMEPAGE_URL).then(hp => {
+      renderHomepageContent(hp);
+      new MutationObserver(() => renderHomepageContent(hp)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => {});
+  }
+
+  /* ============================================================
+     MISSION PAGE CMS CONTENT (mission.html) — content/homepage.json
+     mission_* fields
+     ============================================================ */
+  function renderMissionContent(hp) {
+    const zh = isZh();
+    setTextIfPresent('ms-hero-title', zh ? hp.mission_hero_title_zh : hp.mission_hero_title_en);
+    setTextIfPresent('ms-hero-sub', zh ? hp.mission_hero_sub_zh : hp.mission_hero_sub_en);
+    setTextIfPresent('ms-about-title', zh ? hp.mission_about_title_zh : hp.mission_about_title_en);
+    setTextIfPresent('ms-about-p1', zh ? hp.mission_about_p1_zh : hp.mission_about_p1_en);
+    setTextIfPresent('ms-objectives-title', zh ? hp.mission_objectives_title_zh : hp.mission_objectives_title_en);
+    setTextIfPresent('ms-values-title', zh ? hp.mission_values_title_zh : hp.mission_values_title_en);
+    setTextIfPresent('ms-values-p', zh ? hp.mission_values_p_zh : hp.mission_values_p_en);
+    const list = document.getElementById('ms-objectives-list');
+    if (list && Array.isArray(hp.mission_objectives)) {
+      list.innerHTML = hp.mission_objectives.map(o => '<li>' + escHtml((zh ? o.zh : o.en) || '') + '</li>').join('');
+    }
+  }
+
+  function initMissionContent() {
+    if (!document.getElementById('ms-hero-title')) return; // not on the mission page
+    fetchJSON(HOMEPAGE_URL).then(hp => {
+      renderMissionContent(hp);
+      new MutationObserver(() => renderMissionContent(hp)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => {});
+  }
+
   function boot() {
     initNewsPage();
     initHomePreview();
@@ -450,6 +550,8 @@
     initHomeEventsPreview();
     initLeadershipPage();
     initDirectoryPage();
+    initHomepageContent();
+    initMissionContent();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
