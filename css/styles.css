@@ -201,7 +201,7 @@ img { max-width: 100%; display: block; }
   content: '';
   position: absolute;
   inset: 0;
-  background: url('../images/seattle-bg.jpg') center/cover no-repeat;
+  background: var(--page-hero-bg-url, url('../images/seattle-bg.jpg')) center/cover no-repeat;
   opacity: 0.15;
 }
 [data-theme="dark"] .page-hero::before { opacity: 0.08; }
@@ -954,4 +954,30 @@ img { max-width: 100%; display: block; }
 
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .hero { min-height: auto; padding: 88px 18px 48px; }
+  .hero-content p { font-size: 1rem; margin-bottom: 28px; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .hero-actions .btn { width: 100%; text-align: center; }
+
+  .page-hero { padding: 96px 18px 40px; }
+
+  .section { padding: 52px 0; }
+  .container { padding: 0 18px; }
+  .section-header { margin-bottom: 36px; }
+
+  .stats-container { padding: 0 12px; }
+  .stat { padding: 10px 8px; }
+  .stat-number { font-size: 1.5rem; }
+  .stat-label { font-size: 11px; }
+
+  .cta-section .btn, .cta-btn { width: 100%; text-align: center; }
+
+  .directory-grid { grid-template-columns: 1fr; }
+
+  /* Form inputs below 16px trigger iOS Safari's auto-zoom-on-focus —
+     keep them at 16px on phones without changing desktop sizing. */
+  .form-group input, .form-group textarea, .form-group select, .rich-editor { font-size: 16px; }
 }

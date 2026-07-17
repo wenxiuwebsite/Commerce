@@ -89,7 +89,14 @@
     .logout-btn:hover { background: rgba(255,255,255,0.1); opacity: 1; }
 
     /* Main content */
-    .main { margin-left: 220px; flex: 1; }
+    .main { margin-left: 220px; flex: 1; min-width: 0; }
+    .admin-hamburger {
+      display: none; position: fixed; top: 12px; left: 12px; z-index: 20;
+      width: 38px; height: 38px; border-radius: 8px; background: var(--accent); color: #fff;
+      border: none; align-items: center; justify-content: center; box-shadow: var(--shadow); cursor: pointer;
+    }
+    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9; }
+    .sidebar-backdrop.show { display: block; }
     .topbar {
       background: var(--card); border-bottom: 1px solid var(--border);
       padding: 0 32px; height: 56px; display: flex; align-items: center; gap: 12px;
@@ -562,6 +569,35 @@
       transform: translateY(80px); transition: transform 0.3s; pointer-events: none;
     }
     .toast.show { transform: translateY(0); }
+
+    /* ---- RESPONSIVE (phone/tablet) ---- */
+    @media (max-width: 880px) {
+      .admin-hamburger { display: flex; }
+      .sidebar {
+        transform: translateX(-100%); transition: transform 0.25s ease;
+        box-shadow: 2px 0 16px rgba(0,0,0,0.3); width: 240px;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .topbar { padding-left: 60px; }
+      .panel-body { padding: 20px; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .hp-field-grid { grid-template-columns: 1fr; }
+      .content-card { overflow-x: auto; }
+      .content-card table { min-width: 620px; }
+      .modal-box { max-width: 94vw; max-height: 92vh; }
+      .pub-token-row { flex-direction: column; align-items: stretch; }
+      .inbox-row { flex-wrap: wrap; row-gap: 4px; }
+      .inbox-row-sender { flex: 1 1 100%; order: 3; }
+      .inbox-row-subject { flex: 1 1 100%; order: 4; white-space: normal; }
+    }
+    @media (max-width: 520px) {
+      .topbar { padding: 0 16px 0 56px; }
+      .topbar-title, .topbar h2 { font-size: 14px; }
+      .step { flex-direction: column; }
+      .trash-row { flex-wrap: wrap; }
+      .trash-row-title { flex: 1 1 100%; order: 2; }
+    }
   </style>
 </head>
 <body>
@@ -626,10 +662,14 @@
 
 <!-- APP -->
 <div id="app">
+  <button class="admin-hamburger" id="admin-hamburger" onclick="toggleAdminSidebar()" aria-label="Menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleAdminSidebar(false)"></div>
   <div class="admin-layout">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="admin-sidebar">
       <div class="sidebar-brand">
         <div class="sidebar-brand-name" data-i18n="brand.name">CCCWA Admin</div>
         <div class="sidebar-brand-sub" data-i18n="brand.sub">Content Manager</div>
@@ -642,6 +682,10 @@
         <div class="nav-item" onclick="showPanel('homepage',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span data-i18n="nav.homepage">Homepage</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('mission',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span data-i18n="homepage.mission">Mission Page</span>
         </div>
         <div class="nav-item" onclick="showPanel('news',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -758,6 +802,15 @@
               <div class="form-label">副标题 (中文)</div>
               <textarea class="form-textarea" id="hp-f-hero-subtitle-zh"></textarea>
             </div>
+            <div class="form-group" style="grid-column:1 / -1">
+              <div class="form-label" data-i18n="homepage.hero.bg">Background Image</div>
+              <div class="img-upload-row">
+                <input class="form-input" id="hp-f-hero-bg-image" placeholder="images/seattle-bg.jpg" style="flex:1">
+                <button type="button" class="img-file-btn" onclick="document.getElementById('hp-hero-bg-file').click()">Upload</button>
+                <input type="file" id="hp-hero-bg-file" accept="image/*" style="display:none" onchange="handleHomepageImageUpload(this,'hp-f-hero-bg-image','hp-hero-bg-preview')">
+                <img id="hp-hero-bg-preview" class="img-preview-thumb" alt="">
+              </div>
+            </div>
           </div>
 
           <hr class="pub-divider">
@@ -795,6 +848,15 @@
               <div class="form-label">段落二 (中文)</div>
               <textarea class="form-textarea" id="hp-f-about-p2-zh"></textarea>
             </div>
+            <div class="form-group" style="grid-column:1 / -1">
+              <div class="form-label" data-i18n="homepage.about.photo">Group Photo</div>
+              <div class="img-upload-row">
+                <input class="form-input" id="hp-f-about-photo" placeholder="Leave blank to show the placeholder box" style="flex:1">
+                <button type="button" class="img-file-btn" onclick="document.getElementById('hp-about-photo-file').click()">Upload</button>
+                <input type="file" id="hp-about-photo-file" accept="image/*" style="display:none" onchange="handleHomepageImageUpload(this,'hp-f-about-photo','hp-about-photo-preview')">
+                <img id="hp-about-photo-preview" class="img-preview-thumb" alt="">
+              </div>
+            </div>
           </div>
 
           <hr class="pub-divider">
@@ -826,8 +888,18 @@
           </div>
           <div id="hp-manual-picker" style="display:none"></div>
 
-          <hr class="pub-divider">
-          <h3 class="hp-section-title" data-i18n="homepage.mission">Mission Page</h3>
+          <button class="pub-save-btn" style="margin-top:24px" onclick="saveHomepageContent()" data-i18n="homepage.save">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- MISSION PAGE -->
+      <div id="panel-mission" style="display:none">
+        <div class="topbar">
+          <h2 data-i18n="homepage.mission">Mission Page</h2>
+          <button class="pub-save-btn" onclick="saveHomepageContent()" data-i18n="homepage.save">Save Changes</button>
+        </div>
+        <div class="panel-body" style="max-width:860px">
+          <p class="pub-hint" style="margin-bottom:20px" data-i18n="mission.hint">Controls the content of the separate Mission page (mission.html) — its own hero, "About Us" text, Objectives list, and Values, distinct from the homepage.</p>
           <div class="hp-field-grid">
             <div class="form-group">
               <div class="form-label">Hero Title (English)</div>
@@ -844,6 +916,15 @@
             <div class="form-group">
               <div class="form-label">副标题 (中文)</div>
               <input class="form-input" id="hp-f-ms-hero-sub-zh">
+            </div>
+            <div class="form-group" style="grid-column:1 / -1">
+              <div class="form-label" data-i18n="homepage.hero.bg">Hero Background Image</div>
+              <div class="img-upload-row">
+                <input class="form-input" id="hp-f-ms-hero-bg-image" placeholder="Leave blank to use the site's default background" style="flex:1">
+                <button type="button" class="img-file-btn" onclick="document.getElementById('hp-ms-hero-bg-file').click()">Upload</button>
+                <input type="file" id="hp-ms-hero-bg-file" accept="image/*" style="display:none" onchange="handleHomepageImageUpload(this,'hp-f-ms-hero-bg-image','hp-ms-hero-bg-preview')">
+                <img id="hp-ms-hero-bg-preview" class="img-preview-thumb" alt="">
+              </div>
             </div>
             <div class="form-group">
               <div class="form-label">"About Us" Title (English)</div>
@@ -1737,6 +1818,8 @@ const L = {
     'homepage.latest':'Latest News on Homepage','homepage.latest.hint':'By default the 3 most recent news posts show automatically. Switch to Manual to hand-pick which posts appear instead.',
     'homepage.latest.auto':'Automatic (most recent 3)','homepage.latest.manual':'Manual selection','homepage.mission':'Mission Page',
     'homepage.footerlinks':'Footer Links','homepage.footerlinks.hint':'Shown at the bottom of every page (next to the logo). Add social links, a members-only page, or any other URL.',
+    'homepage.hero.bg':'Background Image','homepage.about.photo':'Group Photo',
+    'mission.hint':'Controls the content of the separate Mission page (mission.html) — its own hero, "About Us" text, Objectives list, and Values, distinct from the homepage.',
     'nav.trash':'Trash','trash.empty':'Empty Trash',
     'trash.hint':"Deleted news articles, events, and inbox messages land here first. Restore them or delete permanently — trashed news/events aren't published until you delete them permanently or restore and re-publish.",
     'sync.btn':'⟳ Sync','sync.ing':'⟳ Syncing…','sync.doing':'Syncing…',
@@ -1804,6 +1887,8 @@ const L = {
     'homepage.latest':'首页最新动态','homepage.latest.hint':'默认自动显示最近3篇文章。切换为手动可自行选择显示的文章。',
     'homepage.latest.auto':'自动（最新3篇）','homepage.latest.manual':'手动选择','homepage.mission':'使命页面',
     'homepage.footerlinks':'页脚链接','homepage.footerlinks.hint':'显示在每个页面底部（Logo旁边）。可添加社交媒体链接、会员专属页面或任何其他网址。',
+    'homepage.hero.bg':'背景图片','homepage.about.photo':'团队合照',
+    'mission.hint':'控制独立使命页面（mission.html）的内容——包括其专属的主视觉区、"关于我们"文字、工作目标列表及价值观，与首页内容相互独立。',
     'nav.trash':'回收站','trash.empty':'清空回收站',
     'trash.hint':'已删除的新闻、活动和收件箱消息会先进入这里。您可以恢复或永久删除——已删除的新闻/活动在您永久删除或恢复并重新发布之前不会显示在网站上。',
     'sync.btn':'⟳ 同步','sync.ing':'⟳ 同步中…','sync.doing':'同步中…',
@@ -2244,12 +2329,25 @@ function doLogout() {
 /* ================================================================
    NAVIGATION
 ================================================================ */
+// On phones/tablets the sidebar is an off-canvas drawer toggled by the
+// hamburger button; pass an explicit false to force-close (e.g. tapping
+// the backdrop) instead of toggling.
+function toggleAdminSidebar(open) {
+  const sidebar = document.getElementById('admin-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  const show = typeof open === 'boolean' ? open : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', show);
+  if (backdrop) backdrop.classList.toggle('show', show);
+}
+
 function showPanel(name, el) {
   document.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
   document.getElementById('panel-' + name).style.display = 'block';
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
-  if (name === 'homepage') ensureHomepageLoaded().then(renderHomepageForm);
+  toggleAdminSidebar(false);
+  if (name === 'homepage' || name === 'mission') ensureHomepageLoaded().then(renderHomepageForm);
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
   if (name === 'leadership') renderLeadershipTable();
@@ -2614,10 +2712,13 @@ function renderHomepageForm() {
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('hp-f-hero-title-en', hp.hero_title_en); set('hp-f-hero-title-zh', hp.hero_title_zh);
   set('hp-f-hero-subtitle-en', hp.hero_subtitle_en); set('hp-f-hero-subtitle-zh', hp.hero_subtitle_zh);
+  set('hp-f-hero-bg-image', hp.hero_bg_image);
   set('hp-f-about-tag-en', hp.about_tag_en); set('hp-f-about-tag-zh', hp.about_tag_zh);
   set('hp-f-about-title-en', hp.about_title_en); set('hp-f-about-title-zh', hp.about_title_zh);
   set('hp-f-about-p1-en', hp.about_p1_en); set('hp-f-about-p1-zh', hp.about_p1_zh);
   set('hp-f-about-p2-en', hp.about_p2_en); set('hp-f-about-p2-zh', hp.about_p2_zh);
+  set('hp-f-about-photo', hp.about_photo);
+  set('hp-f-ms-hero-bg-image', hp.mission_hero_bg_image);
   set('hp-f-ms-hero-title-en', hp.mission_hero_title_en); set('hp-f-ms-hero-title-zh', hp.mission_hero_title_zh);
   set('hp-f-ms-hero-sub-en', hp.mission_hero_sub_en); set('hp-f-ms-hero-sub-zh', hp.mission_hero_sub_zh);
   set('hp-f-ms-about-title-en', hp.mission_about_title_en); set('hp-f-ms-about-title-zh', hp.mission_about_title_zh);
@@ -2627,6 +2728,12 @@ function renderHomepageForm() {
 
   document.querySelectorAll('input[name="hp-events-mode"]').forEach(r => { r.checked = r.value === (hp.latest_events_mode || 'auto'); });
   document.getElementById('hp-manual-picker').style.display = hp.latest_events_mode === 'manual' ? 'block' : 'none';
+
+  [['hp-hero-bg-preview', hp.hero_bg_image], ['hp-about-photo-preview', hp.about_photo], ['hp-ms-hero-bg-preview', hp.mission_hero_bg_image]].forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val) { el.src = previewSrc(val); el.style.display = 'block'; } else { el.style.display = 'none'; }
+  });
 
   renderFooterLinksList();
   renderProgramsList();
@@ -2877,10 +2984,13 @@ function saveHomepageContent() {
   const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   hp.hero_title_en = get('hp-f-hero-title-en'); hp.hero_title_zh = get('hp-f-hero-title-zh');
   hp.hero_subtitle_en = get('hp-f-hero-subtitle-en'); hp.hero_subtitle_zh = get('hp-f-hero-subtitle-zh');
+  hp.hero_bg_image = get('hp-f-hero-bg-image');
   hp.about_tag_en = get('hp-f-about-tag-en'); hp.about_tag_zh = get('hp-f-about-tag-zh');
   hp.about_title_en = get('hp-f-about-title-en'); hp.about_title_zh = get('hp-f-about-title-zh');
   hp.about_p1_en = get('hp-f-about-p1-en'); hp.about_p1_zh = get('hp-f-about-p1-zh');
   hp.about_p2_en = get('hp-f-about-p2-en'); hp.about_p2_zh = get('hp-f-about-p2-zh');
+  hp.about_photo = get('hp-f-about-photo');
+  hp.mission_hero_bg_image = get('hp-f-ms-hero-bg-image');
   hp.mission_hero_title_en = get('hp-f-ms-hero-title-en'); hp.mission_hero_title_zh = get('hp-f-ms-hero-title-zh');
   hp.mission_hero_sub_en = get('hp-f-ms-hero-sub-en'); hp.mission_hero_sub_zh = get('hp-f-ms-hero-sub-zh');
   hp.mission_about_title_en = get('hp-f-ms-about-title-en'); hp.mission_about_title_zh = get('hp-f-ms-about-title-zh');
@@ -3526,6 +3636,27 @@ function selectMediaItem(path) {
     directoryModalDirty = true;
   }
   closeMediaModal();
+}
+
+// Shared uploader for the Homepage/Mission image fields (hero background,
+// about-section photo) — writes the file, drops the path into the given
+// text input, and updates its preview thumbnail, same pattern as the news
+// featured-image upload above.
+async function handleHomepageImageUpload(input, fieldId, previewId) {
+  const file = input.files[0]; if (!file) return;
+  const fieldEl = document.getElementById(fieldId);
+  const prevEl = document.getElementById(previewId);
+  try {
+    const path = await uploadImageFile(file, 'assets/uploads/homepage');
+    localImagePreviews[path] = URL.createObjectURL(file);
+    if (fieldEl) fieldEl.value = path;
+    if (prevEl) { prevEl.src = previewSrc(path); prevEl.style.display = 'block'; }
+    markHomepageDirty();
+  } catch (e) {
+    alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
+  } finally {
+    input.value = '';
+  }
 }
 
 async function handleFeaturedImg(input) {

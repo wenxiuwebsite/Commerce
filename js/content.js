@@ -500,6 +500,23 @@
     setTextIfPresent('hp-about-title', zh ? hp.about_title_zh : hp.about_title_en);
     setTextIfPresent('hp-about-p1', zh ? hp.about_p1_zh : hp.about_p1_en);
     setTextIfPresent('hp-about-p2', zh ? hp.about_p2_zh : hp.about_p2_en);
+
+    const heroBg = document.getElementById('hp-hero-bg');
+    if (heroBg && hp.hero_bg_image) heroBg.style.backgroundImage = "url('" + hp.hero_bg_image + "')";
+
+    const aboutImg = document.getElementById('hp-about-photo');
+    const aboutPlaceholder = document.getElementById('hp-about-photo-placeholder');
+    if (aboutImg && aboutPlaceholder) {
+      if (hp.about_photo) {
+        aboutImg.src = hp.about_photo;
+        aboutImg.style.display = 'block';
+        aboutPlaceholder.style.display = 'none';
+      } else {
+        aboutImg.style.display = 'none';
+        aboutPlaceholder.style.display = 'flex';
+      }
+    }
+
     const grid = document.getElementById('hp-programs-grid');
     if (grid && Array.isArray(hp.programs)) {
       grid.innerHTML = hp.programs.length
@@ -529,6 +546,8 @@
     setTextIfPresent('ms-objectives-title', zh ? hp.mission_objectives_title_zh : hp.mission_objectives_title_en);
     setTextIfPresent('ms-values-title', zh ? hp.mission_values_title_zh : hp.mission_values_title_en);
     setTextIfPresent('ms-values-p', zh ? hp.mission_values_p_zh : hp.mission_values_p_en);
+    const pageHero = document.getElementById('ms-page-hero');
+    if (pageHero && hp.mission_hero_bg_image) pageHero.style.setProperty('--page-hero-bg-url', "url('" + hp.mission_hero_bg_image + "')");
     const list = document.getElementById('ms-objectives-list');
     if (list && Array.isArray(hp.mission_objectives)) {
       list.innerHTML = hp.mission_objectives.map(o => '<li>' + escHtml((zh ? o.zh : o.en) || '') + '</li>').join('');
