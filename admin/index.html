@@ -3272,17 +3272,21 @@ async function updateLocalBackendStatus() {
   }
 }
 
-async function persistJsonFile(path, obj, collectionName) {
-  const raw = JSON.stringify(obj, null, 2) + '\n';
+// Local dev (decap-server) equivalent — writes ALL files in one persistEntry
+// call (one commit), matching the batched live path. Local writes don't cost
+// Netlify credits, but keeping it to a single commit stays consistent.
+async function persistJsonFiles(files, message) {
+  const dataFiles = files.map(f => ({
+    slug: f.collectionName, path: f.path,
+    raw: JSON.stringify(f.obj, null, 2) + '\n', newPath: f.path
+  }));
   const res = await fetch(LOCAL_API, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       action: 'persistEntry',
       params: {
-        branch: 'main',
-        dataFiles: [{ slug: collectionName, path, raw, newPath: path }],
-        assets: [],
-        options: { collectionName, commitMessage: `Update ${path} via admin`, useWorkflow: false, hasAssetStore: true, draft: false, status: 'draft' }
+        branch: 'main', dataFiles, assets: [],
+        options: { collectionName: files[0].collectionName, commitMessage: message, useWorkflow: false, hasAssetStore: true, draft: false, status: 'draft' }
       }
     })
   });
@@ -3291,31 +3295,63 @@ async function persistJsonFile(path, obj, collectionName) {
   return json;
 }
 
-// Writes a file through Git Gateway (real GitHub commit, authenticated via
-// the logged-in Netlify Identity user's JWT — no token ever touches the
-// browser's storage). This is what makes Publish actually go live.
-async function putFileViaGitGateway(path, obj) {
+// Commits MANY files in a SINGLE git commit through Git Gateway, using
+// GitHub's Git Data API (authenticated via the logged-in Netlify Identity
+// user's JWT — no token ever touches the browser's storage).
+//
+// Why this matters for cost: the old code wrote each file with the Contents
+// API, which produces one commit — and therefore one Netlify deploy — PER
+// FILE. Publishing all 5 content files burned up to 5 deploys every time, and
+// deploys are ~all of the Netlify credit spend. Batching into one commit means
+// one Publish = one deploy. And if the new tree is identical to what's already
+// live (nothing actually changed), we skip the commit entirely — zero deploys.
+async function commitFilesViaGitGateway(files, message) {
   const jwt = await identityUser.jwt();
   const headers = { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' };
-  const content = JSON.stringify(obj, null, 2) + '\n';
-  const encoded = btoa(unescape(encodeURIComponent(content)));
+  const api = (path, opts) => fetch(`${GIT_GATEWAY_BASE}${path}`, { headers, ...opts });
 
-  const getRes = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}?ref=main`, { headers });
-  let sha;
-  if (getRes.ok) {
-    sha = (await getRes.json()).sha;
-  } else if (getRes.status !== 404) {
-    const err = await getRes.json().catch(() => ({}));
-    throw new Error(err.message || `HTTP ${getRes.status} reading ${path}`);
-  }
+  // 1. Current branch head, and the tree it points at.
+  const refRes = await api('/git/refs/heads/main');
+  if (!refRes.ok) throw new Error(`HTTP ${refRes.status} reading branch ref`);
+  let refJson = await refRes.json();
+  // GitHub returns a single object for an exact ref, but an array for a prefix
+  // match — handle both so this is robust across Git Gateway's proxying.
+  if (Array.isArray(refJson)) refJson = refJson.find(r => r.ref === 'refs/heads/main') || refJson[0];
+  const parentSha = refJson.object.sha;
 
-  const putRes = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}`, {
-    method: 'PUT', headers,
-    body: JSON.stringify({ message: `Update ${path} via admin`, content: encoded, sha, branch: 'main' })
+  const commitRes = await api(`/git/commits/${parentSha}`);
+  if (!commitRes.ok) throw new Error(`HTTP ${commitRes.status} reading head commit`);
+  const baseTreeSha = (await commitRes.json()).tree.sha;
+
+  // 2. One tree with every file inline (GitHub creates the blobs for us).
+  const tree = files.map(f => ({
+    path: f.path, mode: '100644', type: 'blob',
+    content: JSON.stringify(f.obj, null, 2) + '\n'
+  }));
+  const treeRes = await api('/git/trees', {
+    method: 'POST', body: JSON.stringify({ base_tree: baseTreeSha, tree })
   });
-  const result = await putRes.json().catch(() => ({}));
-  if (!putRes.ok) throw new Error(result.message || `HTTP ${putRes.status} writing ${path}`);
-  return result;
+  const treeJson = await treeRes.json().catch(() => ({}));
+  if (!treeRes.ok) throw new Error(treeJson.message || `HTTP ${treeRes.status} creating tree`);
+
+  // Nothing changed → don't create a commit, so Netlify has nothing to deploy.
+  if (treeJson.sha === baseTreeSha) return { unchanged: true };
+
+  // 3. A single commit for all the files, then fast-forward the branch to it.
+  const newCommitRes = await api('/git/commits', {
+    method: 'POST', body: JSON.stringify({ message, tree: treeJson.sha, parents: [parentSha] })
+  });
+  const newCommitJson = await newCommitRes.json().catch(() => ({}));
+  if (!newCommitRes.ok) throw new Error(newCommitJson.message || `HTTP ${newCommitRes.status} creating commit`);
+
+  const patchRes = await api('/git/refs/heads/main', {
+    method: 'PATCH', body: JSON.stringify({ sha: newCommitJson.sha })
+  });
+  if (!patchRes.ok) {
+    const err = await patchRes.json().catch(() => ({}));
+    throw new Error(err.message || `HTTP ${patchRes.status} updating branch`);
+  }
+  return { unchanged: false, sha: newCommitJson.sha };
 }
 
 async function publishToSite() {
@@ -3323,20 +3359,28 @@ async function publishToSite() {
   btn.disabled = true;
   setPubStatus('busy', 'Publishing...');
   try {
+    // All content files go out in ONE commit → one Netlify deploy per Publish
+    // (instead of one deploy per file).
+    const files = [
+      { path: 'content/news.json',       obj: { items: data.news },       collectionName: 'news' },
+      { path: 'content/events.json',     obj: { items: data.events },     collectionName: 'events' },
+      { path: 'content/leadership.json', obj: { items: data.leadership }, collectionName: 'leadership' },
+      { path: 'content/directory.json',  obj: { items: data.directory },  collectionName: 'directory' }
+    ];
+    if (data.homepage) files.push({ path: 'content/homepage.json', obj: data.homepage, collectionName: 'homepage' });
+    const message = 'Update site content via admin';
+
     if (identityUser) {
-      await putFileViaGitGateway('content/news.json', { items: data.news });
-      await putFileViaGitGateway('content/events.json', { items: data.events });
-      await putFileViaGitGateway('content/leadership.json', { items: data.leadership });
-      await putFileViaGitGateway('content/directory.json', { items: data.directory });
-      if (data.homepage) await putFileViaGitGateway('content/homepage.json', data.homepage);
-      setPubStatus('ok', 'Published live via Git Gateway — Netlify is deploying now');
-      toast('Published to the live site!');
+      const result = await commitFilesViaGitGateway(files, message);
+      if (result.unchanged) {
+        setPubStatus('ok', 'Already up to date — nothing changed, no deploy needed');
+        toast('Nothing to publish — already live');
+      } else {
+        setPubStatus('ok', 'Published live in one commit — Netlify is deploying now');
+        toast('Published to the live site!');
+      }
     } else {
-      await persistJsonFile('content/news.json', { items: data.news }, 'news');
-      await persistJsonFile('content/events.json', { items: data.events }, 'events');
-      await persistJsonFile('content/leadership.json', { items: data.leadership }, 'leadership');
-      await persistJsonFile('content/directory.json', { items: data.directory }, 'directory');
-      if (data.homepage) await persistJsonFile('content/homepage.json', data.homepage, 'homepage');
+      await persistJsonFiles(files, message);
       setPubStatus('ok', 'Published — saved to content/*.json (local only)');
       toast('Published locally!');
     }
@@ -3359,6 +3403,17 @@ async function publishToSite() {
    from git).
 ================================================================ */
 async function syncFromFiles(silent) {
+  // localStorage holds the working draft; content/*.json is the published
+  // source of truth. A sync pulls the published content over the top of the
+  // draft — so never let it silently clobber UNPUBLISHED local edits. That
+  // unconditional overwrite on every login/reload is what made saved-but-not-
+  // yet-published changes "vanish on reload". If there are unpublished edits:
+  //   - auto/background sync (silent): keep the draft, don't touch it.
+  //   - manual Sync button: let the user explicitly confirm the discard.
+  if (dirty) {
+    if (silent) return;
+    if (!confirm('You have unpublished changes. Syncing replaces them with the latest published content. Discard your unpublished changes?')) return;
+  }
   const syncBtn = document.getElementById('sync-btn');
   if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = T('sync.ing'); }
   if (!silent) toast(T('sync.doing'));
