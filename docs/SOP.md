@@ -26,11 +26,34 @@ This is a simple shared-password gate, not a per-person account system — treat
 
 Saving keeps your changes in this browser only (a local draft). **Publishing** is the step that actually writes `content/news.json` / `content/events.json` to disk — nothing is public until you do that.
 
+Photos work the same way as text: uploading one shows it in the editor straight away, but it isn't on the website until you press **Publish**. Everything — all the text and every image — then goes up together in a single step. That is deliberate: the site's hosting plan charges per publish, so batching them keeps the cost down no matter how many photos an article has. It's safe to close the tab in between; queued photos are still there when you come back.
+
+> Titles are always plain text. If you paste a headline copied from a WeChat article, only the words are kept — the styling that comes with it is dropped automatically.
+
 ## 3. How to add or edit an event
 
 Same idea, under **Events** in the sidebar: date, time, bilingual title/location/description, and a registration link (defaults to `contact.html`).
 
-## 4. Local development
+## 4. Keeping hosting costs down
+
+Netlify bills this site almost entirely by **number of Production deploys** — roughly 15 credits each, against 300 free credits a month, so about **20 publishes a month** is the budget. Bandwidth and traffic are rounding errors next to it.
+
+**One Publish = one deploy**, no matter how much went into it. Ten articles and forty photos published together cost the same as fixing a single typo. So the whole game is batching: edit freely, Publish once at the end.
+
+For anyone administering the Netlify account, two dashboard settings under **Site configuration → Build & deploy → Continuous deployment** matter:
+
+- **Deploy Previews** → set to **None**. Otherwise every pull request builds the site again. ("Previews use little bandwidth" is true and irrelevant — the cost is the deploy, not the traffic.)
+- **Branch deploys** → set to **None** (production branch only), so work on a side branch doesn't deploy.
+
+`netlify.toml` also carries `ignore = "exit 0"` for both of those contexts as a backstop, but the dashboard is what actually decides whether a deploy starts.
+
+### Checking it's working
+
+Open **Deploys** in the Netlify dashboard after publishing. You should see exactly **one** new Production deploy per Publish, labelled `Update site content via admin` — with the image count appended when photos went along, e.g. `Update site content via admin (+8 images)`.
+
+If you ever see a run of separate `Upload image via admin` deploys stacked up, per-file committing has come back and the fix has regressed. For reference, that's what the history looked like before: 138 admin deploys (~2,070 credits) for what was really 8 editing sessions (~120 credits).
+
+## 5. Local development
 
 You need two terminals running at the same time:
 

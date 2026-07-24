@@ -20,6 +20,18 @@ The admin panel's Publish button writes files through a local proxy (`decap-serv
 
 Same cause as above — image uploads also go through the local `decap-server` proxy. Make sure it's running in a second terminal before uploading.
 
+## I uploaded a photo but it isn't on the website yet
+
+That's expected. Photos are held with the rest of your draft and go up on the next **Publish**, so all your changes cost a single publish instead of one per photo. The Publish page tells you how many images are waiting. Closing the tab doesn't lose them.
+
+## A news title shows a wall of code instead of the headline
+
+This happens when a headline is copied out of a WeChat article: WeChat hands over the styling along with the words. Titles now keep only the text, both when you paste and when the page renders, so it fixes itself — just re-open the article, paste the headline again, and Publish.
+
+## An image copied from a WeChat article shows as broken
+
+WeChat blocks its images from loading on other websites, so anything still pointing at a `mmbiz.qpic.cn` address will look broken no matter what. The image has to be saved out of the WeChat article and re-uploaded here with the **Upload** button.
+
 ## Chinese text looks garbled (mojibake) somewhere on the site
 
 This is almost always a missing UTF-8 charset when a file is served. `serve.py` explicitly sets UTF-8 charsets for `.json`/`.md` to avoid this locally; if you see it in production, confirm Netlify is serving `content/news.json` with a `charset=utf-8` content type (it does by default for `.json`).

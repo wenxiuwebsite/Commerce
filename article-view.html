@@ -223,7 +223,7 @@
       return;
     }
 
-    const title    = isZh ? (article.title_zh    || article.title_en)    : (article.title_en || article.title_zh);
+    const title    = C.titleText(article, isZh);
     const category = isZh ? (article.category_zh || article.category_en) : (article.category_en || article.category_zh);
     const date     = C.formatDate(article.date, isZh);
     const body     = isZh ? (article.body_zh || article.body_en) : (article.body_en || article.body_zh);

@@ -60,6 +60,16 @@
       .trim();
   }
 
+  // Titles are plain text everywhere they're shown, but editors paste them
+  // straight out of a WeChat article, which drags along the whole
+  // <h1 class="rich_media_title" style="..."> wrapper. escHtml then renders
+  // that wrapper as visible text and the card shows a wall of markup, so
+  // flatten any tags to their text content first.
+  function titleText(item, zh) {
+    const raw = zh ? (item.title_zh || item.title_en) : (item.title_en || item.title_zh);
+    return stripHtml(raw).replace(/\s+/g, ' ').trim();
+  }
+
   function excerptFrom(item, zh) {
     const summary = zh ? item.summary_zh : item.summary_en;
     if (summary) return stripHtml(summary).replace(/\s+/g, ' ').trim();
@@ -94,7 +104,7 @@
       '</div>';
   }
 
-  window.CCCWAContent = { fetchJSON, escHtml, slugify, ensureIds, stripMarkdown, excerptFrom, formatDate, isZh };
+  window.CCCWAContent = { fetchJSON, escHtml, slugify, ensureIds, stripMarkdown, titleText, excerptFrom, formatDate, isZh };
 
   /* ============================================================
      NEWS PAGE (news.html): .news-grid + .archive-list sidebar
@@ -160,7 +170,7 @@
   // here (or on the article page). The data is still stored, so images can
   // be turned back on later without re-uploading anything.
   function newsCardHtml(n, featured, zh) {
-    const title = zh ? (n.title_zh || n.title_en) : (n.title_en || n.title_zh);
+    const title = titleText(n, zh);
     const category = zh ? n.category_zh : n.category_en;
     const date = formatDate(n.date, zh);
     const excerpt = excerptFrom(n, zh);
@@ -306,7 +316,7 @@
     if (!items.length) { wrap.innerHTML = emptyStateHtml(zh); return; }
     const sorted = pickHomePreviewItems(items, hp);
     wrap.innerHTML = sorted.map((n, i) => {
-      const title = zh ? (n.title_zh || n.title_en) : (n.title_en || n.title_zh);
+      const title = titleText(n, zh);
       const category = zh ? n.category_zh : n.category_en;
       const date = formatDate(n.date, zh);
       const excerpt = excerptFrom(n, zh);
@@ -339,7 +349,7 @@
 
   function eventItemHtml(ev, zh) {
     const d = new Date(ev.date + 'T00:00:00');
-    const title = zh ? (ev.title_zh || ev.title_en) : (ev.title_en || ev.title_zh);
+    const title = titleText(ev, zh);
     const location = zh ? (ev.location_zh || ev.location_en) : (ev.location_en || ev.location_zh);
     const desc = zh ? (ev.desc_zh || ev.desc_en) : (ev.desc_en || ev.desc_zh);
     return '<div class="event-item">' +
@@ -480,7 +490,7 @@
   }
 
   function programCardHtml(p, zh) {
-    const title = zh ? (p.title_zh || p.title_en) : (p.title_en || p.title_zh);
+    const title = titleText(p, zh);
     const desc = zh ? (p.desc_zh || p.desc_en) : (p.desc_en || p.desc_zh);
     const icon = PROGRAM_ICONS[p.icon] || PROGRAM_ICONS.star;
     const link = p.link || 'contact.html';

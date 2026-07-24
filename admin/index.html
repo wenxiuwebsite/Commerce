@@ -1147,6 +1147,7 @@
             <div class="pub-fallback">
               <button onclick="exportData()">Download JSON files manually</button>
             </div>
+            <div class="pub-hint" style="margin-top:14px" data-i18n="publish.cadence">Each Publish rebuilds the site once — text and every queued photo go up together. Finish all your edits first, then Publish once, rather than publishing after each change.</div>
 
             <hr class="pub-divider">
             <div class="pub-settings-label">Local Backend</div>
@@ -1779,6 +1780,7 @@ const L = {
     'publish.step2.title':'Replace the content file','publish.step2.desc':'Place the downloaded data.js into the content/ folder of your website, replacing the existing file.',
     'publish.step3.title':'Deploy to Netlify','publish.step3.desc':'Push the updated content/data.js to your repository. Netlify will automatically publish the changes.',
     'publish.btn':'Download data.js',
+    'publish.cadence':'Each Publish rebuilds the site once — text and every queued photo go up together. Finish all your edits first, then Publish once, rather than publishing after each change.',
     'modal.news.add':'Add News Article','modal.news.edit':'Edit Article',
     'modal.sec.en':'English Content','modal.sec.zh':'Chinese Content','modal.sec.details':'Details',
     'modal.news.title.en':'Title (English)','modal.news.category':'Category','modal.news.excerpt.en':'Excerpt (English)',
@@ -1848,6 +1850,7 @@ const L = {
     'publish.step2.title':'替换内容文件','publish.step2.desc':'将下载的 data.js 放入网站的 content/ 文件夹，替换原有文件。',
     'publish.step3.title':'部署到 Netlify','publish.step3.desc':'将更新后的 content/data.js 推送到代码仓库，Netlify 将自动发布更改。',
     'publish.btn':'下载 data.js',
+    'publish.cadence':'每次发布都会重新生成一次网站，文字和所有排队中的图片会一起上线。请先完成全部修改，最后发布一次，不要每改一处就发布一次。',
     'modal.news.add':'新增文章','modal.news.edit':'编辑文章',
     'modal.sec.en':'英文内容','modal.sec.zh':'中文内容','modal.sec.details':'详细信息',
     'modal.news.title.en':'标题（英文）','modal.news.category':'分类','modal.news.excerpt.en':'摘要（英文）',
@@ -2009,6 +2012,10 @@ function onIdentityLoggedIn(user) {
   document.getElementById('app').style.display = 'block';
   loadData();
   renderAll();
+  // Images queued but not yet published (e.g. the tab was reloaded mid-edit)
+  // get their bytes and thumbnails back before anything is rendered against
+  // them; re-render once they're in.
+  restorePendingUploads().then(() => { if (Object.keys(pendingUploads).length) renderAll(); });
   syncFromFiles(true);
   toast('Logged in as ' + (user.email || 'Netlify Identity user'));
 }
@@ -2178,11 +2185,11 @@ function persistData() {
 }
 
 /* ================================================================
-   LOCAL IMAGE PREVIEWS — when uploading via Git Gateway (Netlify
-   Identity), the file is committed straight to GitHub but the live
-   site only serves it once Netlify finishes its next deploy. Rather
-   than show a broken image until that deploy lands, keep a client-side
-   object URL for any path uploaded this session and prefer it.
+   LOCAL IMAGE PREVIEWS — on the live site an uploaded image isn't
+   servable from its path until it has been published and Netlify has
+   finished deploying. Rather than show a broken image until then, keep
+   a client-side object URL for every queued path and prefer it.
+   See PENDING IMAGE UPLOADS for where those bytes are held.
 ================================================================ */
 const localImagePreviews = {};
 function previewSrc(path) { return (path && localImagePreviews[path]) || path; }
@@ -2309,6 +2316,16 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePreview();
   if (e.key === 'Enter' && document.activeElement?.classList.contains('rich-editor-title')) e.preventDefault();
 });
+// Pasting a headline copied from a WeChat article would otherwise drop that
+// article's full <h1 style="..."> wrapper into the title box. Titles render as
+// plain text everywhere, so take the plain-text flavour of the clipboard.
+document.addEventListener('paste', e => {
+  const el = e.target.closest?.('.rich-editor-title');
+  if (!el) return;
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData('text/plain').replace(/\s+/g, ' ').trim();
+  document.execCommand('insertText', false, text);
+}, true);
 document.getElementById('news-modal').addEventListener('input',  () => { newsModalDirty = true; });
 document.getElementById('news-modal').addEventListener('change', () => { newsModalDirty = true; });
 document.getElementById('leadership-modal').addEventListener('input',  () => { leadershipModalDirty = true; });
@@ -2610,8 +2627,12 @@ function saveNews() {
     id,
     date:         document.getElementById('n-date').value.trim(),
     category_en:  cat, category_zh: catZh,
-    title_en:     document.getElementById('n-title-en').innerHTML.trim(),
-    title_zh:     document.getElementById('n-title-zh').innerHTML.trim(),
+    // Titles are plain text on every page that renders them, and editors
+    // routinely paste them out of a WeChat article — which drags the whole
+    // <h1 class="rich_media_title" style="..."> wrapper into the field. Keep
+    // the text only, so the markup can never reach the site.
+    title_en:     stripHtml(document.getElementById('n-title-en').innerHTML).replace(/\s+/g, ' ').trim(),
+    title_zh:     stripHtml(document.getElementById('n-title-zh').innerHTML).replace(/\s+/g, ' ').trim(),
     summary_en:   document.getElementById('n-excerpt-en').innerHTML.trim(),
     summary_zh:   document.getElementById('n-excerpt-zh').innerHTML.trim(),
     cover_image:  document.getElementById('n-image').value.trim(),
@@ -3264,6 +3285,13 @@ async function updateLocalBackendStatus() {
       connEl.style.color = ok ? 'var(--accent)' : 'var(--danger)';
     }
   }
+  // Queued images only reach the site on the next Publish, so say so rather
+  // than letting the panel read as if everything is already live.
+  const queued = identityUser ? pendingUploadCount() : 0;
+  if (queued) {
+    setPubStatus('idle', `${queued} image${queued > 1 ? 's' : ''} waiting — they go live with your next Publish`);
+    return;
+  }
   const lastPub = localStorage.getItem('cccwa_last_pub');
   if (lastPub) {
     setPubStatus('ok', `Last published ${new Date(lastPub).toLocaleString()}`);
@@ -3305,7 +3333,10 @@ async function persistJsonFiles(files, message) {
 // deploys are ~all of the Netlify credit spend. Batching into one commit means
 // one Publish = one deploy. And if the new tree is identical to what's already
 // live (nothing actually changed), we skip the commit entirely — zero deploys.
-async function commitFilesViaGitGateway(files, message) {
+//
+// `assets` are the images queued since the last Publish (see PENDING IMAGE
+// UPLOADS above); they ride along in the very same commit.
+async function commitFilesViaGitGateway(files, message, assets) {
   const jwt = await identityUser.jwt();
   const headers = { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' };
   const api = (path, opts) => fetch(`${GIT_GATEWAY_BASE}${path}`, { headers, ...opts });
@@ -3328,6 +3359,20 @@ async function commitFilesViaGitGateway(files, message) {
     path: f.path, mode: '100644', type: 'blob',
     content: JSON.stringify(f.obj, null, 2) + '\n'
   }));
+
+  // Images can't be inlined as tree content the way JSON can — binary has to
+  // become a blob object first, then be referenced by sha. Creating blobs does
+  // not move the branch, so this stays at exactly one commit (one deploy) no
+  // matter how many images are attached.
+  for (const asset of (assets || [])) {
+    const blobRes = await api('/git/blobs', {
+      method: 'POST', body: JSON.stringify({ content: asset.base64, encoding: 'base64' })
+    });
+    const blobJson = await blobRes.json().catch(() => ({}));
+    if (!blobRes.ok) throw new Error(blobJson.message || `HTTP ${blobRes.status} uploading ${asset.path}`);
+    tree.push({ path: asset.path, mode: '100644', type: 'blob', sha: blobJson.sha });
+  }
+
   const treeRes = await api('/git/trees', {
     method: 'POST', body: JSON.stringify({ base_tree: baseTreeSha, tree })
   });
@@ -3368,19 +3413,30 @@ async function publishToSite() {
       { path: 'content/directory.json',  obj: { items: data.directory },  collectionName: 'directory' }
     ];
     if (data.homepage) files.push({ path: 'content/homepage.json', obj: data.homepage, collectionName: 'homepage' });
-    const message = 'Update site content via admin';
 
     if (identityUser) {
-      const result = await commitFilesViaGitGateway(files, message);
+      // Images uploaded since the last Publish go out in this same commit.
+      const assets = pendingAssetsInUse();
+      if (assets.length) setPubStatus('busy', `Publishing (${assets.length} image${assets.length > 1 ? 's' : ''})...`);
+      // Spell the image count into the commit subject: Netlify's deploy list
+      // shows commit messages, so one line there reads as one deploy carrying
+      // everything. If "Upload image via admin" ever reappears as its own
+      // deploy, per-file committing has crept back in.
+      const message = 'Update site content via admin'
+        + (assets.length ? ` (+${assets.length} image${assets.length > 1 ? 's' : ''})` : '');
+      const result = await commitFilesViaGitGateway(files, message, assets);
       if (result.unchanged) {
         setPubStatus('ok', 'Already up to date — nothing changed, no deploy needed');
         toast('Nothing to publish — already live');
       } else {
-        setPubStatus('ok', 'Published live in one commit — Netlify is deploying now');
+        await clearPendingUploads();
+        setPubStatus('ok', assets.length
+          ? `Published live — content and ${assets.length} image${assets.length > 1 ? 's' : ''} in one commit, Netlify is deploying now`
+          : 'Published live in one commit — Netlify is deploying now');
         toast('Published to the live site!');
       }
     } else {
-      await persistJsonFiles(files, message);
+      await persistJsonFiles(files, 'Update site content via admin');
       setPubStatus('ok', 'Published — saved to content/*.json (local only)');
       toast('Published locally!');
     }
@@ -3443,6 +3499,7 @@ async function syncFromFiles(silent) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     dirty = false;
     localStorage.setItem(DIRTY_KEY, 'false');
+    prunePendingUploads();
     renderAll();
     if (!silent) toast(T('sync.ok'));
   } catch (e) {
@@ -3510,7 +3567,10 @@ async function detectFaceFocus(src) {
       const el = new Image();
       el.onload = () => resolve(el);
       el.onerror = () => reject(new Error('image failed to load'));
-      el.src = src;
+      // A freshly uploaded image isn't on the site yet — read it from the
+      // local object URL, or detection would just fail and fall back to
+      // center-crop on exactly the photos it's meant to help with.
+      el.src = previewSrc(src);
     });
     const result = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions());
     if (!result) return '50% 50%';
@@ -3528,11 +3588,13 @@ async function detectFaceFocus(src) {
    CMS setup used. cover_image / block.src always end up as a plain
    servable path, never embedded base64.
 ================================================================ */
-// Logged in via Netlify Identity (production/live site) -> commit the file
-// straight to GitHub through Git Gateway. Otherwise (local dev) -> the local
-// decap-server proxy, same as before.
+// Logged in via Netlify Identity (production/live site) -> hold the file and
+// send it up with the next Publish, so a batch of photos costs one deploy
+// rather than one each (see PENDING IMAGE UPLOADS). Otherwise (local dev) ->
+// the local decap-server proxy, which writes straight to disk and costs
+// nothing, so there's no reason to defer it.
 function uploadImageFile(file, folder) {
-  return identityUser ? uploadImageFileGitGateway(file, folder) : uploadImageFileLocal(file, folder);
+  return identityUser ? queueImageForPublish(file, folder) : uploadImageFileLocal(file, folder);
 }
 
 function uploadImageFileLocal(file, folder) {
@@ -3560,7 +3622,98 @@ function uploadImageFileLocal(file, folder) {
   });
 }
 
-function uploadImageFileGitGateway(file, folder) {
+/* ================================================================
+   PENDING IMAGE UPLOADS (live/Netlify Identity path)
+
+   Each image used to go straight to GitHub with its own Contents-API
+   PUT, and a PUT is a commit, and a commit is a Netlify deploy. So an
+   article with eight photos spent eight deploys before anyone had even
+   pressed Publish — and deploys are essentially the whole Netlify
+   credit bill. Now the bytes are held here and shipped as blobs inside
+   the same single commit Publish already makes: one deploy, however
+   many images went with it.
+
+   Bytes live in IndexedDB rather than localStorage — the draft content
+   already shares that ~5 MB quota and a couple of photos would blow it.
+   Keeping them stored also means a queued image survives a page reload,
+   which is what the drafts alongside it already do.
+================================================================ */
+const PENDING_DB = 'cccwa-admin';
+const PENDING_STORE = 'pending-uploads';
+let pendingUploads = {}; // repo path (no leading slash) -> { base64, type }
+
+function pendingStore(mode, run) {
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open(PENDING_DB, 1);
+    open.onupgradeneeded = () => {
+      if (!open.result.objectStoreNames.contains(PENDING_STORE)) open.result.createObjectStore(PENDING_STORE);
+    };
+    open.onerror = () => reject(open.error || new Error('IndexedDB unavailable'));
+    open.onsuccess = () => {
+      const db = open.result;
+      const tx = db.transaction(PENDING_STORE, mode);
+      let req;
+      try { req = run(tx.objectStore(PENDING_STORE)); } catch (e) { reject(e); return; }
+      tx.oncomplete = () => { db.close(); resolve(req ? req.result : undefined); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    };
+  });
+}
+
+function base64ToBlob(base64, type) {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: type || 'application/octet-stream' });
+}
+
+// Called once at startup so images queued before a reload keep both their
+// bytes (for the next Publish) and their thumbnail (for the editor).
+async function restorePendingUploads() {
+  try {
+    const records = await pendingStore('readonly', s => s.getAll());
+    (records || []).forEach(rec => {
+      if (!rec || !rec.path || !rec.base64) return;
+      pendingUploads[rec.path] = rec;
+      localImagePreviews['/' + rec.path] = URL.createObjectURL(base64ToBlob(rec.base64, rec.type));
+    });
+  } catch (e) {
+    console.warn('Could not restore pending image uploads:', e);
+  }
+}
+
+// Only images the content still points at are worth committing — one that was
+// uploaded and then replaced or removed would otherwise be pushed to the repo
+// for nothing.
+function pendingAssetsInUse() {
+  const refs = JSON.stringify(data);
+  return Object.keys(pendingUploads)
+    .filter(path => refs.includes('/' + path))
+    .map(path => ({ path, base64: pendingUploads[path].base64 }));
+}
+
+function pendingUploadCount() { return pendingAssetsInUse().length; }
+
+// Drop queued images the content no longer points at — after a Sync discards
+// the draft that referenced them, say — so they don't sit in storage forever.
+async function prunePendingUploads() {
+  const refs = JSON.stringify(data);
+  const stale = Object.keys(pendingUploads).filter(path => !refs.includes('/' + path));
+  if (!stale.length) return;
+  stale.forEach(path => {
+    if (localImagePreviews['/' + path]) URL.revokeObjectURL(localImagePreviews['/' + path]);
+    delete localImagePreviews['/' + path];
+    delete pendingUploads[path];
+  });
+  try { await pendingStore('readwrite', s => { stale.forEach(path => s.delete(path)); }); } catch (e) { /* best effort */ }
+}
+
+async function clearPendingUploads() {
+  pendingUploads = {};
+  try { await pendingStore('readwrite', s => s.clear()); } catch (e) { /* nothing to clear */ }
+}
+
+function queueImageForPublish(file, folder) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async () => {
@@ -3568,14 +3721,11 @@ function uploadImageFileGitGateway(file, folder) {
         const base64 = reader.result.split(',')[1];
         const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
         const path = `${folder || 'assets/uploads/news'}/${Date.now()}-${safeName}`;
-        const jwt = await identityUser.jwt();
-        const res = await fetch(`${GIT_GATEWAY_BASE}/contents/${path}`, {
-          method: 'PUT',
-          headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: 'Upload image via admin', content: base64, branch: 'main' })
-        });
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(json.message || `HTTP ${res.status}`);
+        const rec = { path, base64, type: file.type || mimeFromName(safeName) };
+        pendingUploads[path] = rec;
+        // Best-effort persistence: if IndexedDB is blocked (private mode, say)
+        // the image still publishes fine from memory this session.
+        try { await pendingStore('readwrite', s => s.put(rec, path)); } catch (e) { console.warn('Could not persist queued upload:', e); }
         resolve('/' + path);
       } catch (e) { reject(e); }
     };
