@@ -70,11 +70,19 @@
     return stripHtml(raw).replace(/\s+/g, ' ').trim();
   }
 
+  // Imported articles keep the WeChat publication timestamp as a final italic
+  // line, which belongs at the foot of the article and nowhere else. A long
+  // post never reaches it before the 160-character cut, but a short one — a
+  // festival greeting, say — would otherwise show the date as most of its card.
+  function dropFootTimestamp(body) {
+    return String(body || '').replace(/\n\s*_[^_\n]+_\s*$/, '').trim();
+  }
+
   function excerptFrom(item, zh) {
     const summary = zh ? item.summary_zh : item.summary_en;
     if (summary) return stripHtml(summary).replace(/\s+/g, ' ').trim();
     const body = zh ? (item.body_zh || item.body_en) : (item.body_en || item.body_zh);
-    const text = stripMarkdown(body);
+    const text = stripMarkdown(dropFootTimestamp(body));
     return text.length > 160 ? text.slice(0, 157) + '…' : text;
   }
 
