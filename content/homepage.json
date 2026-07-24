@@ -10,7 +10,7 @@
   "hero_title_zh": "搭建桥梁，\n凝聚社区力量",
   "hero_subtitle_en": "The Chinese Chamber of Commerce in Washington State promotes investment, trade cooperation, and community development throughout the Greater Seattle area.",
   "hero_subtitle_zh": "华盛顿州中国总商会致力于促进中美投资贸易合作，推动大西雅图地区华人商业社区的发展。",
-  "hero_bg_image": "images/seattle-bg.jpg",
+  "hero_bg_image": "/assets/uploads/homepage/1784882266501-ScreenShot_2026-07-24_162548_737.png",
   "about_photo": "",
   "about_tag_en": "Who We Are",
   "about_tag_zh": "关于我们",
@@ -113,5 +113,6 @@
   "mission_values_title_en": "Our Values",
   "mission_values_title_zh": "我们的价值观",
   "mission_values_p_en": "CCCWA is committed to integrity, inclusiveness, and excellence in serving its members and the broader community. We believe that strong business communities are built on trust, collaboration, and mutual respect across cultural boundaries.",
-  "mission_values_p_zh": "CCCWA坚守诚信、包容与卓越的理念，服务会员与广大社区。我们相信，强大的商业社区建立于信任、协作与跨文化相互尊重之上。"
+  "mission_values_p_zh": "CCCWA坚守诚信、包容与卓越的理念，服务会员与广大社区。我们相信，强大的商业社区建立于信任、协作与跨文化相互尊重之上。",
+  "mission_hero_bg_image": ""
 }
