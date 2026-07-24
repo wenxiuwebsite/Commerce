@@ -115,13 +115,19 @@
 
   function insertBodyImages(container, images) {
     if (!images || !images.length) return;
+    const children = Array.from(container.children);
+    // The two languages don't always split into the same number of paragraphs,
+    // and an image anchored past the end of the shorter one would simply never
+    // be inserted — the article would silently lose its pictures. Clamp to the
+    // last paragraph so every image is shown either way.
+    const total = children.filter(n => n.tagName === 'P').length;
     const byParagraph = {};
     images.forEach(img => {
-      const n = parseInt(img.after_paragraph, 10) || 0;
+      let n = parseInt(img.after_paragraph, 10) || 0;
+      if (total && n > total) n = total;
       (byParagraph[n] = byParagraph[n] || []).push(img);
     });
     let pCount = 0;
-    const children = Array.from(container.children);
     children.forEach(node => {
       if (node.tagName === 'P') {
         pCount++;
@@ -159,13 +165,15 @@
   // after their target paragraph the same way single images are.
   function insertBodyGalleries(container, galleries) {
     if (!galleries || !galleries.length) return;
+    const children = Array.from(container.children);
+    const total = children.filter(n => n.tagName === 'P').length;   // see insertBodyImages
     const byParagraph = {};
     galleries.forEach(gal => {
-      const n = parseInt(gal.after_paragraph, 10) || 0;
+      let n = parseInt(gal.after_paragraph, 10) || 0;
+      if (total && n > total) n = total;
       (byParagraph[n] = byParagraph[n] || []).push(gal);
     });
     let pCount = 0;
-    const children = Array.from(container.children);
     children.forEach(node => {
       if (node.tagName === 'P') {
         pCount++;
