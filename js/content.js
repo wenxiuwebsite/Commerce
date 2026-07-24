@@ -166,9 +166,10 @@
     scrollToAnchorIfPresent();
   }
 
-  // Text-only cards by design — cover_image is intentionally not rendered
-  // here (or on the article page). The data is still stored, so images can
-  // be turned back on later without re-uploading anything.
+  // Text-only cards by design — cover_image is deliberately NOT rendered on
+  // the news list or the home page preview. The article page is the opposite:
+  // it does show the cover, the body images and the galleries. Keep it that
+  // way; the bare-looking list is the intended look, not missing data.
   function newsCardHtml(n, featured, zh) {
     const title = titleText(n, zh);
     const category = zh ? n.category_zh : n.category_en;
