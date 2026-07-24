@@ -1,6 +1,23 @@
 [build]
   publish = "."
 
+# COST CONTROL — on this site's plan the bill is essentially "number of
+# Production deploys" (~15 credits each, ~20 deploys inside the free 300/month).
+# Bandwidth and request volume are noise by comparison. So anything that
+# creates a deploy we didn't ask for is the expensive thing to avoid.
+#
+# These two contexts stop PR/Deploy-Preview and non-production-branch builds
+# from running: an `ignore` command that exits 0 tells Netlify there is nothing
+# to build. Note this is the backstop, not the primary switch — set
+# Site configuration -> Build & deploy -> Continuous deployment ->
+# "Deploy Previews" to None and "Branch deploys" to None as well, since the
+# dashboard is what actually decides whether a deploy gets started at all.
+[context.deploy-preview]
+  ignore = "exit 0"
+
+[context.branch-deploy]
+  ignore = "exit 0"
+
 [[redirects]]
   from  = "/admin"
   to    = "/admin/index.html"
