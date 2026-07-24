@@ -166,27 +166,16 @@
     scrollToAnchorIfPresent();
   }
 
-  // Card thumbnail. Both .news-img and .news-img-thumb are object-fit:cover,
-  // so honour cover_focus — the face-aware crop point the admin works out at
-  // upload time — or a portrait can end up cropped through someone's forehead.
-  // Articles without a cover still read fine; the card just starts at the
-  // category tag, which is what the extra top padding is for.
-  function cardImageHtml(n, title, featured, extraStyle) {
-    if (!n.cover_image) return '';
-    return '<img src="' + escHtml(n.cover_image) + '" alt="' + escHtml(title || '') +
-      '" class="' + (featured ? 'news-img' : 'news-img-thumb') + '" loading="lazy"' +
-      ' style="object-position:' + escHtml(n.cover_focus || '50% 50%') + (extraStyle || '') + '"' +
-      ' onerror="this.style.display=\'none\'">';
-  }
-
+  // Text-only cards by design — cover_image is intentionally not rendered
+  // here (or on the article page). The data is still stored, so images can
+  // be turned back on later without re-uploading anything.
   function newsCardHtml(n, featured, zh) {
     const title = titleText(n, zh);
     const category = zh ? n.category_zh : n.category_en;
     const date = formatDate(n.date, zh);
     const excerpt = excerptFrom(n, zh);
     return '<div class="news-card' + (featured ? ' featured' : '') + '" id="post-' + escHtml(n.id) + '">' +
-      cardImageHtml(n, title, featured) +
-      '<div class="news-content"' + (n.cover_image ? '' : ' style="padding-top:22px"') + '>' +
+      '<div class="news-content" style="padding-top:22px">' +
       '<span class="news-category">' + escHtml(category || '') + '</span>' +
       '<h3>' + escHtml(title || '') + '</h3>' +
       '<p>' + escHtml(excerpt) + '</p>' +
@@ -333,8 +322,7 @@
       const excerpt = excerptFrom(n, zh);
       const featured = i === 0;
       return '<div class="news-card' + (featured ? ' featured' : '') + '">' +
-        cardImageHtml(n, title, featured, featured ? '' : ';width:100%;height:140px;object-fit:cover') +
-        '<div class="news-content"' + (n.cover_image ? '' : ' style="padding-top:22px"') + '>' +
+        '<div class="news-content" style="padding-top:22px">' +
         '<span class="news-category">' + escHtml(category || '') + '</span>' +
         '<h3>' + escHtml(title || '') + '</h3>' +
         '<p>' + escHtml(excerpt) + '</p>' +
