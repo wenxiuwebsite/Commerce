@@ -2130,6 +2130,10 @@ async function submitIdentitySetPassword() {
 const PASS = 'cccwa2024';
 const STORAGE_KEY = 'cccwa_cms_data';
 const DIRTY_KEY = 'cccwa_cms_dirty';
+// Ids explicitly deleted in this browser but not yet published. Lets Publish
+// tell a real delete apart from a stale-draft gap (a live post simply missing
+// from an out-of-date copy), so it never silently wipes published content.
+const DELETES_KEY = 'cccwa_cms_deletes';
 const LOCAL_API = 'http://localhost:8081/api/v1';
 
 // Content lives in content/news.json + content/events.json (fetched fresh on
@@ -2150,6 +2154,7 @@ const DEFAULT_DATA = {
 
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let dirty = false;
+let intentionalDeletes = new Set();
 let editingNewsId = null;
 let newsModalDirty = false;
 let editingEventId = null;
@@ -2164,6 +2169,8 @@ function loadData() {
   if (!data.directory) data.directory = [];
   if (!data.trash) data.trash = [];
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
+  try { intentionalDeletes = new Set(JSON.parse(localStorage.getItem(DELETES_KEY) || '[]')); }
+  catch (e) { intentionalDeletes = new Set(); }
 }
 
 // content/homepage.json isn't in DEFAULT_DATA (nothing sensible to default
@@ -2182,6 +2189,49 @@ function persistData() {
   dirty = true;
   localStorage.setItem(DIRTY_KEY, 'true');
   updateDirtyIndicator();
+}
+
+// Remember an item deleted here so a later Publish/Sync knows the removal was
+// deliberate (and doesn't "recover" it as if it were a stale-draft gap).
+function recordDelete(id) {
+  if (!id) return;
+  intentionalDeletes.add(id);
+  localStorage.setItem(DELETES_KEY, JSON.stringify([...intentionalDeletes]));
+}
+
+// Once a Publish succeeds, the deletes are reflected on disk — start fresh so
+// they can't suppress recovery of genuinely-missing items on the next publish.
+function clearIntentionalDeletes() {
+  intentionalDeletes = new Set();
+  localStorage.setItem(DELETES_KEY, '[]');
+}
+
+// Merge a working draft list with the published (on-disk) list without losing
+// either side: keep edits to items present in both, re-add published items the
+// draft is missing (unless deleted here on purpose), keep items newly created
+// here, and honour deletes made here. Returns the merged list and the items
+// that had to be recovered (live on disk, absent from the draft).
+function reconcileList(memList, diskList, deletes) {
+  memList = Array.isArray(memList) ? memList : [];
+  diskList = Array.isArray(diskList) ? diskList : [];
+  const memById = new Map(memList.map(x => [x.id, x]));
+  const diskIds = new Set(diskList.map(x => x.id));
+  const out = [];
+  const recovered = [];
+  // Items created in this browser (not yet on disk) stay at the top, as new
+  // articles do via unshift.
+  for (const m of memList) if (!diskIds.has(m.id)) out.push(m);
+  // Then everything the published file has, in its order.
+  for (const d of diskList) {
+    if (deletes.has(d.id)) continue;                     // deleted here on purpose → drop
+    if (memById.has(d.id)) out.push(memById.get(d.id));  // keep the locally edited version
+    else { out.push(d); recovered.push(d); }             // missing from the draft → recover
+  }
+  return { list: out, recovered };
+}
+
+function itemLabel(it) {
+  return it.title_en || it.title_zh || it.name_en || it.name_zh || it.name || it.id || '(untitled)';
 }
 
 /* ================================================================
@@ -2658,6 +2708,7 @@ function deleteNews(idx) {
   const [item] = data.news.splice(idx, 1);
   if (!item) return;
   data.trash.push({ type: 'news', item, deletedAt: new Date().toISOString() });
+  recordDelete(item.id);
   persistData(); renderNewsTable(); renderDashboard(); updateTrashBadge();
   toast(T('toast.article.deleted'));
 }
@@ -2710,6 +2761,7 @@ function deleteEvent(idx) {
   const [item] = data.events.splice(idx, 1);
   if (!item) return;
   data.trash.push({ type: 'event', item, deletedAt: new Date().toISOString() });
+  recordDelete(item.id);
   persistData(); renderEventsTable(); renderDashboard(); updateTrashBadge();
   toast(T('toast.event.deleted'));
 }
@@ -3128,7 +3180,8 @@ function saveLeadership() {
 
 function deleteLeadership(idx) {
   if (!confirm(T('confirm.del.leadership'))) return;
-  data.leadership.splice(idx, 1);
+  const [item] = data.leadership.splice(idx, 1);
+  if (item) recordDelete(item.id);
   persistData(); renderLeadershipTable();
   toast(T('toast.leadership.deleted'));
 }
@@ -3226,7 +3279,8 @@ function saveDirectory() {
 
 function deleteDirectory(idx) {
   if (!confirm(T('confirm.del.directory'))) return;
-  data.directory.splice(idx, 1);
+  const [item] = data.directory.splice(idx, 1);
+  if (item) recordDelete(item.id);
   persistData(); renderDirectoryTable();
   toast(T('toast.directory.deleted'));
 }
@@ -3399,11 +3453,67 @@ async function commitFilesViaGitGateway(files, message, assets) {
   return { unchanged: false, sha: newCommitJson.sha };
 }
 
+// Reconcile the in-memory draft against the currently-published files right
+// before a Publish. Recovers live items the draft is missing (unless they were
+// deleted here), and — if anything had to be recovered — asks the user to
+// confirm rather than letting a blind overwrite shrink the site. Returns
+// { cancelled } so publishToSite can bail out cleanly.
+async function reconcileBeforePublish() {
+  const collections = ['news', 'events', 'leadership', 'directory'];
+  let disk;
+  try {
+    const responses = await Promise.all(
+      collections.map(c => fetch('../content/' + c + '.json?_=' + Date.now()))
+    );
+    if (responses.some(r => !r.ok)) return { cancelled: false }; // can't read live files → publish as-is
+    const jsons = await Promise.all(responses.map(r => r.json()));
+    disk = {};
+    collections.forEach((c, i) => { disk[c] = jsons[i].items || []; });
+  } catch (e) {
+    return { cancelled: false }; // offline / fetch failed → don't block the user
+  }
+
+  const recoveredAll = [];
+  for (const c of collections) {
+    const { list, recovered } = reconcileList(data[c], disk[c], intentionalDeletes);
+    data[c] = list;
+    recovered.forEach(it => recoveredAll.push(it));
+  }
+  if (!recoveredAll.length) return { cancelled: false };
+
+  // We just merged live content back into the draft — persist and re-render so
+  // the recovered items are visible whatever the user decides next.
+  persistData();
+  renderAll();
+
+  const sample = recoveredAll.slice(0, 8).map(it => '• ' + itemLabel(it)).join('\n');
+  const more = recoveredAll.length > 8 ? '\n…and ' + (recoveredAll.length - 8) + ' more' : '';
+  const ok = confirm(
+    'Safety check — this browser was missing ' + recoveredAll.length +
+    ' item(s) that are live on the site and were not deleted here:\n\n' +
+    sample + more +
+    '\n\nThey have been kept so nothing is lost. Click OK to publish with them included, or Cancel to stop and review.'
+  );
+  return { cancelled: !ok };
+}
+
 async function publishToSite() {
   const btn = document.getElementById('pub-main-btn');
   btn.disabled = true;
   setPubStatus('busy', 'Publishing...');
   try {
+    // SAFETY: each content file is overwritten wholesale below, so a Publish
+    // from an out-of-date copy would silently delete live posts (this is how
+    // 144 articles were once lost). Before writing, reconcile against what's
+    // actually published: recover anything this browser is missing that wasn't
+    // deleted here on purpose, and make the user confirm before any shrink.
+    const guard = await reconcileBeforePublish();
+    if (guard.cancelled) {
+      setPubStatus('idle', 'Publish cancelled — recovered posts kept, nothing sent');
+      btn.disabled = false;
+      return;
+    }
+
     // All content files go out in ONE commit → one Netlify deploy per Publish
     // (instead of one deploy per file).
     const files = [
@@ -3443,6 +3553,7 @@ async function publishToSite() {
     dirty = false;
     localStorage.setItem(DIRTY_KEY, 'false');
     localStorage.setItem('cccwa_last_pub', new Date().toISOString());
+    clearIntentionalDeletes(); // deletes are now on disk — reset the guard
     updateDirtyIndicator();
   } catch (e) {
     setPubStatus('err', 'Error: ' + e.message + (identityUser ? '' : ' — is decap-server running?'));
@@ -3460,15 +3571,17 @@ async function publishToSite() {
 ================================================================ */
 async function syncFromFiles(silent) {
   // localStorage holds the working draft; content/*.json is the published
-  // source of truth. A sync pulls the published content over the top of the
-  // draft — so never let it silently clobber UNPUBLISHED local edits. That
-  // unconditional overwrite on every login/reload is what made saved-but-not-
-  // yet-published changes "vanish on reload". If there are unpublished edits:
-  //   - auto/background sync (silent): keep the draft, don't touch it.
-  //   - manual Sync button: let the user explicitly confirm the discard.
+  // source of truth. How a sync applies it depends on unpublished edits:
+  //   - none: pull the published content straight over the top.
+  //   - background sync (silent) WITH edits: don't discard them and don't
+  //     leave the draft stale either — MERGE in any published items the draft
+  //     is missing (preserving local edits). A stale draft that silently hid
+  //     live content is exactly what let a later Publish overwrite 144 posts.
+  //   - manual Sync button WITH edits: let the user confirm a full discard.
+  let mode = 'replace';
   if (dirty) {
-    if (silent) return;
-    if (!confirm('You have unpublished changes. Syncing replaces them with the latest published content. Discard your unpublished changes?')) return;
+    if (silent) mode = 'merge';
+    else if (!confirm('You have unpublished changes. Syncing replaces them with the latest published content. Discard your unpublished changes?')) return;
   }
   const syncBtn = document.getElementById('sync-btn');
   if (syncBtn) { syncBtn.disabled = true; syncBtn.textContent = T('sync.ing'); }
@@ -3489,19 +3602,37 @@ async function syncFromFiles(silent) {
     const directoryJson = await directoryRes.json();
     const homepageJson = await homepageRes.json();
 
-    data.news = newsJson.items || [];
-    data.events = eventsJson.items || [];
-    data.leadership = leadershipJson.items || [];
-    data.directory = directoryJson.items || [];
-    data.homepage = homepageJson;
-    if (!data.categories) data.categories = DEFAULT_DATA.categories;
+    if (mode === 'merge') {
+      // Keep unpublished edits; only recover published items the draft lacks.
+      const recovered = [];
+      for (const [key, json] of [['news', newsJson], ['events', eventsJson], ['leadership', leadershipJson], ['directory', directoryJson]]) {
+        const r = reconcileList(data[key], json.items || [], intentionalDeletes);
+        data[key] = r.list;
+        recovered.push(...r.recovered);
+      }
+      if (!data.homepage) data.homepage = homepageJson; // fill if absent; don't clobber unpublished homepage edits
+      if (!data.categories) data.categories = DEFAULT_DATA.categories;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); // dirty stays true — edits remain unpublished
+      prunePendingUploads();
+      renderAll();
+      if (recovered.length) toast('Restored ' + recovered.length + ' live post(s) that were missing from this browser');
+    } else {
+      data.news = newsJson.items || [];
+      data.events = eventsJson.items || [];
+      data.leadership = leadershipJson.items || [];
+      data.directory = directoryJson.items || [];
+      data.homepage = homepageJson;
+      if (!data.categories) data.categories = DEFAULT_DATA.categories;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    dirty = false;
-    localStorage.setItem(DIRTY_KEY, 'false');
-    prunePendingUploads();
-    renderAll();
-    if (!silent) toast(T('sync.ok'));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      dirty = false;
+      localStorage.setItem(DIRTY_KEY, 'false');
+      clearIntentionalDeletes(); // draft now matches disk — reset the delete guard
+      prunePendingUploads();
+      renderAll();
+      if (!silent) toast(T('sync.ok'));
+    }
+    updateDirtyIndicator();
   } catch (e) {
     if (!silent) toast(T('sync.fail') + e.message);
   } finally {
