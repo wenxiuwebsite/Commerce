@@ -452,34 +452,7 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
-   LEADERSHIP
-   ============================================================ */
-.leadership-intro { max-width: 700px; margin: 0 auto 60px; text-align: center; color: var(--text-secondary); font-size: 1rem; line-height: 1.75; }
-.leadership-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.leader-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 28px 24px;
-  text-align: center;
-}
-.leader-role {
-  display: inline-block;
-  background: var(--accent-lt);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-}
-.leader-card h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
-.leader-card p { font-size: 13px; color: var(--text-secondary); }
-
-/* ============================================================
-   DIRECTORY
+   DIRECTORY — logo-only cards (no name/category by design)
    ============================================================ */
 .directory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .member-card {
@@ -493,20 +466,18 @@ img { max-width: 100%; display: block; }
 }
 .member-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .member-logo {
-  height: 100px;
+  flex: 1;
+  min-height: 140px;
   background: var(--bg-secondary);
   display: flex; align-items: center; justify-content: center;
-  padding: 16px;
+  padding: 24px;
 }
 .member-logo img {
-  max-height: 72px;
+  max-height: 100px;
   max-width: 100%;
   width: auto;
   object-fit: contain;
 }
-.member-info { padding: 16px; flex: 1; }
-.member-info h4 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
-.member-info p { font-size: 12px; color: var(--text-secondary); }
 
 /* ============================================================
    EVENTS
@@ -899,7 +870,6 @@ img { max-width: 100%; display: block; }
    ============================================================ */
 @media (max-width: 1024px) {
   .directory-grid { grid-template-columns: repeat(3, 1fr); }
-  .leadership-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 960px) {
@@ -940,7 +910,6 @@ img { max-width: 100%; display: block; }
 
   .feature-grid { grid-template-columns: 1fr; }
   .programs-grid { grid-template-columns: 1fr; }
-  .leadership-grid { grid-template-columns: 1fr; }
   .directory-grid { grid-template-columns: repeat(2, 1fr); }
 
   .event-item { flex-direction: column; align-items: flex-start; }
