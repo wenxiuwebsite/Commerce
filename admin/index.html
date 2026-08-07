@@ -2131,7 +2131,20 @@ function itemLabel(it) {
    See PENDING IMAGE UPLOADS for where those bytes are held.
 ================================================================ */
 const localImagePreviews = {};
-function previewSrc(path) { return (path && localImagePreviews[path]) || path; }
+
+// Image paths are stored relative to the SITE root ("/images/x.jpg", or a
+// bare "images/x.jpg" if typed by hand), but this admin page is served from
+// /admin/ — so a bare path resolves to /admin/images/x.jpg and 404s, showing
+// a broken thumbnail. Re-anchor those at the site root; leave absolute,
+// protocol-relative, data: and blob: URLs alone.
+function previewSrc(path) {
+  const local = path && localImagePreviews[path];
+  if (local) return local;
+  if (!path) return path;
+  const p = String(path).trim();
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(p)) return p;
+  return '../' + p.replace(/^(?:\.\/)+/, '');
+}
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
