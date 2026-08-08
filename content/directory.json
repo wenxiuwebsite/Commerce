@@ -3,7 +3,7 @@
     {
       "id": "cai-cai-law",
       "name_en": "Cai & Cai Law Office",
-      "name_zh": "1",
+      "name_zh": "",
       "category_en": "Legal Services",
       "category_zh": "法律服务",
       "logo": "/images/dir-cai.jpg"
@@ -79,6 +79,54 @@
       "category_en": "Chamber Member",
       "category_zh": "商会会员",
       "logo": "/images/dir-member2.jpg"
+    },
+    {
+      "id": "西雅图地产俱乐部",
+      "name_en": "",
+      "name_zh": "西雅图地产俱乐部",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786113258510-ScreenShot_2026-08-07_223409_007.png"
+    },
+    {
+      "id": "kid",
+      "name_en": "",
+      "name_zh": "KID",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786113771163-ScreenShot_2026-08-07_224211_882.png"
+    },
+    {
+      "id": "dil",
+      "name_en": "",
+      "name_zh": "DIL",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786113861503-574e9258d109b3deff61912dcfbf6c81810a4c9c.jpg"
+    },
+    {
+      "id": "czl",
+      "name_en": "",
+      "name_zh": "CZL",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786114088018-ScreenShot_2026-08-07_224706_512.png"
+    },
+    {
+      "id": "global",
+      "name_en": "",
+      "name_zh": "global",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786114099021-ScreenShot_2026-08-07_224642_958.png"
+    },
+    {
+      "id": "新居",
+      "name_en": "",
+      "name_zh": "新居",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786114235618-ScreenShot_2026-08-07_225026_806.png"
     }
   ]
 }
