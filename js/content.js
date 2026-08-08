@@ -405,6 +405,46 @@
   }
 
   /* ============================================================
+     LEADERSHIP PAGE (leadership.html): two grids split by "section"
+     ("executive" -> Board of Directors, "member" -> Member Orgs)
+     ============================================================ */
+  const LEADERSHIP_URL = 'content/leadership.json';
+
+  function leaderCardHtml(m, zh) {
+    const name = zh ? (m.name_zh || m.name_en) : (m.name_en || m.name_zh);
+    const role = zh ? (m.role_zh || m.role_en) : (m.role_en || m.role_zh);
+    const company = zh ? (m.company_zh || m.company_en) : (m.company_en || m.company_zh);
+    return '<div class="leader-card">' +
+      (role ? '<span class="leader-role">' + escHtml(role) + '</span>' : '') +
+      '<h3>' + escHtml(name || '') + '</h3>' +
+      (company ? '<p>' + escHtml(company) + '</p>' : '') +
+      '</div>';
+  }
+
+  function renderLeadershipPage(items) {
+    const zh = isZh();
+    const execGrid = document.getElementById('leadership-exec-grid');
+    const memberGrid = document.getElementById('leadership-member-grid');
+    const exec = items.filter(m => m.section !== 'member');
+    const members = items.filter(m => m.section === 'member');
+    if (execGrid) execGrid.innerHTML = exec.length ? exec.map(m => leaderCardHtml(m, zh)).join('') : emptyStateHtml(zh);
+    if (memberGrid) memberGrid.innerHTML = members.length ? members.map(m => leaderCardHtml(m, zh)).join('') : emptyStateHtml(zh);
+  }
+
+  function initLeadershipPage() {
+    const execGrid = document.getElementById('leadership-exec-grid');
+    const memberGrid = document.getElementById('leadership-member-grid');
+    if (!execGrid && !memberGrid) return;
+    fetchJSON(LEADERSHIP_URL).then(data => {
+      const items = ensureIds(data.items || []);
+      renderLeadershipPage(items);
+      new MutationObserver(() => renderLeadershipPage(items)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => {
+      if (execGrid) execGrid.innerHTML = errorStateHtml(isZh());
+    });
+  }
+
+  /* ============================================================
      DIRECTORY PAGE (directory.html): single grid of member cards
      ============================================================ */
   const DIRECTORY_URL = 'content/directory.json';
@@ -547,6 +587,7 @@
     initHomePreview();
     initEventsList();
     initHomeEventsPreview();
+    initLeadershipPage();
     initDirectoryPage();
     initHomepageContent();
     initMissionContent();

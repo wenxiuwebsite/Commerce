@@ -452,6 +452,33 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
+   LEADERSHIP
+   ============================================================ */
+.leadership-intro { max-width: 700px; margin: 0 auto 60px; text-align: center; color: var(--text-secondary); font-size: 1rem; line-height: 1.75; }
+.leadership-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.leader-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 28px 24px;
+  text-align: center;
+}
+.leader-role {
+  display: inline-block;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.leader-card h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.leader-card p { font-size: 13px; color: var(--text-secondary); }
+
+/* ============================================================
    DIRECTORY — logo-only cards (no name/category by design)
    ============================================================ */
 .directory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -870,6 +897,7 @@ img { max-width: 100%; display: block; }
    ============================================================ */
 @media (max-width: 1024px) {
   .directory-grid { grid-template-columns: repeat(3, 1fr); }
+  .leadership-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 960px) {
@@ -882,6 +910,7 @@ img { max-width: 100%; display: block; }
   .join-grid { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .leadership-grid { grid-template-columns: 1fr; }
   .directory-grid { grid-template-columns: repeat(2, 1fr); }
 }
 

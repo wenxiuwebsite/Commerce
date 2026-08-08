@@ -18,6 +18,7 @@
   const links = [
     { href: 'index.html',      label: 'Home',       key: 'home',       i18n: 'nav.home' },
     { href: 'mission.html',    label: 'Mission',    key: 'mission',    i18n: 'nav.mission' },
+    { href: 'leadership.html', label: 'Leadership', key: 'leadership', i18n: 'nav.leadership' },
     { href: 'directory.html',  label: 'Directory',  key: 'directory',  i18n: 'nav.directory' },
     { href: 'news.html',       label: 'Event',      key: 'news',       i18n: 'nav.news' },
     { href: 'contact.html',    label: 'Contact',    key: 'contact',    i18n: 'nav.contact' },
@@ -80,6 +81,7 @@
       <div class="footer-links">
         <h4 data-i18n="footer.about_title">About</h4>
         <a href="mission.html"    data-i18n="nav.mission">Mission</a>
+        <a href="leadership.html" data-i18n="nav.leadership">Leadership</a>
         <a href="directory.html"  data-i18n="nav.directory">Directory</a>
         <a href="join.html"       data-i18n="nav.join">Join Us</a>
       </div>

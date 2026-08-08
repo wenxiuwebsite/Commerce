@@ -695,6 +695,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span data-i18n="nav.events">Events</span>
         </div>
+        <div class="nav-item" onclick="showPanel('leadership',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span data-i18n="nav.leadership">Leadership</span>
+        </div>
         <div class="nav-item" onclick="showPanel('directory',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           <span data-i18n="nav.directory">Directory</span>
@@ -1045,6 +1049,43 @@
         </div>
       </div>
 
+      <!-- LEADERSHIP -->
+      <div id="panel-leadership" style="display:none">
+        <div class="topbar">
+          <span class="topbar-title" data-i18n="nav.leadership">Leadership</span>
+          <div class="topbar-controls">
+            <button class="btn-primary" onclick="openLeadershipModal()" data-i18n="leadership.add">+ New Member</button>
+            <div class="lang-toggle">
+              <button class="lang-opt active" id="ld-en" onclick="setLang('en')">EN</button>
+              <button class="lang-opt" id="ld-zh" onclick="setLang('zh')">中文</button>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()">
+              <svg id="icon-moon-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg id="icon-sun-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div style="margin-bottom:14px">
+            <input type="text" id="leadership-search" class="form-input" data-i18n-placeholder="leadership.search" placeholder="Search by name, role, or company..." oninput="renderLeadershipTable()" style="max-width:340px">
+          </div>
+          <div class="content-card">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="leadership.col.name">Name</th>
+                  <th data-i18n="leadership.col.role">Role</th>
+                  <th data-i18n="leadership.col.company">Company</th>
+                  <th style="width:110px" data-i18n="leadership.col.section">Section</th>
+                  <th style="width:130px" data-i18n="leadership.col.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leadership-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- DIRECTORY -->
       <div id="panel-directory" style="display:none">
         <div class="topbar">
@@ -1111,7 +1152,7 @@
             <hr class="pub-divider">
             <div class="pub-settings-label">Local Backend</div>
             <div id="pub-conn-status" style="font-size:12px;margin-bottom:12px;color:var(--muted)"></div>
-            <div class="pub-hint">Publishing writes straight to <code>content/news.json</code>, <code>events.json</code> and <code>directory.json</code> via the local proxy. Run <code>npx decap-server</code> in a second terminal (see docs/SOP.md) — if it's not running, Publish will fail and tell you so.</div>
+            <div class="pub-hint">Publishing writes straight to <code>content/news.json</code>, <code>events.json</code>, <code>leadership.json</code> and <code>directory.json</code> via the local proxy. Run <code>npx decap-server</code> in a second terminal (see docs/SOP.md) — if it's not running, Publish will fail and tell you so.</div>
           </div>
         </div>
       </div>
@@ -1566,6 +1607,66 @@
   </div>
 </div>
 
+<!-- LEADERSHIP MODAL -->
+<div class="modal-backdrop" id="leadership-modal" style="display:none" onclick="if(event.target===this)closeLeadershipModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="leadership-modal-title">Add Member</h3>
+      <button class="modal-close" onclick="closeLeadershipModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ld-id">
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.section">Section</label>
+          <select class="form-input" id="ld-section">
+            <option value="executive" data-i18n="leadership.exec_title">Board of Directors</option>
+            <option value="member" data-i18n="leadership.member_title">Member Organizations</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-section" data-i18n="modal.sec.en">English Content</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.name.en">Name (English)</label>
+          <input class="form-input" id="ld-name-en">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.role.en">Role (English)</label>
+          <input class="form-input" id="ld-role-en" placeholder="President, Director, Member...">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.company.en">Company (English)</label>
+          <input class="form-input" id="ld-company-en">
+        </div>
+      </div>
+      <div class="form-section" data-i18n="modal.sec.zh">Chinese Content</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.name.zh">Name (Chinese)</label>
+          <input class="form-input" id="ld-name-zh">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.role.zh">Role (Chinese)</label>
+          <input class="form-input" id="ld-role-zh">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modal.leadership.company.zh">Company (Chinese)</label>
+          <input class="form-input" id="ld-company-zh">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline" onclick="closeLeadershipModal()" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn-primary" onclick="saveLeadership()" data-i18n="btn.save.leadership">Save Member</button>
+    </div>
+  </div>
+</div>
+
 <!-- DIRECTORY MODAL -->
 <div class="modal-backdrop" id="directory-modal" style="display:none" onclick="if(event.target===this)closeDirectoryModal()">
   <div class="modal-box">
@@ -1663,13 +1764,16 @@ const L = {
   en: {
     'login.sub':'Content Management System','login.label':'Password','login.btn':'Sign In','login.err':'Incorrect password. Try again.',
     'brand.sub':'Content Manager',
-    'nav.dashboard':'Dashboard','nav.news':'Event','nav.events':'Events','nav.directory':'Directory','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
+    'nav.dashboard':'Dashboard','nav.news':'Event','nav.events':'Events','nav.leadership':'Leadership','nav.directory':'Directory','nav.publish':'Publish','nav.help':'Help','nav.signout':'Sign Out',
     'dash.stat.news':'Event Articles','dash.stat.events':'Upcoming Events','dash.stat.unsaved':'Unsaved Changes',
     'dash.recent':'Recent Articles','dash.col.category':'Category','dash.col.date':'Date',
     'news.add':'+ New Article','news.add.event':'+ New Event','news.col.title':'Title','news.col.category':'Category','news.col.date':'Date','news.col.page':'Article Page','news.col.actions':'Actions',
     'news.empty':'No articles yet. Click + New Article to add one.',
     'events.add':'+ New Event','events.col.date':'Date','events.col.event':'Event','events.col.location':'Location','events.col.time':'Time','events.col.actions':'Actions',
     'events.empty':'No events yet. Click + New Event to add one.',
+    'leadership.add':'+ New Member','leadership.col.name':'Name','leadership.col.role':'Role','leadership.col.company':'Company','leadership.col.section':'Section','leadership.col.actions':'Actions',
+    'leadership.empty':'No members yet. Click + New Member to add one.','leadership.search':'Search by name, role, or company...',
+    'leadership.exec_title':'Board of Directors','leadership.member_title':'Member Organizations',
     'directory.add':'+ New Company','directory.col.name':'Company','directory.col.category':'Category','directory.col.actions':'Actions',
     'directory.empty':'No companies yet. Click + New Company to add one.','directory.search':'Search by company or category...',
     'publish.desc':'After making changes, export a data.js file and place it in the content/ folder of your site.',
@@ -1690,20 +1794,25 @@ const L = {
     'modal.events.title.en':'Title (English)','modal.events.location.en':'Location (English)','modal.events.time':'Time','modal.events.desc.en':'Description (English)',
     'modal.events.title.zh':'Title (Chinese)','modal.events.location.zh':'Location (Chinese)','modal.events.desc.zh':'Description (Chinese)',
     'modal.events.sec.reg':'Registration','modal.events.reg.url':'Register URL',
+    'modal.leadership.add':'Add Member','modal.leadership.edit':'Edit Member','modal.leadership.section':'Section',
+    'modal.leadership.name.en':'Name (English)','modal.leadership.name.zh':'Name (Chinese)',
+    'modal.leadership.role.en':'Role (English)','modal.leadership.role.zh':'Role (Chinese)',
+    'modal.leadership.company.en':'Company (English)','modal.leadership.company.zh':'Company (Chinese)',
     'modal.directory.add':'Add Company','modal.directory.edit':'Edit Company',
     'modal.directory.name.en':'Company Name (English)','modal.directory.name.zh':'Company Name (Chinese)',
     'modal.directory.category.en':'Category (English)','modal.directory.category.zh':'Category (Chinese)',
     'modal.directory.logo':'Logo','modal.directory.logo.hint':'Required — the directory page shows the logo and nothing else.',
     'modal.directory.optional':'Optional — internal only, not shown on the directory page',
-    'btn.cancel':'Cancel','btn.save.article':'Save Article','btn.save.event':'Save Event','btn.save.directory':'Save Company',
+    'btn.cancel':'Cancel','btn.save.article':'Save Article','btn.save.event':'Save Event','btn.save.leadership':'Save Member','btn.save.directory':'Save Company',
     'btn.edit':'Edit','btn.delete':'Delete',
     'cat.news':'News','cat.event':'Event',
     'toast.article.saved':'Article saved','toast.article.deleted':'Article deleted',
     'toast.event.saved':'Event saved','toast.event.deleted':'Event deleted',
+    'toast.leadership.saved':'Member saved','toast.leadership.deleted':'Member deleted',
     'toast.directory.saved':'Company saved','toast.directory.deleted':'Company deleted',
     'toast.exported':'data.js downloaded — place it in the content/ folder',
     'confirm.del.article':'Delete this article?','confirm.del.event':'Delete this event?',
-    'confirm.del.directory':'Delete this company?',
+    'confirm.del.leadership':'Delete this member?','confirm.del.directory':'Delete this company?',
     'alert.title':'Please enter an English title.',
     'alert.directory.logo':'Please add a logo — it is the only thing the directory page shows.',
     'dash.unsaved.yes':'Yes — export to publish','dash.unsaved.no':'None',
@@ -1727,13 +1836,16 @@ const L = {
   zh: {
     'login.sub':'内容管理系统','login.label':'密码','login.btn':'登录','login.err':'密码错误，请重试。',
     'brand.sub':'内容管理',
-    'nav.dashboard':'概览','nav.news':'活动','nav.events':'活动日历','nav.directory':'会员名录','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
+    'nav.dashboard':'概览','nav.news':'活动','nav.events':'活动日历','nav.leadership':'领导团队','nav.directory':'会员名录','nav.publish':'发布','nav.help':'帮助','nav.signout':'退出登录',
     'dash.stat.news':'活动文章','dash.stat.events':'即将举办活动','dash.stat.unsaved':'未发布更改',
     'dash.recent':'近期文章','dash.col.category':'分类','dash.col.date':'日期',
     'news.add':'+ 新增文章','news.add.event':'+ 新增活动','news.col.title':'标题','news.col.category':'分类','news.col.date':'日期','news.col.page':'文章页面','news.col.actions':'操作',
     'news.empty':'暂无文章，点击"+ 新增文章"添加。',
     'events.add':'+ 新增活动','events.col.date':'日期','events.col.event':'活动','events.col.location':'地点','events.col.time':'时间','events.col.actions':'操作',
     'events.empty':'暂无活动，点击"+ 新增活动"添加。',
+    'leadership.add':'+ 新增成员','leadership.col.name':'姓名','leadership.col.role':'职位','leadership.col.company':'所属机构','leadership.col.section':'分组','leadership.col.actions':'操作',
+    'leadership.empty':'暂无成员，点击"+ 新增成员"添加。','leadership.search':'按姓名、职位或机构搜索…',
+    'leadership.exec_title':'董事会','leadership.member_title':'会员机构',
     'directory.add':'+ 新增企业','directory.col.name':'企业名称','directory.col.category':'类别','directory.col.actions':'操作',
     'directory.empty':'暂无企业，点击"+ 新增企业"添加。','directory.search':'按企业名称或类别搜索…',
     'publish.desc':'完成修改后，导出 data.js 文件并放入网站的 content/ 文件夹即可。',
@@ -1754,20 +1866,25 @@ const L = {
     'modal.events.title.en':'标题（英文）','modal.events.location.en':'地点（英文）','modal.events.time':'时间','modal.events.desc.en':'简介（英文）',
     'modal.events.title.zh':'标题（中文）','modal.events.location.zh':'地点（中文）','modal.events.desc.zh':'简介（中文）',
     'modal.events.sec.reg':'报名','modal.events.reg.url':'报名链接',
+    'modal.leadership.add':'新增成员','modal.leadership.edit':'编辑成员','modal.leadership.section':'分组',
+    'modal.leadership.name.en':'姓名（英文）','modal.leadership.name.zh':'姓名（中文）',
+    'modal.leadership.role.en':'职位（英文）','modal.leadership.role.zh':'职位（中文）',
+    'modal.leadership.company.en':'所属机构（英文）','modal.leadership.company.zh':'所属机构（中文）',
     'modal.directory.add':'新增企业','modal.directory.edit':'编辑企业',
     'modal.directory.name.en':'企业名称（英文）','modal.directory.name.zh':'企业名称（中文）',
     'modal.directory.category.en':'类别（英文）','modal.directory.category.zh':'类别（中文）',
     'modal.directory.logo':'企业标志','modal.directory.logo.hint':'必填 — 会员名录页面只显示企业标志。',
     'modal.directory.optional':'选填 — 仅供后台识别，不会显示在会员名录页面',
-    'btn.cancel':'取消','btn.save.article':'保存文章','btn.save.event':'保存活动','btn.save.directory':'保存企业',
+    'btn.cancel':'取消','btn.save.article':'保存文章','btn.save.event':'保存活动','btn.save.leadership':'保存成员','btn.save.directory':'保存企业',
     'btn.edit':'编辑','btn.delete':'删除',
     'cat.news':'新闻','cat.event':'活动',
     'toast.article.saved':'文章已保存','toast.article.deleted':'文章已删除',
     'toast.event.saved':'活动已保存','toast.event.deleted':'活动已删除',
+    'toast.leadership.saved':'成员已保存','toast.leadership.deleted':'成员已删除',
     'toast.directory.saved':'企业已保存','toast.directory.deleted':'企业已删除',
     'toast.exported':'data.js 已下载，请放入 content/ 文件夹',
     'confirm.del.article':'确认删除此文章？','confirm.del.event':'确认删除此活动？',
-    'confirm.del.directory':'确认删除此企业？',
+    'confirm.del.leadership':'确认删除此成员？','confirm.del.directory':'确认删除此企业？',
     'alert.title':'请输入英文标题。',
     'alert.directory.logo':'请上传企业标志 — 会员名录页面只显示标志。',
     'dash.unsaved.yes':'有更改 — 导出以发布','dash.unsaved.no':'无',
@@ -1801,11 +1918,11 @@ function applyTranslations() {
     if (v) el.textContent = v;
   });
   // Lang buttons
-  ['login-en','app-en','news-en','ev-en','dir-en','pub-en','help-en'].forEach(id => {
+  ['login-en','app-en','news-en','ev-en','ld-en','dir-en','pub-en','help-en'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', lang === 'en');
   });
-  ['login-zh','app-zh','news-zh','ev-zh','dir-zh','pub-zh','help-zh'].forEach(id => {
+  ['login-zh','app-zh','news-zh','ev-zh','ld-zh','dir-zh','pub-zh','help-zh'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', lang === 'zh');
   });
@@ -1837,7 +1954,7 @@ function setLang(l) {
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', theme);
   const isDark = theme === 'dark';
-  ['', '-2', '-3', '-4', '-5', '-7', '-p'].forEach(sfx => {
+  ['', '-2', '-3', '-4', '-5', '-6', '-7', '-p'].forEach(sfx => {
     const m = document.getElementById('icon-moon' + sfx);
     const s = document.getElementById('icon-sun'  + sfx);
     if (m) m.style.display = isDark ? 'none' : 'block';
@@ -2034,6 +2151,7 @@ const DEFAULT_DATA = {
   ],
   news: [],
   events: [],
+  leadership: [],
   directory: [],
   trash: [],
   homepage: null
@@ -2052,10 +2170,8 @@ function loadData() {
   if (!data.categories) data.categories = DEFAULT_DATA.categories;
   if (!data.news) data.news = [];
   if (!data.events) data.events = [];
+  if (!data.leadership) data.leadership = [];
   if (!data.directory) data.directory = [];
-  // The Leadership section was removed; drop any leftovers from a
-  // localStorage draft saved before that so Publish can't resurrect them.
-  delete data.leadership;
   if (!data.trash) data.trash = [];
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
   try { intentionalDeletes = new Set(JSON.parse(localStorage.getItem(DELETES_KEY) || '[]')); }
@@ -2064,7 +2180,7 @@ function loadData() {
 
 // content/homepage.json isn't in DEFAULT_DATA (nothing sensible to default
 // to client-side) — it's always loaded fresh from disk in syncFromFiles,
-// same as news/events/directory.
+// same as news/events/leadership/directory.
 async function ensureHomepageLoaded() {
   if (data.homepage) return;
   try {
@@ -2280,6 +2396,8 @@ document.addEventListener('paste', e => {
 }, true);
 document.getElementById('news-modal').addEventListener('input',  () => { newsModalDirty = true; });
 document.getElementById('news-modal').addEventListener('change', () => { newsModalDirty = true; });
+document.getElementById('leadership-modal').addEventListener('input',  () => { leadershipModalDirty = true; });
+document.getElementById('leadership-modal').addEventListener('change', () => { leadershipModalDirty = true; });
 document.getElementById('directory-modal').addEventListener('input',  () => { directoryModalDirty = true; });
 document.getElementById('directory-modal').addEventListener('change', () => { directoryModalDirty = true; });
 
@@ -2317,6 +2435,7 @@ function showPanel(name, el) {
   if (name === 'homepage' || name === 'mission') ensureHomepageLoaded().then(renderHomepageForm);
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
+  if (name === 'leadership') renderLeadershipTable();
   if (name === 'directory') renderDirectoryTable();
   if (name === 'dashboard') renderDashboard();
   if (name === 'publish') updateLocalBackendStatus();
@@ -2363,6 +2482,7 @@ function renderAll() {
   renderDashboard();
   renderNewsTable();
   renderEventsTable();
+  renderLeadershipTable();
   renderDirectoryTable();
   updateDirtyIndicator();
   updateTrashBadge();
@@ -2669,7 +2789,7 @@ function deleteEvent(idx) {
    Backed by data.homepage (loaded fresh from content/homepage.json
    via syncFromFiles/ensureHomepageLoaded), published the same way
    as news/events. Programs and Mission Objectives are simple
-   reorderable arrays, same pattern as moveDirectory.
+   reorderable arrays, same pattern as moveLeadership.
 ================================================================ */
 const PROGRAM_ICON_OPTIONS = ['trade', 'network', 'culture', 'legal', 'media', 'health', 'star'];
 
@@ -2973,6 +3093,118 @@ function saveHomepageContent() {
 }
 
 /* ================================================================
+   LEADERSHIP CRUD
+================================================================ */
+let editingLeadershipId = null;
+let leadershipModalDirty = false;
+
+function renderLeadershipTable() {
+  const tbody = document.getElementById('leadership-rows');
+  if (!tbody) return;
+  if (!data.leadership.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">${T('leadership.empty')}</td></tr>`;
+    return;
+  }
+  const q = (document.getElementById('leadership-search')?.value || '').trim().toLowerCase();
+  let rows = data.leadership.map((m, i) => ({ m, i }));
+  if (q) {
+    rows = rows.filter(({ m }) => [m.name_en, m.name_zh, m.role_en, m.role_zh, m.company_en, m.company_zh]
+      .some(v => (v || '').toLowerCase().includes(q)));
+  }
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No members match "${esc(q)}".</td></tr>`;
+    return;
+  }
+  // Reordering acts on section-relative neighbors (skipping past the other
+  // section) so "up"/"down" always visibly moves the person within their
+  // own public-site grid — and is hidden while search-filtered, since the
+  // move targets full-array positions that may not be visible in the filter.
+  tbody.innerHTML = rows.map(({ m, i }) => `
+    <tr>
+      <td><div class="cell-title">${esc(m.name_en)}</div><div class="cell-sub">${esc(m.name_zh)}</div></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.role_zh || m.role_en) : (m.role_en || m.role_zh))}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.company_zh || m.company_en) : (m.company_en || m.company_zh))}</td>
+      <td>${m.section === 'member' ? T('leadership.member_title') : T('leadership.exec_title')}</td>
+      <td>
+        ${q ? '' : `
+          <button class="btn-move" onclick="moveLeadership(${i},-1)" ${sectionNeighbor(data.leadership,i,-1)<0?'disabled':''} title="Move up">&#9650;</button>
+          <button class="btn-move" onclick="moveLeadership(${i},1)" ${sectionNeighbor(data.leadership,i,1)<0?'disabled':''} title="Move down">&#9660;</button>
+        `}
+        <button class="btn-edit" onclick="openLeadershipModal(${i})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteLeadership(${i})">${T('btn.delete')}</button>
+      </td>
+    </tr>`).join('');
+}
+
+// Finds the nearest neighbor in the given direction that shares the same
+// "section" as list[idx], skipping past items from the other section.
+// Returns -1 if there's no such neighbor (already first/last in section).
+function sectionNeighbor(list, idx, dir) {
+  let j = idx + dir;
+  while (j >= 0 && j < list.length && list[j].section !== list[idx].section) j += dir;
+  return (j >= 0 && j < list.length) ? j : -1;
+}
+
+function moveLeadership(idx, dir) {
+  const j = sectionNeighbor(data.leadership, idx, dir);
+  if (j < 0) return;
+  [data.leadership[idx], data.leadership[j]] = [data.leadership[j], data.leadership[idx]];
+  persistData(); renderLeadershipTable();
+}
+
+function openLeadershipModal(idx) {
+  editingLeadershipId = idx !== undefined ? idx : null;
+  document.getElementById('leadership-modal-title').textContent = idx !== undefined ? T('modal.leadership.edit') : T('modal.leadership.add');
+  const m = idx !== undefined ? data.leadership[idx] : {};
+  document.getElementById('ld-id').value        = m.id || '';
+  document.getElementById('ld-section').value   = m.section === 'member' ? 'member' : 'executive';
+  document.getElementById('ld-name-en').value    = m.name_en || '';
+  document.getElementById('ld-name-zh').value    = m.name_zh || '';
+  document.getElementById('ld-role-en').value    = m.role_en || '';
+  document.getElementById('ld-role-zh').value    = m.role_zh || '';
+  document.getElementById('ld-company-en').value = m.company_en || '';
+  document.getElementById('ld-company-zh').value = m.company_zh || '';
+  applyTranslations();
+  leadershipModalDirty = false;
+  document.getElementById('leadership-modal').style.display = 'flex';
+}
+
+function closeLeadershipModal() {
+  if (leadershipModalDirty && !confirm('You have unsaved changes. Are you sure you want to close?')) return;
+  document.getElementById('leadership-modal').style.display = 'none';
+}
+
+function saveLeadership() {
+  const nameEn = document.getElementById('ld-name-en').value.trim();
+  const nameZh = document.getElementById('ld-name-zh').value.trim();
+  const id = document.getElementById('ld-id').value.trim() || slugify(nameEn || nameZh) || uid();
+  const item = {
+    id,
+    section:    document.getElementById('ld-section').value,
+    name_en:    nameEn,
+    name_zh:    nameZh,
+    role_en:    document.getElementById('ld-role-en').value.trim(),
+    role_zh:    document.getElementById('ld-role-zh').value.trim(),
+    company_en: document.getElementById('ld-company-en').value.trim(),
+    company_zh: document.getElementById('ld-company-zh').value.trim()
+  };
+  if (!item.name_en && !item.name_zh) { alert(T('alert.title')); return; }
+  if (editingLeadershipId !== null) data.leadership[editingLeadershipId] = item;
+  else data.leadership.push(item);
+  leadershipModalDirty = false;
+  persistData(); renderLeadershipTable(); closeLeadershipModal();
+  toast(T('toast.leadership.saved'));
+}
+
+function deleteLeadership(idx) {
+  if (!confirm(T('confirm.del.leadership'))) return;
+  const [item] = data.leadership.splice(idx, 1);
+  if (item) recordDelete(item.id);
+  persistData(); renderLeadershipTable();
+  toast(T('toast.leadership.deleted'));
+}
+
+/* ================================================================
    DIRECTORY CRUD
 ================================================================ */
 let editingDirectoryId = null;
@@ -3090,7 +3322,7 @@ function deleteDirectory(idx) {
    of the old GitHub Contents API + Personal Access Token.
 ================================================================ */
 function exportData() {
-  const files = [['news.json', { items: data.news }], ['events.json', { items: data.events }], ['directory.json', { items: data.directory }]];
+  const files = [['news.json', { items: data.news }], ['events.json', { items: data.events }], ['leadership.json', { items: data.leadership }], ['directory.json', { items: data.directory }]];
   if (data.homepage) files.push(['homepage.json', data.homepage]);
   files.forEach(([name, obj]) => {
     const blob = new Blob([JSON.stringify(obj, null, 2) + '\n'], { type: 'application/json' });
@@ -3257,7 +3489,7 @@ async function commitFilesViaGitGateway(files, message, assets) {
 // confirm rather than letting a blind overwrite shrink the site. Returns
 // { cancelled } so publishToSite can bail out cleanly.
 async function reconcileBeforePublish() {
-  const collections = ['news', 'events', 'directory'];
+  const collections = ['news', 'events', 'leadership', 'directory'];
   let disk;
   try {
     const responses = await Promise.all(
@@ -3317,6 +3549,7 @@ async function publishToSite() {
     const files = [
       { path: 'content/news.json',       obj: { items: data.news },       collectionName: 'news' },
       { path: 'content/events.json',     obj: { items: data.events },     collectionName: 'events' },
+      { path: 'content/leadership.json', obj: { items: data.leadership }, collectionName: 'leadership' },
       { path: 'content/directory.json',  obj: { items: data.directory },  collectionName: 'directory' }
     ];
     if (data.homepage) files.push({ path: 'content/homepage.json', obj: data.homepage, collectionName: 'homepage' });
@@ -3361,8 +3594,8 @@ async function publishToSite() {
 }
 
 /* ================================================================
-   SYNC — reload content/news.json, events.json and directory.json
-   from disk, so this stays the shared source of truth
+   SYNC — reload content/news.json, events.json, leadership.json and
+   directory.json from disk, so this stays the shared source of truth
    (e.g. after someone else published, or after pulling the latest
    from git).
 ================================================================ */
@@ -3385,22 +3618,24 @@ async function syncFromFiles(silent) {
   if (!silent) toast(T('sync.doing'));
 
   try {
-    const [newsRes, eventsRes, directoryRes, homepageRes] = await Promise.all([
+    const [newsRes, eventsRes, leadershipRes, directoryRes, homepageRes] = await Promise.all([
       fetch('../content/news.json?_=' + Date.now()),
       fetch('../content/events.json?_=' + Date.now()),
+      fetch('../content/leadership.json?_=' + Date.now()),
       fetch('../content/directory.json?_=' + Date.now()),
       fetch('../content/homepage.json?_=' + Date.now())
     ]);
-    if (!newsRes.ok || !eventsRes.ok || !directoryRes.ok || !homepageRes.ok) throw new Error('Could not load content files');
+    if (!newsRes.ok || !eventsRes.ok || !leadershipRes.ok || !directoryRes.ok || !homepageRes.ok) throw new Error('Could not load content files');
     const newsJson = await newsRes.json();
     const eventsJson = await eventsRes.json();
+    const leadershipJson = await leadershipRes.json();
     const directoryJson = await directoryRes.json();
     const homepageJson = await homepageRes.json();
 
     if (mode === 'merge') {
       // Keep unpublished edits; only recover published items the draft lacks.
       const recovered = [];
-      for (const [key, json] of [['news', newsJson], ['events', eventsJson], ['directory', directoryJson]]) {
+      for (const [key, json] of [['news', newsJson], ['events', eventsJson], ['leadership', leadershipJson], ['directory', directoryJson]]) {
         const r = reconcileList(data[key], json.items || [], intentionalDeletes);
         data[key] = r.list;
         recovered.push(...r.recovered);
@@ -3414,6 +3649,7 @@ async function syncFromFiles(silent) {
     } else {
       data.news = newsJson.items || [];
       data.events = eventsJson.items || [];
+      data.leadership = leadershipJson.items || [];
       data.directory = directoryJson.items || [];
       data.homepage = homepageJson;
       if (!data.categories) data.categories = DEFAULT_DATA.categories;
