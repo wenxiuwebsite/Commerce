@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "阳光青少年教育基金会",
+      "section": "executive",
+      "name_en": "",
+      "name_zh": "阳光青少年教育基金会",
+      "role_en": "",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "global-land",
+      "section": "executive",
+      "name_en": "Global Land",
+      "name_zh": "Global Land",
+      "role_en": "",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "软通动力",
+      "section": "executive",
+      "name_en": "",
+      "name_zh": "软通动力",
+      "role_en": "",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
       "id": "当代绿色置业",
       "section": "executive",
       "name_en": "",
