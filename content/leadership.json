@@ -1,18 +1,7 @@
 {
   "items": [
     {
-      "id": "阳光青少年教育基金会",
-      "section": "executive",
-      "name_en": "",
-      "name_zh": "阳光青少年教育基金会",
-      "role_en": "",
-      "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
       "id": "global-land",
-      "section": "executive",
       "name_en": "Global Land",
       "name_zh": "Global Land",
       "role_en": "",
@@ -21,8 +10,16 @@
       "company_zh": ""
     },
     {
+      "id": "阳光青少年教育基金会",
+      "name_en": "",
+      "name_zh": "阳光青少年教育基金会",
+      "role_en": "",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
       "id": "软通动力",
-      "section": "executive",
       "name_en": "",
       "name_zh": "软通动力",
       "role_en": "",
@@ -32,7 +29,6 @@
     },
     {
       "id": "当代绿色置业",
-      "section": "executive",
       "name_en": "",
       "name_zh": "当代绿色置业",
       "role_en": "Council Member",
@@ -42,7 +38,6 @@
     },
     {
       "id": "百利药业",
-      "section": "executive",
       "name_en": "",
       "name_zh": "百利药业",
       "role_en": "Council Member",
@@ -52,7 +47,6 @@
     },
     {
       "id": "梅高国际置业",
-      "section": "executive",
       "name_en": "My International",
       "name_zh": "梅高国际置业",
       "role_en": "Council Member",
@@ -62,7 +56,6 @@
     },
     {
       "id": "jinjing-wu",
-      "section": "executive",
       "name_en": "Lili Lu",
       "name_zh": "吕莉莉",
       "role_en": "President",
@@ -72,7 +65,6 @@
     },
     {
       "id": "lin-yuan",
-      "section": "executive",
       "name_en": "Evan Lin",
       "name_zh": "",
       "role_en": "Vice President",
@@ -82,7 +74,6 @@
     },
     {
       "id": "cai-xia",
-      "section": "executive",
       "name_en": "",
       "name_zh": "曹霄鹤",
       "role_en": "General Legal Counsel",
@@ -92,7 +83,6 @@
     },
     {
       "id": "wa-branch-director",
-      "section": "executive",
       "name_en": "Create World",
       "name_zh": "拓宏美国开发公司",
       "role_en": "Council Member",
@@ -102,7 +92,6 @@
     },
     {
       "id": "modern-land-usa",
-      "section": "executive",
       "name_en": "Onelin Capital Corporation",
       "name_zh": "一林投资",
       "role_en": "Council Member",
@@ -112,7 +101,6 @@
     },
     {
       "id": "isoftstone",
-      "section": "executive",
       "name_en": "",
       "name_zh": "工银美国",
       "role_en": "Council Member",
