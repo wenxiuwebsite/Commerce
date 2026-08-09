@@ -1,10 +1,37 @@
 {
   "items": [
     {
+      "id": "jinjing-wu",
+      "name_en": "Lili Lu",
+      "name_zh": "吕莉莉",
+      "role_en": "President",
+      "role_zh": "会长",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "lin-yuan",
+      "name_en": "Evan Lin",
+      "name_zh": "",
+      "role_en": "Vice President",
+      "role_zh": "副会长",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "cai-xia",
+      "name_en": "",
+      "name_zh": "曹霄鹤",
+      "role_en": "General Legal Counsel",
+      "role_zh": "总法律顾问",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
       "id": "global-land",
       "name_en": "Global Land",
       "name_zh": "Global Land",
-      "role_en": "",
+      "role_en": "Council Member",
       "role_zh": "理事单位",
       "company_en": "",
       "company_zh": ""
@@ -13,7 +40,7 @@
       "id": "阳光青少年教育基金会",
       "name_en": "",
       "name_zh": "阳光青少年教育基金会",
-      "role_en": "",
+      "role_en": "Council Member",
       "role_zh": "理事单位",
       "company_en": "",
       "company_zh": ""
@@ -51,33 +78,6 @@
       "name_zh": "梅高国际置业",
       "role_en": "Council Member",
       "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "jinjing-wu",
-      "name_en": "Lili Lu",
-      "name_zh": "吕莉莉",
-      "role_en": "President",
-      "role_zh": "会长",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "lin-yuan",
-      "name_en": "Evan Lin",
-      "name_zh": "",
-      "role_en": "Vice President",
-      "role_zh": "副会长",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "cai-xia",
-      "name_en": "",
-      "name_zh": "曹霄鹤",
-      "role_en": "General Legal Counsel",
-      "role_zh": "总法律顾问",
       "company_en": "",
       "company_zh": ""
     },
