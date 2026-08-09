@@ -157,6 +157,22 @@
     .btn-move:hover:not(:disabled) { background: var(--accent-lt); color: var(--accent); }
     .btn-move:disabled { opacity: 0.25; cursor: default; }
 
+    /* Drag-to-reorder grip (Leadership + Directory tables) */
+    .drag-cell { width: 34px; padding-right: 0 !important; }
+    .drag-handle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 26px; color: var(--muted); cursor: grab;
+      border-radius: 4px; transition: background var(--t), color var(--t);
+    }
+    .drag-handle:hover { background: var(--accent-lt); color: var(--accent); }
+    .drag-handle:active { cursor: grabbing; }
+    tr.row-dragging td { opacity: 0.4; }
+    /* The drop indicator is an inset shadow on the row's cells rather than a
+       separate element, so it spans the full table width without disturbing
+       row heights mid-drag (which would make the target jump under the cursor). */
+    tr.drop-above td { box-shadow: inset 0 2px 0 0 var(--accent); }
+    tr.drop-below td { box-shadow: inset 0 -2px 0 0 var(--accent); }
+
     .panel-body { padding: 32px; }
 
     /* Table */
@@ -1073,10 +1089,10 @@
             <table>
               <thead>
                 <tr>
+                  <th style="width:34px"></th>
                   <th data-i18n="leadership.col.name">Name</th>
                   <th data-i18n="leadership.col.role">Role</th>
                   <th data-i18n="leadership.col.company">Company</th>
-                  <th style="width:110px" data-i18n="leadership.col.section">Section</th>
                   <th style="width:130px" data-i18n="leadership.col.actions">Actions</th>
                 </tr>
               </thead>
@@ -1110,6 +1126,7 @@
             <table>
               <thead>
                 <tr>
+                  <th style="width:34px"></th>
                   <th style="width:60px"></th>
                   <th data-i18n="directory.col.name">Company</th>
                   <th data-i18n="directory.col.category">Category</th>
@@ -1616,15 +1633,6 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="ld-id">
-      <div class="form-row full">
-        <div class="form-group">
-          <label class="form-label" data-i18n="modal.leadership.section">Section</label>
-          <select class="form-input" id="ld-section">
-            <option value="executive" data-i18n="leadership.exec_title">Board of Directors</option>
-            <option value="member" data-i18n="leadership.member_title">Member Organizations</option>
-          </select>
-        </div>
-      </div>
       <div class="form-section" data-i18n="modal.sec.en">English Content</div>
       <div class="form-row">
         <div class="form-group">
@@ -1771,9 +1779,8 @@ const L = {
     'news.empty':'No articles yet. Click + New Article to add one.',
     'events.add':'+ New Event','events.col.date':'Date','events.col.event':'Event','events.col.location':'Location','events.col.time':'Time','events.col.actions':'Actions',
     'events.empty':'No events yet. Click + New Event to add one.',
-    'leadership.add':'+ New Member','leadership.col.name':'Name','leadership.col.role':'Role','leadership.col.company':'Company','leadership.col.section':'Section','leadership.col.actions':'Actions',
+    'leadership.add':'+ New Member','leadership.col.name':'Name','leadership.col.role':'Role','leadership.col.company':'Company','leadership.col.actions':'Actions',
     'leadership.empty':'No members yet. Click + New Member to add one.','leadership.search':'Search by name, role, or company...',
-    'leadership.exec_title':'Board of Directors','leadership.member_title':'Member Organizations',
     'directory.add':'+ New Company','directory.col.name':'Company','directory.col.category':'Category','directory.col.actions':'Actions',
     'directory.empty':'No companies yet. Click + New Company to add one.','directory.search':'Search by company or category...',
     'publish.desc':'After making changes, export a data.js file and place it in the content/ folder of your site.',
@@ -1794,7 +1801,7 @@ const L = {
     'modal.events.title.en':'Title (English)','modal.events.location.en':'Location (English)','modal.events.time':'Time','modal.events.desc.en':'Description (English)',
     'modal.events.title.zh':'Title (Chinese)','modal.events.location.zh':'Location (Chinese)','modal.events.desc.zh':'Description (Chinese)',
     'modal.events.sec.reg':'Registration','modal.events.reg.url':'Register URL',
-    'modal.leadership.add':'Add Member','modal.leadership.edit':'Edit Member','modal.leadership.section':'Section',
+    'modal.leadership.add':'Add Member','modal.leadership.edit':'Edit Member',
     'modal.leadership.name.en':'Name (English)','modal.leadership.name.zh':'Name (Chinese)',
     'modal.leadership.role.en':'Role (English)','modal.leadership.role.zh':'Role (Chinese)',
     'modal.leadership.company.en':'Company (English)','modal.leadership.company.zh':'Company (Chinese)',
@@ -1843,9 +1850,8 @@ const L = {
     'news.empty':'暂无文章，点击"+ 新增文章"添加。',
     'events.add':'+ 新增活动','events.col.date':'日期','events.col.event':'活动','events.col.location':'地点','events.col.time':'时间','events.col.actions':'操作',
     'events.empty':'暂无活动，点击"+ 新增活动"添加。',
-    'leadership.add':'+ 新增成员','leadership.col.name':'姓名','leadership.col.role':'职位','leadership.col.company':'所属机构','leadership.col.section':'分组','leadership.col.actions':'操作',
+    'leadership.add':'+ 新增成员','leadership.col.name':'姓名','leadership.col.role':'职位','leadership.col.company':'所属机构','leadership.col.actions':'操作',
     'leadership.empty':'暂无成员，点击"+ 新增成员"添加。','leadership.search':'按姓名、职位或机构搜索…',
-    'leadership.exec_title':'董事会','leadership.member_title':'会员机构',
     'directory.add':'+ 新增企业','directory.col.name':'企业名称','directory.col.category':'类别','directory.col.actions':'操作',
     'directory.empty':'暂无企业，点击"+ 新增企业"添加。','directory.search':'按企业名称或类别搜索…',
     'publish.desc':'完成修改后，导出 data.js 文件并放入网站的 content/ 文件夹即可。',
@@ -1866,7 +1872,7 @@ const L = {
     'modal.events.title.en':'标题（英文）','modal.events.location.en':'地点（英文）','modal.events.time':'时间','modal.events.desc.en':'简介（英文）',
     'modal.events.title.zh':'标题（中文）','modal.events.location.zh':'地点（中文）','modal.events.desc.zh':'简介（中文）',
     'modal.events.sec.reg':'报名','modal.events.reg.url':'报名链接',
-    'modal.leadership.add':'新增成员','modal.leadership.edit':'编辑成员','modal.leadership.section':'分组',
+    'modal.leadership.add':'新增成员','modal.leadership.edit':'编辑成员',
     'modal.leadership.name.en':'姓名（英文）','modal.leadership.name.zh':'姓名（中文）',
     'modal.leadership.role.en':'职位（英文）','modal.leadership.role.zh':'职位（中文）',
     'modal.leadership.company.en':'所属机构（英文）','modal.leadership.company.zh':'所属机构（中文）',
@@ -2164,13 +2170,26 @@ let editingNewsId = null;
 let newsModalDirty = false;
 let editingEventId = null;
 
+// Leadership rows used to carry a "section" field splitting the public page
+// into a Board of Directors grid and a Member Organizations grid. That split
+// is retired: leadership.html renders one flat grid, so the field is dead and
+// any surviving "member" row would be invisible on the site while still
+// sitting in the data. Strip the field and drop those rows wherever a list
+// arrives — an older draft in this browser, or a content file published
+// before the change — so Publish can't push them back.
+function normalizeLeadership(list) {
+  return (Array.isArray(list) ? list : [])
+    .filter(m => m.section !== 'member')
+    .map(m => { const { section, ...rest } = m; return rest; });
+}
+
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) { try { data = JSON.parse(saved); } catch(e) {} }
   if (!data.categories) data.categories = DEFAULT_DATA.categories;
   if (!data.news) data.news = [];
   if (!data.events) data.events = [];
-  if (!data.leadership) data.leadership = [];
+  data.leadership = normalizeLeadership(data.leadership);
   if (!data.directory) data.directory = [];
   if (!data.trash) data.trash = [];
   dirty = localStorage.getItem(DIRTY_KEY) === 'true';
@@ -2216,21 +2235,22 @@ function clearIntentionalDeletes() {
 // draft is missing (unless deleted here on purpose), keep items newly created
 // here, and honour deletes made here. Returns the merged list and the items
 // that had to be recovered (live on disk, absent from the draft).
+//
+// ORDER: the draft leads and its order is preserved verbatim. Manual ordering
+// (the up/down arrows) is itself an edit, so rebuilding the list in disk order
+// — as this once did — silently reverted every reorder at Publish time: the
+// admin table showed the new order, the published file kept the old one.
+// Recovered items are appended instead, which never disturbs the order set here.
 function reconcileList(memList, diskList, deletes) {
   memList = Array.isArray(memList) ? memList : [];
   diskList = Array.isArray(diskList) ? diskList : [];
-  const memById = new Map(memList.map(x => [x.id, x]));
-  const diskIds = new Set(diskList.map(x => x.id));
-  const out = [];
+  const memIds = new Set(memList.map(x => x.id));
+  const out = memList.slice();  // the draft, in the draft's order
   const recovered = [];
-  // Items created in this browser (not yet on disk) stay at the top, as new
-  // articles do via unshift.
-  for (const m of memList) if (!diskIds.has(m.id)) out.push(m);
-  // Then everything the published file has, in its order.
   for (const d of diskList) {
-    if (deletes.has(d.id)) continue;                     // deleted here on purpose → drop
-    if (memById.has(d.id)) out.push(memById.get(d.id));  // keep the locally edited version
-    else { out.push(d); recovered.push(d); }             // missing from the draft → recover
+    if (memIds.has(d.id)) continue;  // already in the draft → the local version wins
+    if (deletes.has(d.id)) continue; // deleted here on purpose → stay deleted
+    out.push(d); recovered.push(d);  // live on disk, missing from the draft → recover
   }
   return { list: out, recovered };
 }
@@ -3093,6 +3113,99 @@ function saveHomepageContent() {
 }
 
 /* ================================================================
+   DRAG TO REORDER — Leadership and Directory are hand-ordered: the
+   table's row order IS the order the public page renders. Rows are
+   dragged by the grip in the first column, and stay non-draggable
+   until that grip is pressed, so a stray drag on a name or a button
+   can't silently reorder the live site.
+
+   Wired fresh after every render (the rows are new DOM each time).
+   The list is passed as a getter, not the array itself, because a
+   Sync swaps data.leadership / data.directory for new arrays — a
+   captured reference would go on reordering the discarded one.
+
+   Drag-and-drop is mouse-only (HTML5 DnD does not fire for touch),
+   which is why the ▲▼ buttons stay: they're the keyboard/touch path.
+================================================================ */
+const DRAG_GRIP = '<svg width="10" height="14" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true">' +
+  '<circle cx="2" cy="3" r="1.4"/><circle cx="8" cy="3" r="1.4"/>' +
+  '<circle cx="2" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/>' +
+  '<circle cx="2" cy="13" r="1.4"/><circle cx="8" cy="13" r="1.4"/></svg>';
+
+let dragFrom = null;  // index the drag started at
+let dragTo   = null;  // insertion point under the cursor, in pre-move coordinates
+
+// `q` is the table's active search term: while filtering, data-idx points into
+// the full array but the rows on screen are a subset, so "drop between these
+// two" has no well-defined meaning. Same reason the ▲▼ buttons are hidden.
+function dragCellHtml(q) {
+  return '<td class="drag-cell">' +
+    (q ? '' : `<span class="drag-handle" title="Drag to reorder" onmousedown="armRowDrag(this)">${DRAG_GRIP}</span>`) +
+    '</td>';
+}
+
+function armRowDrag(el) {
+  const tr = el.closest('tr');
+  if (!tr) return;
+  tr.draggable = true;
+  // A press on the grip that never turns into a drag has to disarm the row
+  // again — otherwise it stays draggable from anywhere (a name, a button)
+  // until some later drag ends. A real drag suppresses mouseup, so the
+  // guard checks that no drag is in flight before disarming.
+  document.addEventListener('mouseup', () => {
+    if (dragFrom === null) tr.draggable = false;
+  }, { once: true });
+}
+
+function enableRowDrag(tbodyId, getList, rerender) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  const clearMarks = () => tbody.querySelectorAll('tr').forEach(r =>
+    r.classList.remove('drop-above', 'drop-below', 'row-dragging'));
+
+  tbody.querySelectorAll('tr[data-idx]').forEach(tr => {
+    tr.addEventListener('dragstart', e => {
+      dragFrom = Number(tr.dataset.idx);
+      dragTo = null;
+      tr.classList.add('row-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(dragFrom)); // Firefox won't start a drag without a payload
+    });
+    tr.addEventListener('dragover', e => {
+      if (dragFrom === null) return;  // something else is being dragged (a file, say)
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = tr.getBoundingClientRect();
+      const below = e.clientY > rect.top + rect.height / 2;
+      tbody.querySelectorAll('tr').forEach(r => r.classList.remove('drop-above', 'drop-below'));
+      tr.classList.add(below ? 'drop-below' : 'drop-above');
+      dragTo = Number(tr.dataset.idx) + (below ? 1 : 0);
+    });
+    tr.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragFrom === null || dragTo === null) return;
+      // dragTo is where the row should land *before* it is lifted out; pulling
+      // it from an earlier position shifts everything after it up by one.
+      const to = dragTo > dragFrom ? dragTo - 1 : dragTo;
+      if (to !== dragFrom) {
+        const list = getList();
+        const [item] = list.splice(dragFrom, 1);
+        list.splice(to, 0, item);
+        persistData();
+      }
+      dragFrom = dragTo = null;
+      clearMarks();
+      rerender();
+    });
+    tr.addEventListener('dragend', () => {
+      tr.draggable = false;
+      dragFrom = dragTo = null;
+      clearMarks();
+    });
+  });
+}
+
+/* ================================================================
    LEADERSHIP CRUD
 ================================================================ */
 let editingLeadershipId = null;
@@ -3115,40 +3228,34 @@ function renderLeadershipTable() {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No members match "${esc(q)}".</td></tr>`;
     return;
   }
-  // Reordering acts on section-relative neighbors (skipping past the other
-  // section) so "up"/"down" always visibly moves the person within their
-  // own public-site grid — and is hidden while search-filtered, since the
-  // move targets full-array positions that may not be visible in the filter.
+  // This table's order IS the public page's order — leadership.html renders
+  // one flat grid straight from the array. Reorder by dragging the grip;
+  // the ▲▼ buttons do the same one step at a time. Both are hidden while
+  // search-filtered, since they act on full-array positions that may not be
+  // visible in the filter.
   tbody.innerHTML = rows.map(({ m, i }) => `
-    <tr>
+    <tr data-idx="${i}">
+      ${dragCellHtml(q)}
       <td><div class="cell-title">${esc(m.name_en)}</div><div class="cell-sub">${esc(m.name_zh)}</div></td>
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.role_zh || m.role_en) : (m.role_en || m.role_zh))}</td>
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.company_zh || m.company_en) : (m.company_en || m.company_zh))}</td>
-      <td>${m.section === 'member' ? T('leadership.member_title') : T('leadership.exec_title')}</td>
       <td>
         ${q ? '' : `
-          <button class="btn-move" onclick="moveLeadership(${i},-1)" ${sectionNeighbor(data.leadership,i,-1)<0?'disabled':''} title="Move up">&#9650;</button>
-          <button class="btn-move" onclick="moveLeadership(${i},1)" ${sectionNeighbor(data.leadership,i,1)<0?'disabled':''} title="Move down">&#9660;</button>
+          <button class="btn-move" onclick="moveLeadership(${i},-1)" ${i===0?'disabled':''} title="Move up">&#9650;</button>
+          <button class="btn-move" onclick="moveLeadership(${i},1)" ${i===data.leadership.length-1?'disabled':''} title="Move down">&#9660;</button>
         `}
         <button class="btn-edit" onclick="openLeadershipModal(${i})">${T('btn.edit')}</button>
         <button class="btn-danger" onclick="deleteLeadership(${i})">${T('btn.delete')}</button>
       </td>
     </tr>`).join('');
-}
-
-// Finds the nearest neighbor in the given direction that shares the same
-// "section" as list[idx], skipping past items from the other section.
-// Returns -1 if there's no such neighbor (already first/last in section).
-function sectionNeighbor(list, idx, dir) {
-  let j = idx + dir;
-  while (j >= 0 && j < list.length && list[j].section !== list[idx].section) j += dir;
-  return (j >= 0 && j < list.length) ? j : -1;
+  enableRowDrag('leadership-rows', () => data.leadership, renderLeadershipTable);
 }
 
 function moveLeadership(idx, dir) {
-  const j = sectionNeighbor(data.leadership, idx, dir);
-  if (j < 0) return;
-  [data.leadership[idx], data.leadership[j]] = [data.leadership[j], data.leadership[idx]];
+  const list = data.leadership;
+  const j = idx + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[idx], list[j]] = [list[j], list[idx]];
   persistData(); renderLeadershipTable();
 }
 
@@ -3157,7 +3264,6 @@ function openLeadershipModal(idx) {
   document.getElementById('leadership-modal-title').textContent = idx !== undefined ? T('modal.leadership.edit') : T('modal.leadership.add');
   const m = idx !== undefined ? data.leadership[idx] : {};
   document.getElementById('ld-id').value        = m.id || '';
-  document.getElementById('ld-section').value   = m.section === 'member' ? 'member' : 'executive';
   document.getElementById('ld-name-en').value    = m.name_en || '';
   document.getElementById('ld-name-zh').value    = m.name_zh || '';
   document.getElementById('ld-role-en').value    = m.role_en || '';
@@ -3180,7 +3286,6 @@ function saveLeadership() {
   const id = document.getElementById('ld-id').value.trim() || slugify(nameEn || nameZh) || uid();
   const item = {
     id,
-    section:    document.getElementById('ld-section').value,
     name_en:    nameEn,
     name_zh:    nameZh,
     role_en:    document.getElementById('ld-role-en').value.trim(),
@@ -3190,7 +3295,10 @@ function saveLeadership() {
   };
   if (!item.name_en && !item.name_zh) { alert(T('alert.title')); return; }
   if (editingLeadershipId !== null) data.leadership[editingLeadershipId] = item;
-  else data.leadership.push(item);
+  // New rows go to the top, where staff can see the row they just created
+  // without scrolling to the end of the list and wondering if the save failed.
+  // Drag it down to its real position from there.
+  else data.leadership.unshift(item);
   leadershipModalDirty = false;
   persistData(); renderLeadershipTable(); closeLeadershipModal();
   toast(T('toast.leadership.saved'));
@@ -3214,7 +3322,7 @@ function renderDirectoryTable() {
   const tbody = document.getElementById('directory-rows');
   if (!tbody) return;
   if (!data.directory.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">${T('directory.empty')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">${T('directory.empty')}</td></tr>`;
     return;
   }
   const q = (document.getElementById('directory-search')?.value || '').trim().toLowerCase();
@@ -3224,12 +3332,13 @@ function renderDirectoryTable() {
       .some(v => (v || '').toLowerCase().includes(q)));
   }
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">No companies match "${esc(q)}".</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No companies match "${esc(q)}".</td></tr>`;
     return;
   }
   const bldgIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
   tbody.innerHTML = rows.map(({ m, i }) => `
-    <tr>
+    <tr data-idx="${i}">
+      ${dragCellHtml(q)}
       <td>${m.logo ? `<img src="${esc(previewSrc(m.logo))}" class="thumb" onerror="this.style.display='none'">` : `<div class="no-img">${bldgIcon}</div>`}</td>
       <td><div class="cell-title">${esc(m.name_en || m.name_zh) || logoLabel(m)}</div><div class="cell-sub">${esc(m.name_en ? m.name_zh : '')}</div></td>
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.category_zh || m.category_en) : (m.category_en || m.category_zh))}</td>
@@ -3242,6 +3351,7 @@ function renderDirectoryTable() {
         <button class="btn-danger" onclick="deleteDirectory(${i})">${T('btn.delete')}</button>
       </td>
     </tr>`).join('');
+  enableRowDrag('directory-rows', () => data.directory, renderDirectoryTable);
 }
 
 // A company name is optional now that the public card is logo-only, so a
@@ -3301,7 +3411,7 @@ function saveDirectory() {
   };
   if (!item.logo) { alert(T('alert.directory.logo')); return; }
   if (editingDirectoryId !== null) data.directory[editingDirectoryId] = item;
-  else data.directory.push(item);
+  else data.directory.unshift(item);  // top of the list, same as Leadership — see saveLeadership
   directoryModalDirty = false;
   persistData(); renderDirectoryTable(); closeDirectoryModal();
   toast(T('toast.directory.saved'));
@@ -3499,6 +3609,7 @@ async function reconcileBeforePublish() {
     const jsons = await Promise.all(responses.map(r => r.json()));
     disk = {};
     collections.forEach((c, i) => { disk[c] = jsons[i].items || []; });
+    disk.leadership = normalizeLeadership(disk.leadership);
   } catch (e) {
     return { cancelled: false }; // offline / fetch failed → don't block the user
   }
@@ -3631,6 +3742,7 @@ async function syncFromFiles(silent) {
     const leadershipJson = await leadershipRes.json();
     const directoryJson = await directoryRes.json();
     const homepageJson = await homepageRes.json();
+    leadershipJson.items = normalizeLeadership(leadershipJson.items);
 
     if (mode === 'merge') {
       // Keep unpublished edits; only recover published items the draft lacks.
