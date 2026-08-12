@@ -91,9 +91,9 @@
       </div>
       <div class="footer-contact">
         <h4 data-i18n="nav.contact">Contact</h4>
-        <p>Bellevue, WA</p>
-        <p>(425) 829-5658</p>
-        <p>info@ccc-wa.org</p>
+        <p id="footer-contact-city">Bellevue, WA</p>
+        <p id="footer-contact-phone">(425) 829-5658</p>
+        <p id="footer-contact-email">info@ccc-wa.org</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -109,22 +109,43 @@
   const footerPH = document.getElementById('footer-ph');
   if (footerPH) footerPH.outerHTML = FOOTER;
 
-  // The footer's bottom link row (Facebook, etc.) is editable via the admin
-  // panel's Homepage tab. Static Facebook link above is the pre-JS fallback;
-  // this replaces it once content/homepage.json loads, so the row still
-  // works (just with the default link) if the fetch fails.
+  // The footer's bottom link row (Facebook, etc.) and its contact block are
+  // both editable via the admin panel — footer links on the Homepage tab,
+  // city/phone/email on the Contact Page tab (same fields contact.html
+  // shows, so the two can't drift apart). The markup above is the pre-JS
+  // fallback: if the fetch fails the footer still renders, just with the
+  // built-in defaults.
   const linksExtra = document.getElementById('footer-links-extra');
-  if (linksExtra) {
+  const footerCity = document.getElementById('footer-contact-city');
+  if (linksExtra || footerCity) {
+    const setFooterText = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && val) el.textContent = val;
+    };
+
+    // Re-applied whenever main.js flips <html lang> so the bilingual bits
+    // (link labels, city) follow the language toggle without a reload.
+    const applyFooterContent = hp => {
+      const zh = (localStorage.getItem('lang') || 'en') === 'zh-cn';
+      if (linksExtra && Array.isArray(hp.footer_links)) {
+        linksExtra.innerHTML = hp.footer_links.map(l => {
+          const label = (zh ? l.label_zh : l.label_en) || l.label_en || l.label_zh || l.url;
+          const href = String(l.url || '#').replace(/"/g, '&quot;');
+          const text = String(label).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+        }).join('');
+      }
+      setFooterText('footer-contact-city', (zh ? hp.contact_footer_city_zh : hp.contact_footer_city_en) || hp.contact_footer_city_en);
+      setFooterText('footer-contact-phone', hp.contact_phone);
+      setFooterText('footer-contact-email', hp.contact_email);
+    };
+
     const depth = location.pathname.includes('/admin/') ? '../' : '';
     fetch(depth + 'content/homepage.json').then(r => r.ok ? r.json() : null).then(hp => {
-      if (!hp || !Array.isArray(hp.footer_links)) return;
-      const zh = (localStorage.getItem('lang') || 'en') === 'zh-cn';
-      linksExtra.innerHTML = hp.footer_links.map(l => {
-        const label = (zh ? l.label_zh : l.label_en) || l.label_en || l.label_zh || l.url;
-        const href = String(l.url || '#').replace(/"/g, '&quot;');
-        const text = String(label).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
-      }).join('');
+      if (!hp) return;
+      applyFooterContent(hp);
+      new MutationObserver(() => applyFooterContent(hp))
+        .observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
     }).catch(() => {});
   }
 })();

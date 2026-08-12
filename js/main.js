@@ -482,20 +482,11 @@ if (navbar) {
   }, { passive: true });
 }
 
-/* ============================================================
-   CONTACT FORM
-   ============================================================ */
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-  contactForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const msg = currentLang === 'zh-cn'
-      ? '感谢您的来信！我们会尽快与您联系。'
-      : 'Thank you for your message! We will get back to you soon.';
-    alert(msg);
-    e.target.reset();
-  });
-}
+/* CONTACT FORM — contact.html and join.html each own their submit handler
+   (they POST to Netlify Forms and show an inline success panel). The old
+   alert-and-reset stub that used to live here ran first and reset the form
+   before contact.html could read it, so the submission arrived with an
+   empty email field. Deliberately not replaced. */
 
 /* News/events rendering now lives in js/content.js (reads content/news.json
    + content/events.json instead of the old content/data.js). */

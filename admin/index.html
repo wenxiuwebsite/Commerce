@@ -703,6 +703,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <span data-i18n="homepage.mission">Mission Page</span>
         </div>
+        <div class="nav-item" onclick="showPanel('contact',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span data-i18n="homepage.contact">Contact Page</span>
+        </div>
         <div class="nav-item" onclick="showPanel('news',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span data-i18n="nav.news">News Articles</span>
@@ -982,6 +986,120 @@
             <div class="form-group">
               <div class="form-label">价值观段落 (中文)</div>
               <textarea class="form-textarea" id="hp-f-ms-values-p-zh"></textarea>
+            </div>
+          </div>
+
+          <button class="pub-save-btn" style="margin-top:24px" onclick="saveHomepageContent()" data-i18n="homepage.save">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- CONTACT PAGE -->
+      <div id="panel-contact" style="display:none">
+        <div class="topbar">
+          <h2 data-i18n="homepage.contact">Contact Page</h2>
+          <button class="pub-save-btn" onclick="saveHomepageContent()" data-i18n="homepage.save">Save Changes</button>
+        </div>
+        <div class="panel-body" style="max-width:860px">
+          <p class="pub-hint" style="margin-bottom:20px" data-i18n="contact.hint">Controls the Contact page (contact.html) — the address, phone, email, office hours and map shown there. Phone, email and the city line also appear in the footer of every page.</p>
+
+          <h3 class="hp-section-title" data-i18n="contact.details">Contact Details</h3>
+          <div class="hp-field-grid">
+            <div class="form-group" style="grid-column:1 / -1">
+              <div class="form-label" data-i18n="contact.phone">Phone</div>
+              <input class="form-input" id="hp-f-ct-phone" placeholder="(425) 829-5658">
+            </div>
+            <div class="form-group" style="grid-column:1 / -1">
+              <div class="form-label" data-i18n="contact.email">Email</div>
+              <input class="form-input" id="hp-f-ct-email" placeholder="info@ccc-wa.org">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Address (English)</div>
+              <textarea class="form-textarea" id="hp-f-ct-address-en" placeholder="325 118th Ave SE, Suite 101&#10;Bellevue, WA 98005"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">地址 (中文)</div>
+              <textarea class="form-textarea" id="hp-f-ct-address-zh"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1 / -1">
+              <p class="pub-hint" style="margin:0" data-i18n="contact.address.hint">Press Enter for a new line — the address shows on the page exactly as it's broken up here (e.g. street on one line, city and ZIP on the next).</p>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Office Hours (English)</div>
+              <input class="form-input" id="hp-f-ct-hours-en" placeholder="Monday – Friday: 9:00 AM – 5:00 PM">
+            </div>
+            <div class="form-group">
+              <div class="form-label">办公时间 (中文)</div>
+              <input class="form-input" id="hp-f-ct-hours-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Footer City Line (English)</div>
+              <input class="form-input" id="hp-f-ct-footer-city-en" placeholder="Bellevue, WA">
+            </div>
+            <div class="form-group">
+              <div class="form-label">页脚城市 (中文)</div>
+              <input class="form-input" id="hp-f-ct-footer-city-zh">
+            </div>
+            <div class="form-group" style="grid-column:1 / -1">
+              <div class="form-label" data-i18n="contact.map">Map Image</div>
+              <div class="img-upload-row">
+                <input class="form-input" id="hp-f-ct-map-image" placeholder="Leave blank to hide the map" style="flex:1">
+                <button type="button" class="img-file-btn" onclick="document.getElementById('hp-ct-map-file').click()">Upload</button>
+                <input type="file" id="hp-ct-map-file" accept="image/*" style="display:none" onchange="handleHomepageImageUpload(this,'hp-f-ct-map-image','hp-ct-map-preview')">
+                <img id="hp-ct-map-preview" class="img-preview-thumb" alt="">
+              </div>
+            </div>
+          </div>
+
+          <hr class="pub-divider">
+          <h3 class="hp-section-title" data-i18n="contact.wording">Page Wording</h3>
+          <div class="hp-field-grid">
+            <div class="form-group">
+              <div class="form-label">Hero Title (English)</div>
+              <input class="form-input" id="hp-f-ct-hero-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">主标题 (中文)</div>
+              <input class="form-input" id="hp-f-ct-hero-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Hero Subtitle (English)</div>
+              <input class="form-input" id="hp-f-ct-hero-sub-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">副标题 (中文)</div>
+              <input class="form-input" id="hp-f-ct-hero-sub-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Section Tag (English)</div>
+              <input class="form-input" id="hp-f-ct-info-tag-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">板块标签 (中文)</div>
+              <input class="form-input" id="hp-f-ct-info-tag-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Section Title (English)</div>
+              <input class="form-input" id="hp-f-ct-info-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">板块标题 (中文)</div>
+              <input class="form-input" id="hp-f-ct-info-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Form Title (English)</div>
+              <input class="form-input" id="hp-f-ct-form-title-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">表单标题 (中文)</div>
+              <input class="form-input" id="hp-f-ct-form-title-zh">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Form Subtitle (English)</div>
+              <input class="form-input" id="hp-f-ct-form-sub-en">
+            </div>
+            <div class="form-group">
+              <div class="form-label">表单副标题 (中文)</div>
+              <input class="form-input" id="hp-f-ct-form-sub-zh">
             </div>
           </div>
 
@@ -1391,6 +1509,7 @@
             <li><strong>Programs &amp; Services:</strong> the 6 cards on the homepage — add a new one, remove one, reorder them, and edit each card's icon, title, description, and link.</li>
             <li><strong>Latest News on Homepage:</strong> defaults to Automatic (always shows the 3 newest posts). Switch to Manual to hand-pick specific posts and their order instead — useful for pinning something important above newer posts.</li>
             <li><strong>Mission Page:</strong> the hero title/subtitle, "About Us" text, the numbered Objectives list (add/remove/reorder), and the Values text on the separate Mission page.</li>
+            <li><strong>Contact Page:</strong> the address, phone, email, office hours and map image on the Contact page, plus that page's wording. The phone, email and city line are shared with the footer of every page, so changing them here updates both at once.</li>
           </ul>
           <div class="form-hint">Remember to click <strong>Save Changes</strong> at the top or bottom of the Homepage tab first, then <strong>Publish</strong> from the sidebar to make edits live — saving alone only stores the draft in this browser.</div>
 
@@ -1832,6 +1951,11 @@ const L = {
     'homepage.footerlinks':'Footer Links','homepage.footerlinks.hint':'Shown at the bottom of every page (next to the logo). Add social links, a members-only page, or any other URL.',
     'homepage.hero.bg':'Background Image','homepage.about.photo':'Group Photo',
     'mission.hint':'Controls the content of the separate Mission page (mission.html) — its own hero, "About Us" text, Objectives list, and Values, distinct from the homepage.',
+    'homepage.contact':'Contact Page',
+    'contact.hint':'Controls the Contact page (contact.html) — the address, phone, email, office hours and map shown there. Phone, email and the city line also appear in the footer of every page.',
+    'contact.details':'Contact Details','contact.wording':'Page Wording',
+    'contact.phone':'Phone','contact.email':'Email','contact.map':'Map Image',
+    'contact.address.hint':"Press Enter for a new line — the address shows on the page exactly as it's broken up here (e.g. street on one line, city and ZIP on the next).",
     'nav.trash':'Trash','trash.empty':'Empty Trash',
     'trash.hint':"Deleted news articles, events, and inbox messages land here first. Restore them or delete permanently — trashed news/events aren't published until you delete them permanently or restore and re-publish.",
     'sync.btn':'⟳ Sync','sync.ing':'⟳ Syncing…','sync.doing':'Syncing…',
@@ -1903,6 +2027,11 @@ const L = {
     'homepage.footerlinks':'页脚链接','homepage.footerlinks.hint':'显示在每个页面底部（Logo旁边）。可添加社交媒体链接、会员专属页面或任何其他网址。',
     'homepage.hero.bg':'背景图片','homepage.about.photo':'团队合照',
     'mission.hint':'控制独立使命页面（mission.html）的内容——包括其专属的主视觉区、"关于我们"文字、工作目标列表及价值观，与首页内容相互独立。',
+    'homepage.contact':'联系页面',
+    'contact.hint':'控制"联系我们"页面（contact.html）的内容——包括地址、电话、邮箱、办公时间及地图。其中电话、邮箱和城市信息同时显示在每个页面的页脚。',
+    'contact.details':'联系信息','contact.wording':'页面文案',
+    'contact.phone':'电话','contact.email':'邮箱','contact.map':'地图图片',
+    'contact.address.hint':'按回车键换行——地址会按此处的换行方式原样显示（例如街道一行、城市和邮编一行）。',
     'nav.trash':'回收站','trash.empty':'清空回收站',
     'trash.hint':'已删除的新闻、活动和收件箱消息会先进入这里。您可以恢复或永久删除——已删除的新闻/活动在您永久删除或恢复并重新发布之前不会显示在网站上。',
     'sync.btn':'⟳ 同步','sync.ing':'⟳ 同步中…','sync.doing':'同步中…',
@@ -2452,7 +2581,7 @@ function showPanel(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
   toggleAdminSidebar(false);
-  if (name === 'homepage' || name === 'mission') ensureHomepageLoaded().then(renderHomepageForm);
+  if (name === 'homepage' || name === 'mission' || name === 'contact') ensureHomepageLoaded().then(renderHomepageForm);
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
   if (name === 'leadership') renderLeadershipTable();
@@ -2813,6 +2942,34 @@ function deleteEvent(idx) {
 ================================================================ */
 const PROGRAM_ICON_OPTIONS = ['trade', 'network', 'culture', 'legal', 'media', 'health', 'star'];
 
+// The Contact Page fields were added after this admin shipped, so a draft
+// saved in localStorage before that predates them. Without a backfill the
+// panel would open with every contact field blank and the next Save would
+// publish those blanks over the real address/phone/email. Only genuinely
+// absent keys are filled — an editor who deliberately clears a field (say,
+// the map) gets an empty string, which is left alone.
+const CONTACT_FIELD_DEFAULTS = {
+  contact_hero_title_en: 'Contact Us', contact_hero_title_zh: '联系我们',
+  contact_hero_sub_en: "We'd love to hear from you", contact_hero_sub_zh: '期待与您沟通',
+  contact_info_tag_en: 'Get In Touch', contact_info_tag_zh: '联系方式',
+  contact_info_title_en: 'Contact Information', contact_info_title_zh: '联系信息',
+  contact_address_en: '325 118th Ave SE, Suite 101\nBellevue, WA 98005',
+  contact_address_zh: '325 118th Ave SE, Suite 101\n华盛顿州贝尔维尤市 98005',
+  contact_phone: '(425) 829-5658',
+  contact_email: 'info@ccc-wa.org',
+  contact_hours_en: 'Monday – Friday: 9:00 AM – 5:00 PM', contact_hours_zh: '周一至周五：上午9:00 – 下午5:00',
+  contact_map_image: 'images/map.jpg',
+  contact_form_title_en: 'Send Us a Message', contact_form_title_zh: '给我们发送消息',
+  contact_form_sub_en: "We'll respond within 1-2 business days.", contact_form_sub_zh: '我们将在1-2个工作日内回复。',
+  contact_footer_city_en: 'Bellevue, WA', contact_footer_city_zh: '华盛顿州贝尔维尤'
+};
+
+function backfillContactDefaults(hp) {
+  Object.keys(CONTACT_FIELD_DEFAULTS).forEach(k => {
+    if (hp[k] === undefined) hp[k] = CONTACT_FIELD_DEFAULTS[k];
+  });
+}
+
 function renderHomepageForm() {
   const hp = data.homepage;
   const list = document.getElementById('hp-programs-list');
@@ -2820,6 +2977,7 @@ function renderHomepageForm() {
     if (list) list.innerHTML = '<div class="inbox-empty">Loading homepage content…</div>';
     return;
   }
+  backfillContactDefaults(hp);
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('hp-f-hero-title-en', hp.hero_title_en); set('hp-f-hero-title-zh', hp.hero_title_zh);
   set('hp-f-hero-subtitle-en', hp.hero_subtitle_en); set('hp-f-hero-subtitle-zh', hp.hero_subtitle_zh);
@@ -2836,11 +2994,22 @@ function renderHomepageForm() {
   set('hp-f-ms-about-p1-en', hp.mission_about_p1_en); set('hp-f-ms-about-p1-zh', hp.mission_about_p1_zh);
   set('hp-f-ms-values-title-en', hp.mission_values_title_en); set('hp-f-ms-values-title-zh', hp.mission_values_title_zh);
   set('hp-f-ms-values-p-en', hp.mission_values_p_en); set('hp-f-ms-values-p-zh', hp.mission_values_p_zh);
+  set('hp-f-ct-phone', hp.contact_phone); set('hp-f-ct-email', hp.contact_email);
+  set('hp-f-ct-address-en', hp.contact_address_en); set('hp-f-ct-address-zh', hp.contact_address_zh);
+  set('hp-f-ct-hours-en', hp.contact_hours_en); set('hp-f-ct-hours-zh', hp.contact_hours_zh);
+  set('hp-f-ct-footer-city-en', hp.contact_footer_city_en); set('hp-f-ct-footer-city-zh', hp.contact_footer_city_zh);
+  set('hp-f-ct-map-image', hp.contact_map_image);
+  set('hp-f-ct-hero-title-en', hp.contact_hero_title_en); set('hp-f-ct-hero-title-zh', hp.contact_hero_title_zh);
+  set('hp-f-ct-hero-sub-en', hp.contact_hero_sub_en); set('hp-f-ct-hero-sub-zh', hp.contact_hero_sub_zh);
+  set('hp-f-ct-info-tag-en', hp.contact_info_tag_en); set('hp-f-ct-info-tag-zh', hp.contact_info_tag_zh);
+  set('hp-f-ct-info-title-en', hp.contact_info_title_en); set('hp-f-ct-info-title-zh', hp.contact_info_title_zh);
+  set('hp-f-ct-form-title-en', hp.contact_form_title_en); set('hp-f-ct-form-title-zh', hp.contact_form_title_zh);
+  set('hp-f-ct-form-sub-en', hp.contact_form_sub_en); set('hp-f-ct-form-sub-zh', hp.contact_form_sub_zh);
 
   document.querySelectorAll('input[name="hp-events-mode"]').forEach(r => { r.checked = r.value === (hp.latest_events_mode || 'auto'); });
   document.getElementById('hp-manual-picker').style.display = hp.latest_events_mode === 'manual' ? 'block' : 'none';
 
-  [['hp-hero-bg-preview', hp.hero_bg_image], ['hp-about-photo-preview', hp.about_photo], ['hp-ms-hero-bg-preview', hp.mission_hero_bg_image]].forEach(([id, val]) => {
+  [['hp-hero-bg-preview', hp.hero_bg_image], ['hp-about-photo-preview', hp.about_photo], ['hp-ms-hero-bg-preview', hp.mission_hero_bg_image], ['hp-ct-map-preview', hp.contact_map_image]].forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (!el) return;
     if (val) { el.src = previewSrc(val); el.style.display = 'block'; } else { el.style.display = 'none'; }
@@ -3108,6 +3277,17 @@ function saveHomepageContent() {
   hp.mission_about_p1_en = get('hp-f-ms-about-p1-en'); hp.mission_about_p1_zh = get('hp-f-ms-about-p1-zh');
   hp.mission_values_title_en = get('hp-f-ms-values-title-en'); hp.mission_values_title_zh = get('hp-f-ms-values-title-zh');
   hp.mission_values_p_en = get('hp-f-ms-values-p-en'); hp.mission_values_p_zh = get('hp-f-ms-values-p-zh');
+  hp.contact_phone = get('hp-f-ct-phone'); hp.contact_email = get('hp-f-ct-email');
+  hp.contact_address_en = get('hp-f-ct-address-en'); hp.contact_address_zh = get('hp-f-ct-address-zh');
+  hp.contact_hours_en = get('hp-f-ct-hours-en'); hp.contact_hours_zh = get('hp-f-ct-hours-zh');
+  hp.contact_footer_city_en = get('hp-f-ct-footer-city-en'); hp.contact_footer_city_zh = get('hp-f-ct-footer-city-zh');
+  hp.contact_map_image = get('hp-f-ct-map-image');
+  hp.contact_hero_title_en = get('hp-f-ct-hero-title-en'); hp.contact_hero_title_zh = get('hp-f-ct-hero-title-zh');
+  hp.contact_hero_sub_en = get('hp-f-ct-hero-sub-en'); hp.contact_hero_sub_zh = get('hp-f-ct-hero-sub-zh');
+  hp.contact_info_tag_en = get('hp-f-ct-info-tag-en'); hp.contact_info_tag_zh = get('hp-f-ct-info-tag-zh');
+  hp.contact_info_title_en = get('hp-f-ct-info-title-en'); hp.contact_info_title_zh = get('hp-f-ct-info-title-zh');
+  hp.contact_form_title_en = get('hp-f-ct-form-title-en'); hp.contact_form_title_zh = get('hp-f-ct-form-title-zh');
+  hp.contact_form_sub_en = get('hp-f-ct-form-sub-en'); hp.contact_form_sub_zh = get('hp-f-ct-form-sub-zh');
   persistData();
   toast('Homepage content saved — click Publish to make it live');
 }

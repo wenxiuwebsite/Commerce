@@ -575,6 +575,52 @@
     }).catch(() => {});
   }
 
+  /* ============================================================
+     CONTACT PAGE CMS CONTENT (contact.html) — content/homepage.json
+     contact_* fields, edited from the admin's "Contact Page" tab.
+     Phone/email/address are single-sourced here so the footer block
+     (js/layout.js) can't drift from what this page shows.
+     ============================================================ */
+  function renderContactContent(hp) {
+    const zh = isZh();
+    setTextIfPresent('ct-hero-title', zh ? hp.contact_hero_title_zh : hp.contact_hero_title_en);
+    setTextIfPresent('ct-hero-sub', zh ? hp.contact_hero_sub_zh : hp.contact_hero_sub_en);
+    setTextIfPresent('ct-info-tag', zh ? hp.contact_info_tag_zh : hp.contact_info_tag_en);
+    setTextIfPresent('ct-info-title', zh ? hp.contact_info_title_zh : hp.contact_info_title_en);
+    setTextIfPresent('ct-hours', zh ? hp.contact_hours_zh : hp.contact_hours_en);
+    setTextIfPresent('ct-form-title', zh ? hp.contact_form_title_zh : hp.contact_form_title_en);
+    setTextIfPresent('ct-form-sub', zh ? hp.contact_form_sub_zh : hp.contact_form_sub_en);
+    setTextIfPresent('ct-phone', hp.contact_phone);
+
+    // The address is a multi-line field in the admin (street, then city/zip),
+    // so line breaks are the one bit of markup it's allowed to produce.
+    const addr = document.getElementById('ct-address');
+    const addrText = (zh ? hp.contact_address_zh : hp.contact_address_en) || hp.contact_address_en;
+    if (addr && addrText) addr.innerHTML = escHtml(addrText).replace(/\r?\n/g, '<br>');
+
+    const email = document.getElementById('ct-email');
+    if (email && hp.contact_email) {
+      email.textContent = hp.contact_email;
+      email.setAttribute('href', 'mailto:' + hp.contact_email);
+    }
+
+    // Blank map path means "no map" — hide the image rather than leaving a
+    // broken-image box behind.
+    const map = document.getElementById('ct-map');
+    if (map) {
+      if (hp.contact_map_image) { map.src = hp.contact_map_image; map.style.display = 'block'; }
+      else { map.style.display = 'none'; }
+    }
+  }
+
+  function initContactContent() {
+    if (!document.getElementById('ct-info-title')) return; // not on the contact page
+    fetchJSON(HOMEPAGE_URL).then(hp => {
+      renderContactContent(hp);
+      new MutationObserver(() => renderContactContent(hp)).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }).catch(() => {});
+  }
+
   function boot() {
     initNewsPage();
     initHomePreview();
@@ -584,6 +630,7 @@
     initDirectoryPage();
     initHomepageContent();
     initMissionContent();
+    initContactContent();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

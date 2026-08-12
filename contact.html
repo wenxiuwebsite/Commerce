@@ -14,8 +14,8 @@
 
 <div class="page-hero">
   <div class="page-hero-content">
-    <h1 data-i18n="contact.hero_title">Contact Us</h1>
-    <p data-i18n="contact.hero_sub">We'd love to hear from you</p>
+    <h1 id="ct-hero-title" data-i18n="contact.hero_title">Contact Us</h1>
+    <p id="ct-hero-sub" data-i18n="contact.hero_sub">We'd love to hear from you</p>
   </div>
 </div>
 
@@ -23,8 +23,8 @@
   <div class="container">
     <div class="contact-grid">
       <div>
-        <span class="section-tag" data-i18n="contact.info_tag">Get In Touch</span>
-        <h2 style="font-size:1.75rem;font-weight:700;margin:10px 0 28px;" data-i18n="contact.info_title">Contact Information</h2>
+        <span class="section-tag" id="ct-info-tag" data-i18n="contact.info_tag">Get In Touch</span>
+        <h2 id="ct-info-title" style="font-size:1.75rem;font-weight:700;margin:10px 0 28px;" data-i18n="contact.info_title">Contact Information</h2>
 
         <div class="contact-item">
           <div class="contact-icon-wrap">
@@ -32,7 +32,7 @@
           </div>
           <div>
             <strong data-i18n="contact.label_address">Address</strong>
-            <p>325 118th Ave SE, Suite 101<br>Bellevue, WA 98005</p>
+            <p id="ct-address">325 118th Ave SE, Suite 101<br>Bellevue, WA 98005</p>
           </div>
         </div>
 
@@ -42,7 +42,7 @@
           </div>
           <div>
             <strong data-i18n="contact.label_phone">Phone</strong>
-            <p>(425) 829-5658</p>
+            <p id="ct-phone">(425) 829-5658</p>
           </div>
         </div>
 
@@ -52,7 +52,7 @@
           </div>
           <div>
             <strong data-i18n="contact.label_email">Email</strong>
-            <p><a href="mailto:info@ccc-wa.org" style="color:var(--accent);">info@ccc-wa.org</a></p>
+            <p><a id="ct-email" href="mailto:info@ccc-wa.org" style="color:var(--accent);">info@ccc-wa.org</a></p>
           </div>
         </div>
 
@@ -62,16 +62,16 @@
           </div>
           <div>
             <strong data-i18n="contact.label_hours">Office Hours</strong>
-            <p data-i18n="contact.hours">Monday – Friday: 9:00 AM – 5:00 PM</p>
+            <p id="ct-hours" data-i18n="contact.hours">Monday – Friday: 9:00 AM – 5:00 PM</p>
           </div>
         </div>
 
-        <img src="images/map.jpg" alt="Map to CCCWA Office" style="width:100%;border-radius:10px;margin-top:12px;border:1px solid var(--border);">
+        <img id="ct-map" src="images/map.jpg" alt="Map to CCCWA Office" style="width:100%;border-radius:10px;margin-top:12px;border:1px solid var(--border);">
       </div>
 
       <div class="contact-form">
-        <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:6px;color:var(--text-primary);" data-i18n="contact.form_title">Send Us a Message</h3>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;" data-i18n="contact.form_sub">We'll respond within 1-2 business days.</p>
+        <h3 id="ct-form-title" style="font-size:1.15rem;font-weight:700;margin-bottom:6px;color:var(--text-primary);" data-i18n="contact.form_title">Send Us a Message</h3>
+        <p id="ct-form-sub" style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;" data-i18n="contact.form_sub">We'll respond within 1-2 business days.</p>
 
         <div id="contact-success" style="display:none;padding:28px;text-align:center;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border);margin-bottom:16px">
           <div style="font-size:2rem;margin-bottom:10px">✓</div>
@@ -182,5 +182,6 @@
   });
 </script>
 <script src="js/main.js"></script>
+<script src="js/content.js"></script>
 </body>
 </html>
