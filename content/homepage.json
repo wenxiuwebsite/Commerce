@@ -122,8 +122,8 @@
   "contact_info_tag_zh": "联系方式",
   "contact_info_title_en": "Contact Information",
   "contact_info_title_zh": "联系信息",
-  "contact_address_en": "325 118th Ave SE, Suite 101\nBellevue, WA 98005",
-  "contact_address_zh": "325 118th Ave SE, Suite 101\n华盛顿州贝尔维尤市 98005",
+  "contact_address_en": "12509 Bel-Red Rd. \nBellevue WA 98005",
+  "contact_address_zh": "12509 Bel-Red Rd. \n华盛顿州贝尔维尤市 98005",
   "contact_phone": "(425) 829-5658",
   "contact_email": "info@ccc-wa.org",
   "contact_hours_en": "Monday – Friday: 9:00 AM – 5:00 PM",
@@ -134,5 +134,6 @@
   "contact_form_sub_en": "We'll respond within 1-2 business days.",
   "contact_form_sub_zh": "我们将在1-2个工作日内回复。",
   "contact_footer_city_en": "Bellevue, WA",
-  "contact_footer_city_zh": "华盛顿州贝尔维尤"
+  "contact_footer_city_zh": "华盛顿州贝尔维尤",
+  "mission_hero_bg_image": ""
 }
