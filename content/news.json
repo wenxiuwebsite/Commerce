@@ -150,7 +150,7 @@
       "cover_image": "",
       "cover_focus": "50% 50%",
       "body_en": "<p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">In response to the sudden outbreak of the novel coronavirus (COVID-19) pandemic, member organizations of the CCCWA (Chinese Chamber of Commerce in Washington State) demonstrated their corporate social responsibility across various sectors. They actively coordinated with their domestic and international branches to procure essential supplies and donated them free of charge to institutions in hard-hit areas in urgent need. After donating medical supplies such as masks and protective gowns to healthcare facilities, the CCCWA further organized a group of outstanding and compassionate local restaurants to donate love lunches valued at $400,000 to medical staff on the front lines.</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\">Seattle's local television station Kiro7 News conducted a special interview with one of the participating restaurants, The Dolar Shop, as well as CCCWA President Ms. Lili Lyu and member attorney Cai Qing, and produced a featured report on the initiative.</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">Kiro7 News Report 1 – CCCWA's \"Food with Love\" and other public welfare campaigns organized during the fight against the COVID-19 pandemic.</span></p>",
-      "body_zh": "<p>面对突如其来的新型冠状病毒感染的肺炎疫情，CCCWA华盛顿州中国总商会各会员单位在各个领域发挥出了企业社会责任感，积极协调公司海内外分支机构进行相关物资采购，并无偿捐赠给有需求的疫情严重的机构。在向医疗机构捐赠口罩、防护服等医疗物资之后，CCCWA又组织了一批优秀而有爱的餐饮企业向抗疫一线的医护人员捐赠价值40万美元的爱心午餐。</p><p><br></p><p>&nbsp;西雅图本地的电视台Kiro7 News 特地采访了参与活动的餐厅发起餐厅之一“豆捞坊”和CCCWA会长吕莉莉女士及会员蔡清律师，并作了专题报导。</p><p><br></p><p>Kiro7 News&nbsp;报道&nbsp;1-&nbsp;CCCWA&nbsp;（Chinese Chamber of Commerce in washington State&nbsp;）在抗击疫情期间组织的“Food with love”爱心餐等系列公益活动</p>\n\nKiro7 News报道5-“ Food with Love”活动募集资金，以分担爱心餐厅的制作成本，全社会一起把爱心放大。",
+      "body_zh": "<p>面对突如其来的新型冠状病毒感染的肺炎疫情，CCCWA华盛顿州中国总商会各会员单位在各个领域发挥出了企业社会责任感，积极协调公司海内外分支机构进行相关物资采购，并无偿捐赠给有需求的疫情严重的机构。在向医疗机构捐赠口罩、防护服等医疗物资之后，CCCWA又组织了一批优秀而有爱的餐饮企业向抗疫一线的医护人员捐赠价值40万美元的爱心午餐。</p><p><br></p><p>&nbsp;西雅图本地的电视台Kiro7 News 特地采访了参与活动的餐厅发起餐厅之一“豆捞坊”和CCCWA会长吕莉莉女士及会员蔡清律师，并作了专题报导。</p><p><br></p><p>Kiro7 News&nbsp;报道&nbsp;1-&nbsp;CCCWA&nbsp;（Chinese Chamber of Commerce in washington State&nbsp;）在抗击疫情期间组织的“Food with love”爱心餐等系列公益活动</p>\n\n<p> Kiro7 News报道5-“ Food with Love”活动募集资金，以分担爱心餐厅的制作成本，全社会一起把爱心放大。</p>",
       "body_images": [
         {
           "src": "/assets/uploads/news/1786691219928-640--4-.jpg",
@@ -162,6 +162,8 @@
           "focus": "53.1% 44.1%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 3,
+          "after_paragraph_zh": 5,
           "after_paragraph": 5
         },
         {
@@ -174,6 +176,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 3,
+          "after_paragraph_zh": 5,
           "after_paragraph": 5
         },
         {
@@ -186,6 +190,8 @@
           "focus": "46.9% 31.9%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 3,
+          "after_paragraph_zh": 5,
           "after_paragraph": 5
         },
         {
@@ -198,6 +204,8 @@
           "focus": "50.5% 35.3%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 3,
+          "after_paragraph_zh": 5,
           "after_paragraph": 5
         },
         {
@@ -210,6 +218,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 3,
+          "after_paragraph_zh": 5,
           "after_paragraph": 5
         },
         {
@@ -222,10 +232,96 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 3,
+          "after_paragraph_zh": 6,
           "after_paragraph": 6
         }
       ],
       "body_galleries": [],
+      "content_blocks": [
+        {
+          "type": "text",
+          "en": "<p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">In response to the sudden outbreak of the novel coronavirus (COVID-19) pandemic, member organizations of the CCCWA (Chinese Chamber of Commerce in Washington State) demonstrated their corporate social responsibility across various sectors. They actively coordinated with their domestic and international branches to procure essential supplies and donated them free of charge to institutions in hard-hit areas in urgent need. After donating medical supplies such as masks and protective gowns to healthcare facilities, the CCCWA further organized a group of outstanding and compassionate local restaurants to donate love lunches valued at $400,000 to medical staff on the front lines.</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\">Seattle's local television station Kiro7 News conducted a special interview with one of the participating restaurants, The Dolar Shop, as well as CCCWA President Ms. Lili Lyu and member attorney Cai Qing, and produced a featured report on the initiative.</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">Kiro7 News Report 1 – CCCWA's \"Food with Love\" and other public welfare campaigns organized during the fight against the COVID-19 pandemic.</span></p>",
+          "zh": "<p>面对突如其来的新型冠状病毒感染的肺炎疫情，CCCWA华盛顿州中国总商会各会员单位在各个领域发挥出了企业社会责任感，积极协调公司海内外分支机构进行相关物资采购，并无偿捐赠给有需求的疫情严重的机构。在向医疗机构捐赠口罩、防护服等医疗物资之后，CCCWA又组织了一批优秀而有爱的餐饮企业向抗疫一线的医护人员捐赠价值40万美元的爱心午餐。</p><p><br></p><p>&nbsp;西雅图本地的电视台Kiro7 News 特地采访了参与活动的餐厅发起餐厅之一“豆捞坊”和CCCWA会长吕莉莉女士及会员蔡清律师，并作了专题报导。</p><p><br></p><p>Kiro7 News&nbsp;报道&nbsp;1-&nbsp;CCCWA&nbsp;（Chinese Chamber of Commerce in washington State&nbsp;）在抗击疫情期间组织的“Food with love”爱心餐等系列公益活动</p>"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786691219928-640--4-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "53.1% 44.1%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786691224918-640--5-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786692364303-640--6-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "46.9% 31.9%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786692376221-640--7-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50.5% 35.3%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786692384823-640--8-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "text",
+          "en": "",
+          "zh": "<p> Kiro7 News报道5-“ Food with Love”活动募集资金，以分担爱心餐厅的制作成本，全社会一起把爱心放大。</p>"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786692392375-640--10-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        }
+      ],
       "external_link": "",
       "external_link_label_en": "",
       "external_link_label_zh": "",
@@ -299,8 +395,8 @@
       "summary_zh": "",
       "cover_image": "/assets/uploads/news/1786688508211-ScreenShot_2026-08-14_142139_425.png",
       "cover_focus": "50% 50%",
-      "body_en": "<div>With the initial stage of the Food with Love program has been successfully completed, CCCWA, WSRF, and Tsinghua GIX (all three non-profits organizations) together kicked off the second phase of this program: &nbsp;“You help them, we’ll help you!” The program calls for all corners of society to continue to donate and support those restaurants that have already enthusiastically participated in this effort. As we all know, the restaurant industry has suffered unprecedented costs from Covid-19. Even in this situation, restaurants have still stepped forward and helped others. The motivation of these restaurant owners is pure and simple—they deeply care about this city and want to put forth their best effort as members of their communities. They make gourmet and nutritious meals without consideration of costs, repeatedly every day as if they were in a &nbsp;gastronomical competition. These activities are actually elevating and raising awareness of Chinese gourmet culture, making more people love and appreciate Chinese food.</div>\n\n<p><br></p><p><span style=\"font-size: 15px;\">Husband and wife Leo and Lucy, owners of Frying Fish, started their business from scratch and have worked hard for many years in the Seattle region. Even during a sudden 70% drop in business, “helping others is a kind of priceless happiness and fortune. We want to contribute as much as we can, and pull back only when we can’t hold on any longer.”</span></p><p>On June 8, the WSCRF deposited checks for nearly $24,000 into this charitable program. According to WSCRF and WSCRC President J. Norwell Coquillard, “The Washington State China Relations Fund is pleased to support this highly innovative and meaningful effort to support both our business community and those workers who are on the front line of the battle against Covid-19. &nbsp;We are very pleased that our members and friends stepped up to help make this program a success. We enjoyed the opportunity to&nbsp;work with CCCWA and Tsinghua GIX and look forward to more cooperation in the future.”</p>\n\n<section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><section powered-by=\"xiumi.us\" style=\"margin-top: 10px; margin-bottom: 10px; text-align: center; transform: translate3d(-10px, 0px, 0px);\"><section style=\"padding: 6px 10px; display: inline-block; min-width: 10%; max-width: 100%; vertical-align: top; transform: matrix(1, 0, -0.2, 1, 0, 0); border-style: solid; border-width: 0px; border-radius: 0px; border-color: rgb(76, 68, 71);\"><section powered-by=\"xiumi.us\" style=\"line-height: 1;\"><p>Event Information</p></section></section></section><section powered-by=\"xiumi.us\"><section powered-by=\"xiumi.us\" style=\"max-width: 100%; overflow-wrap: break-word !important;\"><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\">Organizers:</p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\">CCCWA – Chinese Chamber of Commerce in Washington State</span><br><span class=\"\">WSCRC – Washington State China Relations Council</span><br><span class=\"\">WSCRF – Washington State China Relations Fund</span><br><span class=\"\">Tsinghua GIX North America Center – Tsinghua The Global Innovation Exchange</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\">Supporting Organizations for This Event:</p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">The Dolar Shop</span><br><span class=\"\" style=\"\">Asian Family Market</span><br><span class=\"\" style=\"\">IJ Sushi Burrito</span><br><span class=\"\" style=\"\">Chowbus Inc.</span><br><span class=\"\" style=\"\">Imperial Garden (Peking Duck Restaurant)</span><br><span class=\"\" style=\"\">Chengdu Memory (Hot Pot)</span><br><span class=\"\" style=\"\">Frying Fish</span><br><span class=\"\" style=\"\">Liuyishou Hot Pot</span><br><span class=\"\" style=\"\">Shanghai House Restaurant</span><br><span class=\"\" style=\"\">Sizzling Pot King</span><br><span class=\"\" style=\"\">No.9 Alley Hot Pot</span><br><span class=\"\" style=\"\">J&amp;J Chinese Restaurant</span><br><span class=\"\" style=\"\">Happy Lamb Hot Pot</span><br><span class=\"\" style=\"\">Panda Dim Sum</span><br><span class=\"\" style=\"\">Tamarindos Indian Restaurant</span><br><span class=\"\" style=\"\">Seattle Entrepreneurship Club</span><br><span class=\"\" style=\"\">Seattle Chinese New Immigrants Center</span><br><span class=\"\" style=\"\">Sunshine Youth Culture and Education Development Association</span><br><span class=\"\" style=\"\">Seattle Real Estate Investment Club</span><br><span class=\"\" style=\"\">Issaquah Highlands Chinese Heritage Club</span><br><span class=\"\" style=\"\">Jing Wei LLC</span><br><span class=\"\" style=\"\">SC Intl Realty (206-228-9404)</span><br><span class=\"\" style=\"\">Cai &amp; Cai Associates</span></p></section></section></section>",
-      "body_zh": "<span class=\"\" link-id=\"link-1786688458785-0.781921039410426\">爱心午餐行动第一阶段胜利完成，CCCWA，WSCRF和清华GIX三个非盈利机构又联合发起第二阶段行动：“你们帮助他们，我们帮助你们！” 行动呼吁社会各界继续捐款支持已经参与热心义捐的餐厅，用所得善款补贴他们所捐餐食的部分成本。众所周知，餐饮业在此次新冠疫情中遭受了前所未有的重创。在这种情况下，餐厅们依然挺身而出帮助别人。餐厅老板们的愿望简单又朴素，他们深爱这个城市，希望作为社区的一员尽到自己的力量。他们不计成本地做出美味又营养的食物，仿佛每天在进行厨艺大赛。这个特殊的行动，实际上也传播了中华美食文化，让更多的人爱上了中餐。</span>\n\n<div>沸腾鱼乡的Leo和Lucy夫妇白手起家，在西雅图地区努力奋斗多年。这次在营业额骤降70%的情况下，仍然表示：“能够帮助到别人，是一种金钱买不到的快乐和幸福。希望出一份自己的力，能出多少就出多少，到最后如果我们撑不下去的时候再撤下来。”</div><div><br></div><div>6月8日，WSCRF将他们新近募集的24,100美元，以支票形式汇聚到行动善款中。WSCRF和WSCRC会长J. Norwell Coquillard先生表示：“华中基金会很高兴参与并支持‘爱心餐’这个既有创新性又有意义的活动。在为抗击Covid-19的一线人员供餐的同时，也支持当地的餐饮企业。我们感谢WSCRC的会员和朋友，为本活动的成功积极做出贡献。我们也很高兴能和CCCWA以及清华GIX合作，期待今后有更多的合作机会。”</div>\n\n<p></p><section powered-by=\"xiumi.us\" style=\"margin-top: 10px; margin-bottom: 10px; text-align: center; transform: translate3d(-10px, 0px, 0px);\"><section style=\"padding: 6px 10px; display: inline-block; min-width: 10%; max-width: 100%; vertical-align: top; transform: matrix(1, 0, -0.2, 1, 0, 0); border-style: solid; border-width: 0px; border-radius: 0px; border-color: rgb(76, 68, 71);\"><section powered-by=\"xiumi.us\" style=\"line-height: 1;\"><p>活动信息</p></section></section></section><section powered-by=\"xiumi.us\"><p><br></p></section><section powered-by=\"xiumi.us\"><p><br></p><section powered-by=\"xiumi.us\" style=\"max-width: 100%; overflow-wrap: break-word !important;\"><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">主办单位：</span></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">CCCWA华盛顿州中国总商会&nbsp;</span></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Chinese Chamber of&nbsp;Commerce in Washington State</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">WSCRC华盛顿州中国理事会<br style=\"max-width: 100%; overflow-wrap: break-word !important;\"></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Washington State China Relations Council</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">WSCRF华盛顿州中国基金会</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Washionton State China Relations Fund</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">清华GIX北美中心<br></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Tsinghua The Global Innovation Exchange</p></section></section><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">本次活动支持单位：</span></p><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">豆捞坊 THE DOLAR SHOP<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">百家超市 (ASIAN FAMILY MARKET)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">IJ SUSHI BURRITO<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">Chowbus Inc.<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">颐和园北京烤鸭店 （Imperial Garden）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">蓉城老火锅（CHENGDU MEMORY)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">沸腾渔乡 (FRYING FISH)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">刘一手（LIUYISHOU HOT POT)</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">上海味道坊（Shanghai House Restaurant）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">芙蓉湘(Sizzling&nbsp;Pot&nbsp;King)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">九号巷（No.9 Alley Hot Pot）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">百味轩(J&amp;J Chinese&nbsp;Restaurant)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">小肥羊（快乐小羊Happy Lamb Hot Pot）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">熊猫点心(Panda&nbsp;Dim Sum)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">Tamarindos&nbsp;Indian&nbsp;Restaurant<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图创业协会（Seattle Entrepreneurship Club)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图移民之家（Seattle Chinese New immigrants Center）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">阳光青少年教育发展基金会（Sunshine Youth Culture and Education Development Association ）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图地产投资俱乐部（Seattle Real Estate Investment Club ）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">Issaquah Highlands Chinese Heritage Club<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">美国经纬有限公司（Jing Wei LLC）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">SC Intl Realty （2062289404）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">蔡和蔡律师事务所（ Cai &amp; Cai Associates）</section></section>",
+      "body_en": "<p>With the initial stage of the Food with Love program has been successfully completed, CCCWA, WSRF, and Tsinghua GIX (all three non-profits organizations) together kicked off the second phase of this program: &nbsp;“You help them, we’ll help you!” The program calls for all corners of society to continue to donate and support those restaurants that have already enthusiastically participated in this effort. As we all know, the restaurant industry has suffered unprecedented costs from Covid-19. Even in this situation, restaurants have still stepped forward and helped others. The motivation of these restaurant owners is pure and simple—they deeply care about this city and want to put forth their best effort as members of their communities. They make gourmet and nutritious meals without consideration of costs, repeatedly every day as if they were in a &nbsp;gastronomical competition. These activities are actually elevating and raising awareness of Chinese gourmet culture, making more people love and appreciate Chinese food.</p>\n\n<p><br></p><p><span style=\"font-size: 15px;\">Husband and wife Leo and Lucy, owners of Frying Fish, started their business from scratch and have worked hard for many years in the Seattle region. Even during a sudden 70% drop in business, “helping others is a kind of priceless happiness and fortune. We want to contribute as much as we can, and pull back only when we can’t hold on any longer.”</span></p><p>On June 8, the WSCRF deposited checks for nearly $24,000 into this charitable program. According to WSCRF and WSCRC President J. Norwell Coquillard, “The Washington State China Relations Fund is pleased to support this highly innovative and meaningful effort to support both our business community and those workers who are on the front line of the battle against Covid-19. &nbsp;We are very pleased that our members and friends stepped up to help make this program a success. We enjoyed the opportunity to&nbsp;work with CCCWA and Tsinghua GIX and look forward to more cooperation in the future.”</p>\n\n<section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><section powered-by=\"xiumi.us\" style=\"margin-top: 10px; margin-bottom: 10px; text-align: center; transform: translate3d(-10px, 0px, 0px);\"><section style=\"padding: 6px 10px; display: inline-block; min-width: 10%; max-width: 100%; vertical-align: top; transform: matrix(1, 0, -0.2, 1, 0, 0); border-style: solid; border-width: 0px; border-radius: 0px; border-color: rgb(76, 68, 71);\"><section powered-by=\"xiumi.us\" style=\"line-height: 1;\"><p>Event Information</p></section></section></section><section powered-by=\"xiumi.us\"><section powered-by=\"xiumi.us\" style=\"max-width: 100%; overflow-wrap: break-word !important;\"><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\">Organizers:</p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\">CCCWA – Chinese Chamber of Commerce in Washington State</span><br><span class=\"\">WSCRC – Washington State China Relations Council</span><br><span class=\"\">WSCRF – Washington State China Relations Fund</span><br><span class=\"\">Tsinghua GIX North America Center – Tsinghua The Global Innovation Exchange</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\">Supporting Organizations for This Event:</p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">The Dolar Shop</span><br><span class=\"\" style=\"\">Asian Family Market</span><br><span class=\"\" style=\"\">IJ Sushi Burrito</span><br><span class=\"\" style=\"\">Chowbus Inc.</span><br><span class=\"\" style=\"\">Imperial Garden (Peking Duck Restaurant)</span><br><span class=\"\" style=\"\">Chengdu Memory (Hot Pot)</span><br><span class=\"\" style=\"\">Frying Fish</span><br><span class=\"\" style=\"\">Liuyishou Hot Pot</span><br><span class=\"\" style=\"\">Shanghai House Restaurant</span><br><span class=\"\" style=\"\">Sizzling Pot King</span><br><span class=\"\" style=\"\">No.9 Alley Hot Pot</span><br><span class=\"\" style=\"\">J&amp;J Chinese Restaurant</span><br><span class=\"\" style=\"\">Happy Lamb Hot Pot</span><br><span class=\"\" style=\"\">Panda Dim Sum</span><br><span class=\"\" style=\"\">Tamarindos Indian Restaurant</span><br><span class=\"\" style=\"\">Seattle Entrepreneurship Club</span><br><span class=\"\" style=\"\">Seattle Chinese New Immigrants Center</span><br><span class=\"\" style=\"\">Sunshine Youth Culture and Education Development Association</span><br><span class=\"\" style=\"\">Seattle Real Estate Investment Club</span><br><span class=\"\" style=\"\">Issaquah Highlands Chinese Heritage Club</span><br><span class=\"\" style=\"\">Jing Wei LLC</span><br><span class=\"\" style=\"\">SC Intl Realty (206-228-9404)</span><br><span class=\"\" style=\"\">Cai &amp; Cai Associates</span></p></section></section></section>",
+      "body_zh": "<p><span class=\"\" link-id=\"link-1786688458785-0.781921039410426\">爱心午餐行动第一阶段胜利完成，CCCWA，WSCRF和清华GIX三个非盈利机构又联合发起第二阶段行动：“你们帮助他们，我们帮助你们！” 行动呼吁社会各界继续捐款支持已经参与热心义捐的餐厅，用所得善款补贴他们所捐餐食的部分成本。众所周知，餐饮业在此次新冠疫情中遭受了前所未有的重创。在这种情况下，餐厅们依然挺身而出帮助别人。餐厅老板们的愿望简单又朴素，他们深爱这个城市，希望作为社区的一员尽到自己的力量。他们不计成本地做出美味又营养的食物，仿佛每天在进行厨艺大赛。这个特殊的行动，实际上也传播了中华美食文化，让更多的人爱上了中餐。</span></p>\n\n<p>沸腾鱼乡的Leo和Lucy夫妇白手起家，在西雅图地区努力奋斗多年。这次在营业额骤降70%的情况下，仍然表示：“能够帮助到别人，是一种金钱买不到的快乐和幸福。希望出一份自己的力，能出多少就出多少，到最后如果我们撑不下去的时候再撤下来。”</p><p><br></p><p>6月8日，WSCRF将他们新近募集的24,100美元，以支票形式汇聚到行动善款中。WSCRF和WSCRC会长J. Norwell Coquillard先生表示：“华中基金会很高兴参与并支持‘爱心餐’这个既有创新性又有意义的活动。在为抗击Covid-19的一线人员供餐的同时，也支持当地的餐饮企业。我们感谢WSCRC的会员和朋友，为本活动的成功积极做出贡献。我们也很高兴能和CCCWA以及清华GIX合作，期待今后有更多的合作机会。”</p>\n\n<p></p><section powered-by=\"xiumi.us\" style=\"margin-top: 10px; margin-bottom: 10px; text-align: center; transform: translate3d(-10px, 0px, 0px);\"><section style=\"padding: 6px 10px; display: inline-block; min-width: 10%; max-width: 100%; vertical-align: top; transform: matrix(1, 0, -0.2, 1, 0, 0); border-style: solid; border-width: 0px; border-radius: 0px; border-color: rgb(76, 68, 71);\"><section powered-by=\"xiumi.us\" style=\"line-height: 1;\"><p>活动信息</p></section></section></section><section powered-by=\"xiumi.us\"><p><br></p></section><section powered-by=\"xiumi.us\"><p><br></p><section powered-by=\"xiumi.us\" style=\"max-width: 100%; overflow-wrap: break-word !important;\"><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">主办单位：</span></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">CCCWA华盛顿州中国总商会&nbsp;</span></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Chinese Chamber of&nbsp;Commerce in Washington State</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">WSCRC华盛顿州中国理事会<br style=\"max-width: 100%; overflow-wrap: break-word !important;\"></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Washington State China Relations Council</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">WSCRF华盛顿州中国基金会</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Washionton State China Relations Fund</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">清华GIX北美中心<br></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Tsinghua The Global Innovation Exchange</p></section></section><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">本次活动支持单位：</span></p><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">豆捞坊 THE DOLAR SHOP<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">百家超市 (ASIAN FAMILY MARKET)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">IJ SUSHI BURRITO<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">Chowbus Inc.<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">颐和园北京烤鸭店 （Imperial Garden）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">蓉城老火锅（CHENGDU MEMORY)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">沸腾渔乡 (FRYING FISH)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">刘一手（LIUYISHOU HOT POT)</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">上海味道坊（Shanghai House Restaurant）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">芙蓉湘(Sizzling&nbsp;Pot&nbsp;King)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">九号巷（No.9 Alley Hot Pot）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">百味轩(J&amp;J Chinese&nbsp;Restaurant)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">小肥羊（快乐小羊Happy Lamb Hot Pot）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">熊猫点心(Panda&nbsp;Dim Sum)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">Tamarindos&nbsp;Indian&nbsp;Restaurant<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图创业协会（Seattle Entrepreneurship Club)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图移民之家（Seattle Chinese New immigrants Center）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">阳光青少年教育发展基金会（Sunshine Youth Culture and Education Development Association ）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图地产投资俱乐部（Seattle Real Estate Investment Club ）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">Issaquah Highlands Chinese Heritage Club<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">美国经纬有限公司（Jing Wei LLC）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">SC Intl Realty （2062289404）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">蔡和蔡律师事务所（ Cai &amp; Cai Associates）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><br></section></section>",
       "body_images": [
         {
           "src": "/assets/uploads/news/1786688514518-640--4-.jpg",
@@ -312,6 +408,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -324,6 +422,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -336,6 +436,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -348,6 +450,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -360,6 +464,8 @@
           "focus": "87.0% 61.1%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -372,6 +478,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -384,6 +492,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -396,6 +506,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -408,6 +520,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -420,6 +534,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -432,6 +548,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -444,6 +562,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 1,
+          "after_paragraph_zh": 1,
           "after_paragraph": 1
         },
         {
@@ -456,6 +576,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 4,
+          "after_paragraph_zh": 4,
           "after_paragraph": 4
         },
         {
@@ -468,6 +590,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 4,
+          "after_paragraph_zh": 4,
           "after_paragraph": 4
         },
         {
@@ -480,6 +604,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 4,
+          "after_paragraph_zh": 4,
           "after_paragraph": 4
         },
         {
@@ -492,6 +618,8 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 4,
+          "after_paragraph_zh": 4,
           "after_paragraph": 4
         },
         {
@@ -504,10 +632,233 @@
           "focus": "50% 50%",
           "align": "center",
           "size": "100",
+          "after_paragraph_en": 4,
+          "after_paragraph_zh": 4,
           "after_paragraph": 4
         }
       ],
       "body_galleries": [],
+      "content_blocks": [
+        {
+          "type": "text",
+          "en": "<p>With the initial stage of the Food with Love program has been successfully completed, CCCWA, WSRF, and Tsinghua GIX (all three non-profits organizations) together kicked off the second phase of this program: &nbsp;“You help them, we’ll help you!” The program calls for all corners of society to continue to donate and support those restaurants that have already enthusiastically participated in this effort. As we all know, the restaurant industry has suffered unprecedented costs from Covid-19. Even in this situation, restaurants have still stepped forward and helped others. The motivation of these restaurant owners is pure and simple—they deeply care about this city and want to put forth their best effort as members of their communities. They make gourmet and nutritious meals without consideration of costs, repeatedly every day as if they were in a &nbsp;gastronomical competition. These activities are actually elevating and raising awareness of Chinese gourmet culture, making more people love and appreciate Chinese food.</p>",
+          "zh": "<p><span class=\"\" link-id=\"link-1786688458785-0.781921039410426\">爱心午餐行动第一阶段胜利完成，CCCWA，WSCRF和清华GIX三个非盈利机构又联合发起第二阶段行动：“你们帮助他们，我们帮助你们！” 行动呼吁社会各界继续捐款支持已经参与热心义捐的餐厅，用所得善款补贴他们所捐餐食的部分成本。众所周知，餐饮业在此次新冠疫情中遭受了前所未有的重创。在这种情况下，餐厅们依然挺身而出帮助别人。餐厅老板们的愿望简单又朴素，他们深爱这个城市，希望作为社区的一员尽到自己的力量。他们不计成本地做出美味又营养的食物，仿佛每天在进行厨艺大赛。这个特殊的行动，实际上也传播了中华美食文化，让更多的人爱上了中餐。</span></p>"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688514518-640--4-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688560562-640--19-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688567123-640--20-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688572985-640--21-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688581498-640--22-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "87.0% 61.1%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688589249-640--23-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688595598-640--24-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688819239-640--25-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688826771-640--26-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688867804-640--11-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786688883282-640--27-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786689247626-640--28-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "text",
+          "en": "<p><br></p><p><span style=\"font-size: 15px;\">Husband and wife Leo and Lucy, owners of Frying Fish, started their business from scratch and have worked hard for many years in the Seattle region. Even during a sudden 70% drop in business, “helping others is a kind of priceless happiness and fortune. We want to contribute as much as we can, and pull back only when we can’t hold on any longer.”</span></p><p>On June 8, the WSCRF deposited checks for nearly $24,000 into this charitable program. According to WSCRF and WSCRC President J. Norwell Coquillard, “The Washington State China Relations Fund is pleased to support this highly innovative and meaningful effort to support both our business community and those workers who are on the front line of the battle against Covid-19. &nbsp;We are very pleased that our members and friends stepped up to help make this program a success. We enjoyed the opportunity to&nbsp;work with CCCWA and Tsinghua GIX and look forward to more cooperation in the future.”</p>",
+          "zh": "<p>沸腾鱼乡的Leo和Lucy夫妇白手起家，在西雅图地区努力奋斗多年。这次在营业额骤降70%的情况下，仍然表示：“能够帮助到别人，是一种金钱买不到的快乐和幸福。希望出一份自己的力，能出多少就出多少，到最后如果我们撑不下去的时候再撤下来。”</p><p><br></p><p>6月8日，WSCRF将他们新近募集的24,100美元，以支票形式汇聚到行动善款中。WSCRF和WSCRC会长J. Norwell Coquillard先生表示：“华中基金会很高兴参与并支持‘爱心餐’这个既有创新性又有意义的活动。在为抗击Covid-19的一线人员供餐的同时，也支持当地的餐饮企业。我们感谢WSCRC的会员和朋友，为本活动的成功积极做出贡献。我们也很高兴能和CCCWA以及清华GIX合作，期待今后有更多的合作机会。”</p>"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786689292937-640--29-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786689327788-640--12-.jpg",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786689385465-640--30-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786689397038-640--31-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "image",
+          "src": "/assets/uploads/news/1786689406799-640--32-.png",
+          "alt": "",
+          "caption_en": "",
+          "caption_zh": "",
+          "text_en": "",
+          "text_zh": "",
+          "focus": "50% 50%",
+          "align": "center",
+          "size": "100"
+        },
+        {
+          "type": "text",
+          "en": "<section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><section powered-by=\"xiumi.us\" style=\"margin-top: 10px; margin-bottom: 10px; text-align: center; transform: translate3d(-10px, 0px, 0px);\"><section style=\"padding: 6px 10px; display: inline-block; min-width: 10%; max-width: 100%; vertical-align: top; transform: matrix(1, 0, -0.2, 1, 0, 0); border-style: solid; border-width: 0px; border-radius: 0px; border-color: rgb(76, 68, 71);\"><section powered-by=\"xiumi.us\" style=\"line-height: 1;\"><p>Event Information</p></section></section></section><section powered-by=\"xiumi.us\"><section powered-by=\"xiumi.us\" style=\"max-width: 100%; overflow-wrap: break-word !important;\"><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\">Organizers:</p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\">CCCWA – Chinese Chamber of Commerce in Washington State</span><br><span class=\"\">WSCRC – Washington State China Relations Council</span><br><span class=\"\">WSCRF – Washington State China Relations Fund</span><br><span class=\"\">Tsinghua GIX North America Center – Tsinghua The Global Innovation Exchange</span></p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\">Supporting Organizations for This Event:</p><p class=\"ds-markdown-paragraph\" style=\"margin-top: 16px; margin-bottom: 16px;\"><span class=\"\" style=\"\">The Dolar Shop</span><br><span class=\"\" style=\"\">Asian Family Market</span><br><span class=\"\" style=\"\">IJ Sushi Burrito</span><br><span class=\"\" style=\"\">Chowbus Inc.</span><br><span class=\"\" style=\"\">Imperial Garden (Peking Duck Restaurant)</span><br><span class=\"\" style=\"\">Chengdu Memory (Hot Pot)</span><br><span class=\"\" style=\"\">Frying Fish</span><br><span class=\"\" style=\"\">Liuyishou Hot Pot</span><br><span class=\"\" style=\"\">Shanghai House Restaurant</span><br><span class=\"\" style=\"\">Sizzling Pot King</span><br><span class=\"\" style=\"\">No.9 Alley Hot Pot</span><br><span class=\"\" style=\"\">J&amp;J Chinese Restaurant</span><br><span class=\"\" style=\"\">Happy Lamb Hot Pot</span><br><span class=\"\" style=\"\">Panda Dim Sum</span><br><span class=\"\" style=\"\">Tamarindos Indian Restaurant</span><br><span class=\"\" style=\"\">Seattle Entrepreneurship Club</span><br><span class=\"\" style=\"\">Seattle Chinese New Immigrants Center</span><br><span class=\"\" style=\"\">Sunshine Youth Culture and Education Development Association</span><br><span class=\"\" style=\"\">Seattle Real Estate Investment Club</span><br><span class=\"\" style=\"\">Issaquah Highlands Chinese Heritage Club</span><br><span class=\"\" style=\"\">Jing Wei LLC</span><br><span class=\"\" style=\"\">SC Intl Realty (206-228-9404)</span><br><span class=\"\" style=\"\">Cai &amp; Cai Associates</span></p></section></section></section>",
+          "zh": "<p></p><section powered-by=\"xiumi.us\" style=\"margin-top: 10px; margin-bottom: 10px; text-align: center; transform: translate3d(-10px, 0px, 0px);\"><section style=\"padding: 6px 10px; display: inline-block; min-width: 10%; max-width: 100%; vertical-align: top; transform: matrix(1, 0, -0.2, 1, 0, 0); border-style: solid; border-width: 0px; border-radius: 0px; border-color: rgb(76, 68, 71);\"><section powered-by=\"xiumi.us\" style=\"line-height: 1;\"><p>活动信息</p></section></section></section><section powered-by=\"xiumi.us\"><p><br></p></section><section powered-by=\"xiumi.us\"><p><br></p><section powered-by=\"xiumi.us\" style=\"max-width: 100%; overflow-wrap: break-word !important;\"><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">主办单位：</span></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">CCCWA华盛顿州中国总商会&nbsp;</span></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Chinese Chamber of&nbsp;Commerce in Washington State</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">WSCRC华盛顿州中国理事会<br style=\"max-width: 100%; overflow-wrap: break-word !important;\"></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Washington State China Relations Council</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">WSCRF华盛顿州中国基金会</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Washionton State China Relations Fund</p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">清华GIX北美中心<br></p><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\">Tsinghua The Global Innovation Exchange</p></section></section><p style=\"max-width: 100%; min-height: 1em; overflow-wrap: break-word !important;\"><span style=\"max-width: 100%; overflow-wrap: break-word !important;\">本次活动支持单位：</span></p><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">豆捞坊 THE DOLAR SHOP<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">百家超市 (ASIAN FAMILY MARKET)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">IJ SUSHI BURRITO<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">Chowbus Inc.<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">颐和园北京烤鸭店 （Imperial Garden）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">蓉城老火锅（CHENGDU MEMORY)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">沸腾渔乡 (FRYING FISH)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">刘一手（LIUYISHOU HOT POT)</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">上海味道坊（Shanghai House Restaurant）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">芙蓉湘(Sizzling&nbsp;Pot&nbsp;King)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">九号巷（No.9 Alley Hot Pot）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">百味轩(J&amp;J Chinese&nbsp;Restaurant)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">小肥羊（快乐小羊Happy Lamb Hot Pot）<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">熊猫点心(Panda&nbsp;Dim Sum)<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">Tamarindos&nbsp;Indian&nbsp;Restaurant<br></section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图创业协会（Seattle Entrepreneurship Club)<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图移民之家（Seattle Chinese New immigrants Center）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">阳光青少年教育发展基金会（Sunshine Youth Culture and Education Development Association ）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">西雅图地产投资俱乐部（Seattle Real Estate Investment Club ）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">Issaquah Highlands Chinese Heritage Club<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">美国经纬有限公司（Jing Wei LLC）<br style=\"max-width: 100%; overflow-wrap: break-word !important;\">SC Intl Realty （2062289404）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\">蔡和蔡律师事务所（ Cai &amp; Cai Associates）</section><section style=\"max-width: 100%; overflow-wrap: break-word !important;\"><br></section></section>"
+        }
+      ],
       "external_link": "",
       "external_link_label_en": "",
       "external_link_label_zh": "",
