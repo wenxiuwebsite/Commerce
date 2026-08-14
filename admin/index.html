@@ -2121,7 +2121,22 @@ applyTheme();
    affected users with no visible error. The REST endpoints are
    same-origin with the admin page, so they aren't subject to that.
 ================================================================ */
-const NETLIFY_SITE_URL = 'https://thunderous-bavarois-667c98.netlify.app';
+// Whatever host this page was actually opened from. Hardcoding one meant that
+// opening the panel on the site's real domain (ccc-wa.org) sent every login,
+// token refresh and publish to a DIFFERENT domain — cross-origin, and so
+// exactly the kind of request the note above says these endpoints avoid being.
+// It would also have broken outright the day the netlify.app subdomain is
+// renamed or turned off. Netlify serves /.netlify/* from every domain the site
+// answers on, so the origin the staff member is already on is always right.
+//
+// Local dev is the one exception: localhost serves the static files but has no
+// /.netlify/* endpoints of its own, so it still has to borrow the deployed
+// site's. Kept as the netlify.app subdomain rather than the custom domain
+// because Netlify always provides it, so this fallback can't lapse.
+const FALLBACK_SITE_URL = 'https://thunderous-bavarois-667c98.netlify.app';
+const IS_LOCAL_DEV = !/^https?:$/.test(location.protocol)
+  || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+const NETLIFY_SITE_URL = IS_LOCAL_DEV ? FALLBACK_SITE_URL : location.origin;
 const GIT_GATEWAY_BASE = NETLIFY_SITE_URL + '/.netlify/git/github';
 const IDENTITY_BASE = NETLIFY_SITE_URL + '/.netlify/identity';
 const IDENTITY_SESSION_KEY = 'cccwa_identity_session';
@@ -2295,9 +2310,83 @@ const DEFAULT_DATA = {
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let dirty = false;
 let intentionalDeletes = new Set();
-let editingNewsId = null;
+// WHICH ITEM A MODAL IS EDITING.
+//
+// This used to be the item's index in data.news / data.events / …, captured
+// when the modal opened and used verbatim when it saved. Nothing keeps that
+// index valid in between: syncFromFiles() replaces those arrays wholesale
+// (it runs in the background right after login), and adding or deleting an
+// item renumbers everything after it. Save then wrote the edited article over
+// whichever article happened to be sitting at that index — "I edited one post
+// and the one above it broke too", with the neighbour's content destroyed.
+//
+// Hold the object itself instead, with its id as a fallback for when the list
+// really was reloaded underneath us and the old object is gone.
+let editingNewsRef = null,       editingNewsOrigId = null;
 let newsModalDirty = false;
-let editingEventId = null;
+let editingEventRef = null,      editingEventOrigId = null;
+
+// Index of the item a modal is editing, or -1 if it is no longer in the list.
+function resolveEditTarget(list, ref, origId) {
+  if (!ref) return -1;
+  const i = (list || []).indexOf(ref);
+  if (i >= 0) return i;
+  return origId ? (list || []).findIndex(x => x && x.id === origId) : -1;
+}
+
+// WHICH ITEM A TABLE ROW POINTS AT.
+//
+// Rows are rendered with the item's array index baked into the button's
+// onclick. That index can go stale before the click ever happens: a background
+// syncFromFiles() swaps the whole array out, and adding or deleting an item
+// renumbers everything after it. Acting on a stale index edits or deletes
+// whichever item drifted into that slot — the same class of bug as saving by
+// index, and how "I edited one article and the one above it broke too" happens
+// on the *delete* path too.
+//
+// So every row also carries its id. Trust the index only if the item sitting
+// there still has that id; otherwise look the id up. -1 means it is genuinely
+// gone, and the caller must do nothing rather than guess.
+function rowIndex(list, idx, id) {
+  list = list || [];
+  const i = Number(idx);
+  if (!id) return (i >= 0 && i < list.length) ? i : -1;   // legacy row with no id — nothing to verify against
+  if (list[i] && list[i].id === id) return i;
+  return list.findIndex(x => x && x.id === id);
+}
+
+// Embed a string as an argument inside an inline onclick="…": JSON-quote it so
+// the JS parser sees a string literal, then HTML-escape so the attribute keeps
+// its shape. Ids come from slugified titles and are normally tame, but legacy
+// imported content is not something to trust with string concatenation.
+function jsArg(s) {
+  return JSON.stringify(String(s == null ? '' : s))
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Write an edited item back over the one it came from. Never falls back to a
+// positional guess: if the original is genuinely gone, the edit is added as a
+// new entry rather than overwriting an unrelated item.
+function commitEdit(list, ref, origId, item, whatZh, append) {
+  const add = () => append ? list.push(item) : list.unshift(item);
+  if (!ref) { add(); return; }
+  const i = resolveEditTarget(list, ref, origId);
+  if (i < 0) {
+    alert('这条内容已不在列表中（编辑期间被重新加载或删除了）。\n为避免覆盖其它内容，您的修改已作为一条新内容添加。\n\nThis ' + (whatZh || 'item') + ' is no longer in the list — it was reloaded or removed while you were editing. Your changes were added as a new entry instead of overwriting something else.');
+    add();
+    return;
+  }
+  list[i] = item;
+}
+
+// A silent background sync in 'replace' mode swaps out the very array an open
+// editor is about to write back into. Don't do that underneath someone.
+function isEditorModalOpen() {
+  return ['news-modal', 'event-modal', 'leadership-modal', 'directory-modal'].some(id => {
+    const el = document.getElementById(id);
+    return el && el.style.display === 'flex';
+  });
+}
 
 // Leadership rows used to carry a "section" field splitting the public page
 // into a Board of Directors grid and a Member Organizations grid. That split
@@ -2337,8 +2426,32 @@ async function ensureHomepageLoaded() {
   } catch (e) { /* panel will just show blank fields until sync succeeds */ }
 }
 
+// Write the draft to localStorage, reporting a full quota instead of failing
+// silently.
+//
+// localStorage has a ~5 MB quota and setItem throws the moment the draft
+// crosses it. Swallowing that leaves the browser holding an older copy of
+// everything, so the next reload quietly reverts work that looked saved. Say so
+// loudly instead — the in-memory copy is still correct, so publishing from this
+// tab is the way out.
+//
+// Returns false rather than throwing: syncFromFiles() writes through here too,
+// mid-way through applying freshly-fetched content, and an exception there
+// escaped to its catch — skipping the re-render and the dirty reset and leaving
+// the panel showing one thing while data held another.
+function writeDraftToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
+  } catch (e) {
+    console.error('Could not save draft to localStorage:', e);
+    alert('浏览器本地存储已满，草稿未能保存到本地。\n如果有尚未发布的修改，请立刻点击 Publish 发布，否则刷新页面后会丢失。\n\nThe browser ran out of local storage, so the draft was NOT saved locally. If you have unpublished changes, Publish now — reloading the page first loses them.');
+    return false;
+  }
+}
+
 function persistData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  writeDraftToStorage();
   dirty = true;
   localStorage.setItem(DIRTY_KEY, 'true');
   updateDirtyIndicator();
@@ -2418,18 +2531,168 @@ function slugify(str) {
     .replace(/[^\w一-龥]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-function countParagraphs(html) {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html || '';
-  const ps = tmp.querySelectorAll('p');
-  return ps.length || (String(html || '').trim() ? 1 : 0);
+// IDS MUST BE UNIQUE WITHIN THEIR LIST.
+//
+// A new item's id is just its slugified title, with no check of any kind — so
+// two articles titled the same got the SAME id. Everything downstream assumes
+// otherwise: reconcileList() de-duplicates by id (a Publish could drop one of
+// the twins), recordDelete() suppresses recovery by id (deleting one buries
+// both), and the id lookups that keep saving and deleting off a stale index
+// would happily pick the wrong twin. The public article URL is
+// article-view.html?id=… too, so twins are one page.
+//
+// `self` is the item being edited, excluded so re-saving an item keeps the id
+// it already has (and its URL) instead of drifting to -2, -3, … each time.
+function uniqueId(list, base, self) {
+  base = String(base || '').trim() || uid();
+  const taken = new Set((list || []).filter(x => x && x !== self).map(x => x && x.id));
+  if (!taken.has(base)) return base;
+  let n = 2;
+  while (taken.has(base + '-' + n)) n++;
+  return base + '-' + n;
 }
 
-function splitParagraphs(html) {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html || '';
-  const kids = Array.from(tmp.children);
-  return kids.length ? kids.map(el => el.outerHTML) : (html ? [html] : []);
+/* ----------------------------------------------------------------
+   THE PARAGRAPH MODEL
+
+   An image's place in an article is stored as `after_paragraph` — "show
+   me after the Nth paragraph". That number is written in one place, read
+   back in another and rendered in a third, so all three have to agree on
+   what counts as a paragraph. They didn't:
+
+     write   (blocksToBody)       every <p> at ANY depth
+     read    (bodyToBlocks)       every TOP-LEVEL element, any tag
+     render  (article-view.html)  top-level <P> only
+
+   Anything pasted out of WeChat/秀米 is <section> wrappers around <p>, so
+   the write count ran far ahead of the read count — and the read loop only
+   looked for anchors up to its own count, silently dropping every image
+   past it. The read side also walked .children, which skips text nodes, so
+   a line typed straight into an empty rich-text box (contenteditable emits
+   a bare text node for the first line) vanished on the next open.
+
+   One definition now, shared by all three: a paragraph is a <p> element, at
+   any depth. normalizeBodyHtml() guarantees no content can sit outside one,
+   and no step anywhere is allowed to discard an anchor it can't place.
+---------------------------------------------------------------- */
+
+// Tags that stand on their own as body-level content. Everything else
+// (text, <span>, <a>, <br>, <img>…) is inline and has to be wrapped.
+const BLOCK_TAGS = ['P','DIV','SECTION','ARTICLE','ASIDE','HEADER','FOOTER','MAIN','NAV',
+  'H1','H2','H3','H4','H5','H6','UL','OL','LI','DL','DT','DD','TABLE','THEAD','TBODY','TFOOT',
+  'TR','TD','TH','BLOCKQUOTE','PRE','FIGURE','FIGCAPTION','HR','FORM'];
+const BLOCK_TAG_SET = new Set(BLOCK_TAGS);
+const BLOCK_SELECTOR = BLOCK_TAGS.join(',');
+
+// Parse HTML into a tree WITHOUT running any of it, and hand back the root to
+// read from.
+//
+// Assigning to .innerHTML on an element belonging to this document executes the
+// markup as it is parsed. A detached <div> is not an exception — its images
+// still load, so `<img src=x onerror=…>` fires before a single line of our code
+// gets to look at the result. A document from createHTMLDocument() has no
+// browsing context: nothing fetches, and no handler runs.
+//
+// Everything routed through here is article bodies pasted out of WeChat. That
+// is staff-supplied rather than public, so it is a lower bar than the contact
+// form (see sanitizeInboxHtml) — but a WeChat page is still someone else's
+// markup, and parsing it inertly costs nothing.
+function inertParse(html) {
+  const doc = document.implementation.createHTMLDocument('');
+  doc.body.innerHTML = html == null ? '' : String(html);
+  return doc.body;
+}
+
+function parseHtml(html) {
+  return inertParse(html);
+}
+
+// THE paragraph count. article-view.html counts the same way off the same
+// markup, so a written anchor and a rendered one cannot drift apart.
+function countParagraphs(html) {
+  return parseHtml(html).querySelectorAll('p').length;
+}
+
+// Paragraphs contributed by a single top-level node. querySelectorAll only
+// sees descendants, so a <p> has to count itself.
+function nodeParagraphCount(node) {
+  if (!node || node.nodeType !== 1) return 0;
+  return node.querySelectorAll('p').length + (node.tagName === 'P' ? 1 : 0);
+}
+
+// Turn a body into a flat run of block elements with nothing loose between
+// them: stray text/inline content gets wrapped in <p>, and a <div> holding no
+// block content of its own (what contenteditable emits per line) is promoted
+// to <p> so it can carry an anchor. Idempotent — safe on already-clean HTML.
+function normalizeBodyHtml(html) {
+  const tmp = parseHtml(html);
+  let run = [];
+  const flush = () => {
+    if (!run.length) return;
+    // Whitespace between blocks is just source formatting; anything else is
+    // real content and must survive.
+    const meaningful = run.some(n => n.nodeType === 1 || (n.textContent || '').trim());
+    if (!meaningful) {
+      run.forEach(n => n.parentNode && n.parentNode.removeChild(n));
+      run = [];
+      return;
+    }
+    const p = document.createElement('p');
+    run[0].parentNode.insertBefore(p, run[0]);
+    // Blank lines inside the wrapper would end marked's HTML block early when
+    // article-view.html parses the body, splitting one paragraph into two.
+    run.forEach(n => {
+      if (n.nodeType === 3) n.textContent = n.textContent.replace(/\s*\n\s*/g, ' ');
+      p.appendChild(n);
+    });
+    while (p.firstChild && p.firstChild.nodeType === 3 && !p.firstChild.textContent.trim()) p.removeChild(p.firstChild);
+    while (p.lastChild && p.lastChild.nodeType === 3 && !p.lastChild.textContent.trim()) p.removeChild(p.lastChild);
+    run = [];
+  };
+  Array.from(tmp.childNodes).forEach(n => {
+    if (n.nodeType === 1 && BLOCK_TAG_SET.has(n.tagName)) flush();
+    else run.push(n);
+  });
+  flush();
+  Array.from(tmp.children).forEach(el => {
+    if (el.tagName !== 'DIV' || el.querySelector(BLOCK_SELECTOR)) return; // holds real blocks — leave it
+    const p = document.createElement('p');
+    Array.from(el.attributes).forEach(a => p.setAttribute(a.name, a.value));
+    while (el.firstChild) p.appendChild(el.firstChild);
+    el.parentNode.replaceChild(p, el);
+  });
+  return tmp.innerHTML;
+}
+
+// Split a body into cuts.length + 1 segments, cutting once the running
+// paragraph count reaches each cut. `cuts` must be non-decreasing.
+//
+// Both ends are deliberate, because both are places images used to end up in
+// the wrong half of the article:
+//   - a cut of 0 yields an EMPTY leading segment, so whatever is anchored
+//     there lands above all the text rather than after the first paragraph.
+//   - a cut past the end yields an empty TRAILING segment: the leftover text
+//     is emitted first, then the empty ones, so an image anchored past the
+//     last paragraph lands at the bottom instead of jumping above the text
+//     that follows the previous cut.
+function splitBodyAt(html, cuts) {
+  const tmp = parseHtml(html);
+  const segs = [];
+  let buf = [], count = 0, ci = 0;
+  const flush = () => {
+    segs.push(buf.map(n => n.nodeType === 1 ? n.outerHTML : (n.textContent || '')).join(''));
+    buf = [];
+  };
+  const flushReached = () => { while (ci < cuts.length && count >= cuts[ci]) { flush(); ci++; } };
+  flushReached();                                   // any cuts of 0
+  Array.from(tmp.childNodes).forEach(node => {
+    buf.push(node);
+    count += nodeParagraphCount(node);
+    flushReached();
+  });
+  flush();                                          // text after the last cut that was reached
+  while (segs.length < cuts.length + 1) segs.push('');
+  return segs;
 }
 
 // content_blocks (ordered text/image blocks) -> body_en/body_zh + body_images.
@@ -2437,10 +2700,20 @@ function splitParagraphs(html) {
 function blocksToBody(blocks) {
   let bodyEn = [], bodyZh = [], images = [], galleries = [];
   let pCountEn = 0, pCountZh = 0;
-  blocks.forEach(b => {
+  // The two bodies rarely split into the same number of paragraphs, and one
+  // shared anchor could only ever be right for one of them — which is why
+  // images drifted when the languages were unevenly translated. Record both
+  // and keep after_paragraph as the max, for any renderer that predates them.
+  const anchors = () => ({
+    after_paragraph_en: pCountEn,
+    after_paragraph_zh: pCountZh,
+    after_paragraph: Math.max(pCountEn, pCountZh, 0)
+  });
+  (blocks || []).forEach(b => {
     if (b.type === 'text') {
-      if (b.en) { bodyEn.push(b.en); pCountEn += countParagraphs(b.en); }
-      if (b.zh) { bodyZh.push(b.zh); pCountZh += countParagraphs(b.zh); }
+      const en = normalizeBodyHtml(b.en), zh = normalizeBodyHtml(b.zh);
+      if (en) { bodyEn.push(en); pCountEn += countParagraphs(en); }
+      if (zh) { bodyZh.push(zh); pCountZh += countParagraphs(zh); }
     } else if (b.type === 'image' && b.src) {
       images.push({
         src: b.src, alt: b.alt || '',
@@ -2448,7 +2721,7 @@ function blocksToBody(blocks) {
         text_en: b.text_en || '', text_zh: b.text_zh || '',
         focus: b.focus || '50% 50%',
         align: b.align || 'center', size: b.size || '100',
-        after_paragraph: Math.max(pCountEn, pCountZh, 0)
+        ...anchors()
       });
     } else if (b.type === 'gallery' && (b.images || []).some(im => im.src)) {
       galleries.push({
@@ -2457,55 +2730,91 @@ function blocksToBody(blocks) {
           caption_en: im.caption_en || '', caption_zh: im.caption_zh || '',
           focus: im.focus || '50% 50%'
         })),
-        after_paragraph: Math.max(pCountEn, pCountZh, 0)
+        ...anchors()
       });
     }
   });
   return { body_en: bodyEn.join('\n\n'), body_zh: bodyZh.join('\n\n'), body_images: images, body_galleries: galleries };
 }
 
-// Reverse of blocksToBody — reconstructs an editable ordered block list from
-// a saved article, splitting the body back into text blocks around each
-// positioned image/gallery so it can be edited the same way it was authored.
+function positionedItemToBlock(entry) {
+  if (entry.kind === 'image') {
+    const img = entry.data;
+    return {
+      type: 'image', src: img.src, alt: img.alt || '',
+      caption_en: img.caption_en || '', caption_zh: img.caption_zh || '',
+      text_en: img.text_en || '', text_zh: img.text_zh || '',
+      focus: img.focus || '50% 50%',
+      align: img.align || 'center', size: img.size || '100'
+    };
+  }
+  return { type: 'gallery', images: (entry.data.images || []).map(im => ({ focus: '50% 50%', ...im })) };
+}
+
+// Reverse of blocksToBody — reconstructs an editable block list from a saved
+// article. Only used for articles published before content_blocks was stored;
+// everything saved since carries its blocks verbatim and needs no guesswork.
+//
+// The hard rule is that NOTHING may be dropped. Every paragraph of both bodies
+// and every image and gallery ends up in exactly one block, whatever the
+// anchors say: an anchor of 0 puts its image at the very top, an anchor past
+// the end of the text puts it at the very bottom. The old version simply
+// skipped both cases, which is how articles lost their pictures just by being
+// opened and saved again.
 function bodyToBlocks(article) {
-  const bodyImages = article.body_images || [];
-  const bodyGalleries = article.body_galleries || [];
-  if (!bodyImages.length && !bodyGalleries.length) {
-    return (article.body_en || article.body_zh)
-      ? [{ type: 'text', en: article.body_en || '', zh: article.body_zh || '' }]
-      : [];
+  const enHtml = normalizeBodyHtml(article.body_en);
+  const zhHtml = normalizeBodyHtml(article.body_zh);
+  const entries = [
+    ...(article.body_images || []).map(d => ({ kind: 'image', data: d })),
+    ...(article.body_galleries || []).map(d => ({ kind: 'gallery', data: d }))
+  ];
+  if (!entries.length) {
+    return (enHtml || zhHtml) ? [{ type: 'text', en: enHtml, zh: zhHtml }] : [];
   }
-  const enParas = splitParagraphs(article.body_en);
-  const zhParas = splitParagraphs(article.body_zh);
-  const maxLen = Math.max(enParas.length, zhParas.length);
-  const byPos = {};
-  bodyImages.forEach(img => { (byPos[img.after_paragraph] = byPos[img.after_paragraph] || []).push({ kind: 'image', data: img }); });
-  bodyGalleries.forEach(gal => { (byPos[gal.after_paragraph] = byPos[gal.after_paragraph] || []).push({ kind: 'gallery', data: gal }); });
+  // Each language is cut at ITS OWN anchor. blocksToBody() records both, and
+  // reading back only the shared one (the max of the two) meant the shorter
+  // translation was always cut too late — so every save nudged its images a
+  // few paragraphs further down. Articles that predate the per-language
+  // anchors have only the shared number, and fall back to it.
+  const anchorOf = (d, zh) => {
+    const per = zh ? d.after_paragraph_zh : d.after_paragraph_en;
+    const n = parseInt((per === undefined || per === null) ? d.after_paragraph : per, 10);
+    return isNaN(n) || n < 0 ? 0 : n;
+  };
+  entries.forEach((e, i) => {
+    e.posEn = anchorOf(e.data, false);
+    e.posZh = anchorOf(e.data, true);
+    e.ord = i;
+  });
+  // Both counts only ever rise as blocksToBody() walks the article, so either
+  // orders the media the same way; ord keeps ties in their authored order.
+  entries.sort((a, b) => a.posEn - b.posEn || a.posZh - b.posZh || a.ord - b.ord);
+
+  // One group per distinct anchor pair — a group sits at the same point in
+  // both languages, and becomes one cut in each.
+  const groups = [];
+  entries.forEach(e => {
+    const last = groups[groups.length - 1];
+    if (last && last.posEn === e.posEn && last.posZh === e.posZh) last.items.push(e);
+    else groups.push({ posEn: e.posEn, posZh: e.posZh, items: [e] });
+  });
+
+  // splitBodyAt needs non-decreasing cuts. They always are for anything this
+  // admin wrote; hand-edited JSON is clamped rather than allowed to silently
+  // drop a cut and take the images with it.
+  const cutsOf = key => { let m = 0; return groups.map(g => (m = Math.max(m, g[key]))); };
+  const enSegs = splitBodyAt(enHtml, cutsOf('posEn'));
+  const zhSegs = splitBodyAt(zhHtml, cutsOf('posZh'));
+
   const blocks = [];
-  let bufEn = [], bufZh = [];
-  for (let i = 0; i < maxLen; i++) {
-    if (enParas[i]) bufEn.push(enParas[i]);
-    if (zhParas[i]) bufZh.push(zhParas[i]);
-    if (byPos[i + 1]) {
-      blocks.push({ type: 'text', en: bufEn.join(''), zh: bufZh.join('') });
-      bufEn = []; bufZh = [];
-      byPos[i + 1].forEach(entry => {
-        if (entry.kind === 'image') {
-          const img = entry.data;
-          blocks.push({
-            type: 'image', src: img.src, alt: img.alt || '',
-            caption_en: img.caption_en || '', caption_zh: img.caption_zh || '',
-            text_en: img.text_en || '', text_zh: img.text_zh || '',
-            focus: img.focus || '50% 50%',
-            align: img.align || 'center', size: img.size || '100'
-          });
-        } else {
-          blocks.push({ type: 'gallery', images: (entry.data.images || []).map(im => ({ focus: '50% 50%', ...im })) });
-        }
-      });
-    }
-  }
-  if (bufEn.length || bufZh.length) blocks.push({ type: 'text', en: bufEn.join(''), zh: bufZh.join('') });
+  const textAt = i => {
+    const en = enSegs[i] || '', zh = zhSegs[i] || '';
+    if (en || zh) blocks.push({ type: 'text', en, zh });
+  };
+  // A group anchored at 0 gets an empty leading segment from splitBodyAt, so
+  // it simply falls out here above all the text — no special case needed.
+  groups.forEach((g, i) => { textAt(i); blocks.push(...g.items.map(positionedItemToBlock)); });
+  textAt(groups.length);                                       // whatever is left over
   return blocks;
 }
 
@@ -2533,6 +2842,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePreview();
   if (e.key === 'Enter' && document.activeElement?.classList.contains('rich-editor-title')) e.preventDefault();
 });
+// Without this, contenteditable wraps new lines in <div> (Chrome) or nothing
+// at all for the first line — and a bare text node is not a paragraph, so it
+// could neither carry an image anchor nor survive a reload. Ask for <p>.
+try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) { /* older browsers — normalizeBodyHtml still cleans up */ }
+
 // Pasting a headline copied from a WeChat article would otherwise drop that
 // article's full <h1 style="..."> wrapper into the title box. Titles render as
 // plain text everywhere, so take the plain-text flavour of the clipboard.
@@ -2576,12 +2890,21 @@ function toggleAdminSidebar(open) {
 }
 
 function showPanel(name, el) {
+  // Moving between Homepage/Mission/Contact keeps the edits in place (they are
+  // one form). Leaving for anywhere else is the moment they get forgotten:
+  // they stay in the inputs, but they are NOT in the draft, so a Publish would
+  // quietly go out without them. Offer to fold them in on the way past.
+  if (homepageFormDirty && !HOMEPAGE_PANELS.has(name)) {
+    if (confirm('「首页 / 使命 / 联系方式」有尚未保存的修改。\n现在保存到草稿吗？\n（点「取消」则先留在表单里，之后再回来保存）\n\nYou have unsaved Homepage/Mission/Contact changes. Save them to the draft now?\nCancel keeps them in the form for later.')) {
+      saveHomepageContent();
+    }
+  }
   document.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
   document.getElementById('panel-' + name).style.display = 'block';
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
   toggleAdminSidebar(false);
-  if (name === 'homepage' || name === 'mission' || name === 'contact') ensureHomepageLoaded().then(renderHomepageForm);
+  if (HOMEPAGE_PANELS.has(name)) ensureHomepageLoaded().then(() => renderHomepageForm());
   if (name === 'news') renderNewsTable();
   if (name === 'events') renderEventsTable();
   if (name === 'leadership') renderLeadershipTable();
@@ -2633,6 +2956,12 @@ function renderAll() {
   renderEventsTable();
   renderLeadershipTable();
   renderDirectoryTable();
+  // A sync replaces data.homepage, and this used to leave the Homepage/
+  // Mission/Contact inputs showing the values from before it — so a later
+  // Save wrote those stale values back over the content just pulled in.
+  // Safe to call now: renderHomepageForm() leaves the fields alone while they
+  // hold unsaved edits, and does nothing at all until data.homepage exists.
+  renderHomepageForm();
   updateDirtyIndicator();
   updateTrashBadge();
   applyTranslations();
@@ -2696,8 +3025,8 @@ function renderNewsTable() {
       <td>${catTag(n.category_en, n.category_zh)}</td>
       <td style="color:var(--muted);font-size:12px;white-space:nowrap">${esc(n.date)}</td>
       <td>
-        <button class="btn-edit" onclick="openNewsModal(${i})">${T('btn.edit')}</button>
-        <button class="btn-danger" onclick="deleteNews(${i})">${T('btn.delete')}</button>
+        <button class="btn-edit" onclick="openNewsModal(${i}, false, ${jsArg(n.id)})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteNews(${i}, ${jsArg(n.id)})">${T('btn.delete')}</button>
       </td>
     </tr>`).join('');
 }
@@ -2730,8 +3059,8 @@ function renderEventsTable() {
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? e.location_zh : e.location_en)}</td>
       <td style="font-size:12px;color:var(--muted);white-space:nowrap">${esc(e.time)}</td>
       <td>
-        <button class="btn-edit" onclick="openEventModal(${i})">${T('btn.edit')}</button>
-        <button class="btn-danger" onclick="deleteEvent(${i})">${T('btn.delete')}</button>
+        <button class="btn-edit" onclick="openEventModal(${i}, ${jsArg(e.id)})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteEvent(${i}, ${jsArg(e.id)})">${T('btn.delete')}</button>
       </td>
     </tr>`;
   }).join('');
@@ -2741,10 +3070,12 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Titles and table cells, taken from the same pasted-in markup — parsed inertly
+// for the reason spelled out on inertParse(). (textContent is always a string,
+// so the old innerText fallback never did anything; an inert tree has no layout
+// to give innerText a different answer anyway.)
 function stripHtml(html) {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html || '';
-  return tmp.textContent || tmp.innerText || '';
+  return inertParse(html).textContent || '';
 }
 
 // Inbox messages come from PUBLIC, unauthenticated form submissions — the
@@ -2753,14 +3084,27 @@ function stripHtml(html) {
 // straight to the Netlify Forms endpoint, bypassing that editor entirely.
 // Strip everything to an allowlist before ever rendering it as innerHTML.
 const INBOX_HTML_ALLOWED_TAGS = new Set(['B','STRONG','I','EM','U','P','BR','UL','OL','LI','H2','H3','A']);
+// The message body is whatever a stranger typed into the public contact form,
+// so it is parsed in an INERT document — never in this one.
+//
+// The cleaning below is fine; the problem was where the parsing happened.
+// Assigning untrusted HTML to an element belonging to the live document runs it
+// AS IT IS PARSED, and a detached <div> is not an exception — its images still
+// load, so `<img src=x onerror="...">` fires before the first line of cleaning
+// gets to look at it. In this panel that handler would be running next to a
+// Netlify access token in localStorage.
+//
+// document.implementation.createHTMLDocument() has no browsing context: nothing
+// fetches, no handler runs, and only the sanitised markup ever comes back out.
 function sanitizeInboxHtml(html) {
-  const tmp = document.createElement('div');
+  const inert = document.implementation.createHTMLDocument('');
+  const tmp = inert.body;
   tmp.innerHTML = String(html || '');
   (function clean(node) {
     [...node.childNodes].forEach(child => {
       if (child.nodeType === Node.ELEMENT_NODE) {
         if (!INBOX_HTML_ALLOWED_TAGS.has(child.tagName)) {
-          child.replaceWith(document.createTextNode(child.textContent));
+          child.replaceWith(inert.createTextNode(child.textContent));
           return;
         }
         const safeHref = child.tagName === 'A' && /^(https?:|mailto:)/i.test(child.getAttribute('href') || '')
@@ -2791,10 +3135,20 @@ function onCategoryEnChange() {
 /* ================================================================
    NEWS CRUD
 ================================================================ */
-function openNewsModal(idx, presetEvent) {
-  editingNewsId = idx !== undefined ? idx : null;
-  document.getElementById('news-modal-title').textContent = idx !== undefined ? T('modal.news.edit') : (presetEvent ? T('news.add.event') : T('modal.news.add'));
-  const n = idx !== undefined ? data.news[idx] : {};
+// `id` is the row's own id — see rowIndex(). Opening the wrong article is what
+// makes a later save overwrite the wrong article, so resolve it here rather
+// than trusting the index the row was rendered with.
+function openNewsModal(idx, presetEvent, id) {
+  if (idx !== undefined) {
+    const i = rowIndex(data.news, idx, id);
+    if (i < 0) { toast('That article is no longer in the list — the table has been refreshed.'); renderNewsTable(); return; }
+    editingNewsRef = data.news[i];
+  } else {
+    editingNewsRef = null;
+  }
+  editingNewsOrigId = editingNewsRef ? editingNewsRef.id : null;
+  document.getElementById('news-modal-title').textContent = editingNewsRef ? T('modal.news.edit') : (presetEvent ? T('news.add.event') : T('modal.news.add'));
+  const n = editingNewsRef || {};
   document.getElementById('n-id').value                     = n.id || '';
   document.getElementById('n-title-en').innerHTML           = n.title_en || '';
   document.getElementById('n-title-zh').innerHTML           = n.title_zh || '';
@@ -2820,8 +3174,15 @@ function openNewsModal(idx, presetEvent) {
   } else {
     prev.src = ''; prev.style.display = 'none';
   }
-  // Content blocks — reconstructed from body_en/body_zh + body_images
-  currentBlocks = bodyToBlocks(n);
+  // Content blocks. Articles saved by this admin carry their blocks verbatim,
+  // so editing round-trips exactly. bodyToBlocks() only runs for articles
+  // published before that field existed — reconstructing blocks from a body
+  // plus numeric anchors is inherently approximate, and doing it on every
+  // single open is what let small errors compound into lost paragraphs and
+  // images. Now it happens once, and the result sticks.
+  currentBlocks = Array.isArray(n.content_blocks) && n.content_blocks.length
+    ? JSON.parse(JSON.stringify(n.content_blocks))
+    : bodyToBlocks(n);
   renderBlocks();
   applyTranslations();
   newsModalDirty = false;
@@ -2838,7 +3199,9 @@ function saveNews() {
   const cat   = document.getElementById('n-category-en').value.trim() || 'News';
   const catZhInput = document.getElementById('n-category-zh').value.trim();
   const catZh = catZhInput || (data.categories || []).find(c => c.en === cat)?.zh || cat;
-  const id = document.getElementById('n-id').value.trim() || slugify(stripHtml(document.getElementById('n-title-en').innerHTML) || stripHtml(document.getElementById('n-title-zh').innerHTML)) || uid();
+  const id = uniqueId(data.news,
+    document.getElementById('n-id').value.trim() || slugify(stripHtml(document.getElementById('n-title-en').innerHTML) || stripHtml(document.getElementById('n-title-zh').innerHTML)) || uid(),
+    editingNewsRef);
   const bodyParts = blocksToBody(currentBlocks);
   const item = {
     id,
@@ -2858,21 +3221,28 @@ function saveNews() {
     body_zh:      bodyParts.body_zh,
     body_images:  bodyParts.body_images,
     body_galleries: bodyParts.body_galleries,
+    // The editor's own format, stored so reopening this article restores
+    // exactly what was authored instead of re-deriving it from the rendered
+    // body. body_* above stays the source of truth for the public pages.
+    content_blocks: JSON.parse(JSON.stringify(currentBlocks || [])),
     external_link: document.getElementById('n-external-link').value.trim(),
     external_link_label_en: document.getElementById('n-external-link-label-en').value.trim(),
     external_link_label_zh: document.getElementById('n-external-link-label-zh').value.trim(),
     register_url: document.getElementById('n-register-url').value.trim()
   };
   if (!stripHtml(item.title_zh) && !stripHtml(item.title_en)) { alert(T('alert.title')); return; }
-  if (editingNewsId !== null) data.news[editingNewsId] = item;
-  else data.news.unshift(item);
+  commitEdit(data.news, editingNewsRef, editingNewsOrigId, item, '文章 / article');
   newsModalDirty = false;
   persistData(); renderNewsTable(); renderDashboard(); closeNewsModal();
   toast(T('toast.article.saved'));
 }
 
-function deleteNews(idx) {
-  const [item] = data.news.splice(idx, 1);
+// Deleting by a stale index destroys whichever article drifted into that slot,
+// so resolve the row's id first — see rowIndex().
+function deleteNews(idx, id) {
+  const i = rowIndex(data.news, idx, id);
+  if (i < 0) { toast('That article is no longer in the list — nothing was deleted.'); renderNewsTable(); return; }
+  const [item] = data.news.splice(i, 1);
   if (!item) return;
   data.trash.push({ type: 'news', item, deletedAt: new Date().toISOString() });
   recordDelete(item.id);
@@ -2883,10 +3253,17 @@ function deleteNews(idx) {
 /* ================================================================
    EVENTS CRUD
 ================================================================ */
-function openEventModal(idx) {
-  editingEventId = idx !== undefined ? idx : null;
-  document.getElementById('event-modal-title').textContent = idx !== undefined ? T('modal.events.edit') : T('modal.events.add');
-  const e = idx !== undefined ? data.events[idx] : {};
+function openEventModal(idx, id) {
+  if (idx !== undefined) {
+    const i = rowIndex(data.events, idx, id);   // see rowIndex()
+    if (i < 0) { toast('That event is no longer in the list — the table has been refreshed.'); renderEventsTable(); return; }
+    editingEventRef = data.events[i];
+  } else {
+    editingEventRef = null;
+  }
+  editingEventOrigId = editingEventRef ? editingEventRef.id : null;
+  document.getElementById('event-modal-title').textContent = editingEventRef ? T('modal.events.edit') : T('modal.events.add');
+  const e = editingEventRef || {};
   document.getElementById('e-id').value           = e.id || '';
   document.getElementById('e-date').value         = e.date || '';
   document.getElementById('e-title-en').value     = e.title_en || '';
@@ -2904,7 +3281,9 @@ function openEventModal(idx) {
 function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
 
 function saveEvent() {
-  const id = document.getElementById('e-id').value.trim() || slugify(document.getElementById('e-title-en').value || document.getElementById('e-title-zh').value) || uid();
+  const id = uniqueId(data.events,
+    document.getElementById('e-id').value.trim() || slugify(document.getElementById('e-title-en').value || document.getElementById('e-title-zh').value) || uid(),
+    editingEventRef);
   const item = {
     id,
     date:         document.getElementById('e-date').value.trim(),
@@ -2918,14 +3297,15 @@ function saveEvent() {
     register_url: document.getElementById('e-register-url').value.trim() || 'contact.html'
   };
   if (!item.title_en && !item.title_zh) { alert(T('alert.title')); return; }
-  if (editingEventId !== null) data.events[editingEventId] = item;
-  else data.events.push(item);
+  commitEdit(data.events, editingEventRef, editingEventOrigId, item, '活动 / event', true);
   persistData(); renderEventsTable(); renderDashboard(); closeEventModal();
   toast(T('toast.event.saved'));
 }
 
-function deleteEvent(idx) {
-  const [item] = data.events.splice(idx, 1);
+function deleteEvent(idx, id) {
+  const i = rowIndex(data.events, idx, id);   // see rowIndex()
+  if (i < 0) { toast('That event is no longer in the list — nothing was deleted.'); renderEventsTable(); return; }
+  const [item] = data.events.splice(i, 1);
   if (!item) return;
   data.trash.push({ type: 'event', item, deletedAt: new Date().toISOString() });
   recordDelete(item.id);
@@ -2970,7 +3350,38 @@ function backfillContactDefaults(hp) {
   });
 }
 
-function renderHomepageForm() {
+/* ----------------------------------------------------------------
+   UNSAVED EDITS IN THE HOMEPAGE / MISSION / CONTACT FORM
+
+   Those three tabs are three views of ONE form: renderHomepageForm() fills
+   every field of all three out of data.homepage, and saveHomepageContent()
+   reads every field of all three back into it. showPanel() re-renders on
+   entry to any of them — so typing in Homepage and clicking Mission re-filled
+   the Homepage inputs from the draft and threw the typing away, silently.
+
+   The list editors further down (programs, objectives, footer links) write
+   straight into data.homepage as you type, so they were never affected. The
+   ~50 plain fields have no per-field handler at all and only reach the draft
+   when Save is pressed — so there was nothing to recover them from.
+
+   While this flag is set, renderHomepageForm() leaves the inputs alone.
+---------------------------------------------------------------- */
+let homepageFormDirty = false;
+const HOMEPAGE_PANELS = new Set(['homepage', 'mission', 'contact']);
+
+function markHomepageFormDirty() { homepageFormDirty = true; }
+
+// One delegated listener rather than ~50 inline oninput attributes. Note that
+// a programmatic `.value = …` does NOT fire `input`, so the image-upload
+// buttons mark themselves (see handleHomepageImageUpload).
+document.addEventListener('input', e => {
+  const id = e.target && e.target.id;
+  if (typeof id === 'string' && id.startsWith('hp-f-')) markHomepageFormDirty();
+});
+
+// `force` repopulates even over unsaved edits — used after an explicit Save,
+// when the fields and the draft are known to agree.
+function renderHomepageForm(force) {
   const hp = data.homepage;
   const list = document.getElementById('hp-programs-list');
   if (!hp) {
@@ -2978,6 +3389,16 @@ function renderHomepageForm() {
     return;
   }
   backfillContactDefaults(hp);
+  if (homepageFormDirty && !force) {
+    // Someone is mid-edit. Refilling the inputs from the draft is exactly the
+    // bug this guards; the list editors below are backed directly by
+    // data.homepage, so they are always current and safe to redraw.
+    renderFooterLinksList();
+    renderProgramsList();
+    renderManualPicker();
+    renderObjectivesList();
+    return;
+  }
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('hp-f-hero-title-en', hp.hero_title_en); set('hp-f-hero-title-zh', hp.hero_title_zh);
   set('hp-f-hero-subtitle-en', hp.hero_subtitle_en); set('hp-f-hero-subtitle-zh', hp.hero_subtitle_zh);
@@ -3288,6 +3709,7 @@ function saveHomepageContent() {
   hp.contact_info_title_en = get('hp-f-ct-info-title-en'); hp.contact_info_title_zh = get('hp-f-ct-info-title-zh');
   hp.contact_form_title_en = get('hp-f-ct-form-title-en'); hp.contact_form_title_zh = get('hp-f-ct-form-title-zh');
   hp.contact_form_sub_en = get('hp-f-ct-form-sub-en'); hp.contact_form_sub_zh = get('hp-f-ct-form-sub-zh');
+  homepageFormDirty = false;   // fields and draft now agree
   persistData();
   toast('Homepage content saved — click Publish to make it live');
 }
@@ -3388,7 +3810,7 @@ function enableRowDrag(tbodyId, getList, rerender) {
 /* ================================================================
    LEADERSHIP CRUD
 ================================================================ */
-let editingLeadershipId = null;
+let editingLeadershipRef = null, editingLeadershipOrigId = null;
 let leadershipModalDirty = false;
 
 function renderLeadershipTable() {
@@ -3421,28 +3843,37 @@ function renderLeadershipTable() {
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.company_zh || m.company_en) : (m.company_en || m.company_zh))}</td>
       <td>
         ${q ? '' : `
-          <button class="btn-move" onclick="moveLeadership(${i},-1)" ${i===0?'disabled':''} title="Move up">&#9650;</button>
-          <button class="btn-move" onclick="moveLeadership(${i},1)" ${i===data.leadership.length-1?'disabled':''} title="Move down">&#9660;</button>
+          <button class="btn-move" onclick="moveLeadership(${i},-1,${jsArg(m.id)})" ${i===0?'disabled':''} title="Move up">&#9650;</button>
+          <button class="btn-move" onclick="moveLeadership(${i},1,${jsArg(m.id)})" ${i===data.leadership.length-1?'disabled':''} title="Move down">&#9660;</button>
         `}
-        <button class="btn-edit" onclick="openLeadershipModal(${i})">${T('btn.edit')}</button>
-        <button class="btn-danger" onclick="deleteLeadership(${i})">${T('btn.delete')}</button>
+        <button class="btn-edit" onclick="openLeadershipModal(${i}, ${jsArg(m.id)})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteLeadership(${i}, ${jsArg(m.id)})">${T('btn.delete')}</button>
       </td>
     </tr>`).join('');
   enableRowDrag('leadership-rows', () => data.leadership, renderLeadershipTable);
 }
 
-function moveLeadership(idx, dir) {
+function moveLeadership(idx, dir, id) {
   const list = data.leadership;
-  const j = idx + dir;
+  const i = rowIndex(list, idx, id);   // see rowIndex()
+  if (i < 0) { renderLeadershipTable(); return; }
+  const j = i + dir;
   if (j < 0 || j >= list.length) return;
-  [list[idx], list[j]] = [list[j], list[idx]];
+  [list[i], list[j]] = [list[j], list[i]];
   persistData(); renderLeadershipTable();
 }
 
-function openLeadershipModal(idx) {
-  editingLeadershipId = idx !== undefined ? idx : null;
-  document.getElementById('leadership-modal-title').textContent = idx !== undefined ? T('modal.leadership.edit') : T('modal.leadership.add');
-  const m = idx !== undefined ? data.leadership[idx] : {};
+function openLeadershipModal(idx, id) {
+  if (idx !== undefined) {
+    const i = rowIndex(data.leadership, idx, id);   // see rowIndex()
+    if (i < 0) { toast('That member is no longer in the list — the table has been refreshed.'); renderLeadershipTable(); return; }
+    editingLeadershipRef = data.leadership[i];
+  } else {
+    editingLeadershipRef = null;
+  }
+  editingLeadershipOrigId = editingLeadershipRef ? editingLeadershipRef.id : null;
+  document.getElementById('leadership-modal-title').textContent = editingLeadershipRef ? T('modal.leadership.edit') : T('modal.leadership.add');
+  const m = editingLeadershipRef || {};
   document.getElementById('ld-id').value        = m.id || '';
   document.getElementById('ld-name-en').value    = m.name_en || '';
   document.getElementById('ld-name-zh').value    = m.name_zh || '';
@@ -3463,7 +3894,9 @@ function closeLeadershipModal() {
 function saveLeadership() {
   const nameEn = document.getElementById('ld-name-en').value.trim();
   const nameZh = document.getElementById('ld-name-zh').value.trim();
-  const id = document.getElementById('ld-id').value.trim() || slugify(nameEn || nameZh) || uid();
+  const id = uniqueId(data.leadership,
+    document.getElementById('ld-id').value.trim() || slugify(nameEn || nameZh) || uid(),
+    editingLeadershipRef);
   const item = {
     id,
     name_en:    nameEn,
@@ -3474,19 +3907,20 @@ function saveLeadership() {
     company_zh: document.getElementById('ld-company-zh').value.trim()
   };
   if (!item.name_en && !item.name_zh) { alert(T('alert.title')); return; }
-  if (editingLeadershipId !== null) data.leadership[editingLeadershipId] = item;
   // New rows go to the top, where staff can see the row they just created
   // without scrolling to the end of the list and wondering if the save failed.
   // Drag it down to its real position from there.
-  else data.leadership.unshift(item);
+  commitEdit(data.leadership, editingLeadershipRef, editingLeadershipOrigId, item, '成员 / member');
   leadershipModalDirty = false;
   persistData(); renderLeadershipTable(); closeLeadershipModal();
   toast(T('toast.leadership.saved'));
 }
 
-function deleteLeadership(idx) {
+function deleteLeadership(idx, id) {
   if (!confirm(T('confirm.del.leadership'))) return;
-  const [item] = data.leadership.splice(idx, 1);
+  const i = rowIndex(data.leadership, idx, id);   // see rowIndex()
+  if (i < 0) { toast('That member is no longer in the list — nothing was deleted.'); renderLeadershipTable(); return; }
+  const [item] = data.leadership.splice(i, 1);
   if (item) recordDelete(item.id);
   persistData(); renderLeadershipTable();
   toast(T('toast.leadership.deleted'));
@@ -3495,7 +3929,7 @@ function deleteLeadership(idx) {
 /* ================================================================
    DIRECTORY CRUD
 ================================================================ */
-let editingDirectoryId = null;
+let editingDirectoryRef = null, editingDirectoryOrigId = null;
 let directoryModalDirty = false;
 
 function renderDirectoryTable() {
@@ -3524,11 +3958,11 @@ function renderDirectoryTable() {
       <td style="font-size:12px;color:var(--muted)">${esc(lang === 'zh' ? (m.category_zh || m.category_en) : (m.category_en || m.category_zh))}</td>
       <td>
         ${q ? '' : `
-          <button class="btn-move" onclick="moveDirectory(${i},-1)" ${i===0?'disabled':''} title="Move up">&#9650;</button>
-          <button class="btn-move" onclick="moveDirectory(${i},1)" ${i===data.directory.length-1?'disabled':''} title="Move down">&#9660;</button>
+          <button class="btn-move" onclick="moveDirectory(${i},-1,${jsArg(m.id)})" ${i===0?'disabled':''} title="Move up">&#9650;</button>
+          <button class="btn-move" onclick="moveDirectory(${i},1,${jsArg(m.id)})" ${i===data.directory.length-1?'disabled':''} title="Move down">&#9660;</button>
         `}
-        <button class="btn-edit" onclick="openDirectoryModal(${i})">${T('btn.edit')}</button>
-        <button class="btn-danger" onclick="deleteDirectory(${i})">${T('btn.delete')}</button>
+        <button class="btn-edit" onclick="openDirectoryModal(${i}, ${jsArg(m.id)})">${T('btn.edit')}</button>
+        <button class="btn-danger" onclick="deleteDirectory(${i}, ${jsArg(m.id)})">${T('btn.delete')}</button>
       </td>
     </tr>`).join('');
   enableRowDrag('directory-rows', () => data.directory, renderDirectoryTable);
@@ -3542,18 +3976,27 @@ function logoLabel(m) {
   return file ? `<span style="color:var(--muted)">${esc(file)}</span>` : '<span style="color:var(--muted)">—</span>';
 }
 
-function moveDirectory(idx, dir) {
+function moveDirectory(idx, dir, id) {
   const list = data.directory;
-  const j = idx + dir;
+  const i = rowIndex(list, idx, id);   // see rowIndex()
+  if (i < 0) { renderDirectoryTable(); return; }
+  const j = i + dir;
   if (j < 0 || j >= list.length) return;
-  [list[idx], list[j]] = [list[j], list[idx]];
+  [list[i], list[j]] = [list[j], list[i]];
   persistData(); renderDirectoryTable();
 }
 
-function openDirectoryModal(idx) {
-  editingDirectoryId = idx !== undefined ? idx : null;
-  document.getElementById('directory-modal-title').textContent = idx !== undefined ? T('modal.directory.edit') : T('modal.directory.add');
-  const m = idx !== undefined ? data.directory[idx] : {};
+function openDirectoryModal(idx, id) {
+  if (idx !== undefined) {
+    const i = rowIndex(data.directory, idx, id);   // see rowIndex()
+    if (i < 0) { toast('That company is no longer in the list — the table has been refreshed.'); renderDirectoryTable(); return; }
+    editingDirectoryRef = data.directory[i];
+  } else {
+    editingDirectoryRef = null;
+  }
+  editingDirectoryOrigId = editingDirectoryRef ? editingDirectoryRef.id : null;
+  document.getElementById('directory-modal-title').textContent = editingDirectoryRef ? T('modal.directory.edit') : T('modal.directory.add');
+  const m = editingDirectoryRef || {};
   document.getElementById('d-id').value           = m.id || '';
   document.getElementById('d-name-en').value      = m.name_en || '';
   document.getElementById('d-name-zh').value      = m.name_zh || '';
@@ -3580,7 +4023,9 @@ function saveDirectory() {
   // The directory page renders the logo and nothing else, so the logo — not
   // the name — is the one required field. Name/category stay optional: they
   // only label the row here in the admin and supply the image alt text.
-  const id = document.getElementById('d-id').value.trim() || slugify(nameEn || nameZh) || uid();
+  const id = uniqueId(data.directory,
+    document.getElementById('d-id').value.trim() || slugify(nameEn || nameZh) || uid(),
+    editingDirectoryRef);
   const item = {
     id,
     name_en:     nameEn,
@@ -3590,16 +4035,18 @@ function saveDirectory() {
     logo
   };
   if (!item.logo) { alert(T('alert.directory.logo')); return; }
-  if (editingDirectoryId !== null) data.directory[editingDirectoryId] = item;
-  else data.directory.unshift(item);  // top of the list, same as Leadership — see saveLeadership
+  // New rows go to the top of the list, same as Leadership — see saveLeadership
+  commitEdit(data.directory, editingDirectoryRef, editingDirectoryOrigId, item, '会员单位 / directory entry');
   directoryModalDirty = false;
   persistData(); renderDirectoryTable(); closeDirectoryModal();
   toast(T('toast.directory.saved'));
 }
 
-function deleteDirectory(idx) {
+function deleteDirectory(idx, id) {
   if (!confirm(T('confirm.del.directory'))) return;
-  const [item] = data.directory.splice(idx, 1);
+  const i = rowIndex(data.directory, idx, id);   // see rowIndex()
+  if (i < 0) { toast('That company is no longer in the list — nothing was deleted.'); renderDirectoryTable(); return; }
+  const [item] = data.directory.splice(i, 1);
   if (item) recordDelete(item.id);
   persistData(); renderDirectoryTable();
   toast(T('toast.directory.deleted'));
@@ -3621,9 +4068,13 @@ function exportData() {
     a.href = url; a.download = name; a.click();
     URL.revokeObjectURL(url);
   });
-  dirty = false;
-  localStorage.setItem(DIRTY_KEY, 'false');
-  updateDirtyIndicator();
+  // Deliberately does NOT clear `dirty`. This only drops copies in the
+  // browser's download folder — the site has not been published, and the edits
+  // are still unpublished. Marking the draft clean here told the next
+  // background syncFromFiles() it had nothing to protect, so it took the
+  // 'replace' path and overwrote every unpublished edit with the older content
+  // from disk, silently. The button reads as a save, so staff pressed it and
+  // lost work; leaving the "unsaved" indicator red is the honest answer.
   toast(T('toast.exported'));
 }
 
@@ -3891,6 +4342,11 @@ async function publishToSite() {
    from git).
 ================================================================ */
 async function syncFromFiles(silent) {
+  // Never swap the lists out from under an open editor. Saves are keyed by
+  // object now so this can no longer corrupt a neighbouring item, but a table
+  // that reshuffles behind the modal is still confusing — and in 'replace'
+  // mode the edit being typed would be silently orphaned. Try again later.
+  if (silent && isEditorModalOpen()) { setTimeout(() => syncFromFiles(true), 30000); return; }
   // localStorage holds the working draft; content/*.json is the published
   // source of truth. How a sync applies it depends on unpublished edits:
   //   - none: pull the published content straight over the top.
@@ -3899,8 +4355,13 @@ async function syncFromFiles(silent) {
   //     is missing (preserving local edits). A stale draft that silently hid
   //     live content is exactly what let a later Publish overwrite 144 posts.
   //   - manual Sync button WITH edits: let the user confirm a full discard.
+  //
+  // Edits typed into the Homepage/Mission/Contact form count as unpublished
+  // even though they haven't reached the draft yet: 'replace' would swap
+  // data.homepage for the published copy, and the next Save would then write
+  // the form's older values straight back over it.
   let mode = 'replace';
-  if (dirty) {
+  if (dirty || homepageFormDirty) {
     if (silent) mode = 'merge';
     else if (!confirm('You have unpublished changes. Syncing replaces them with the latest published content. Discard your unpublished changes?')) return;
   }
@@ -3924,6 +4385,16 @@ async function syncFromFiles(silent) {
     const homepageJson = await homepageRes.json();
     leadershipJson.items = normalizeLeadership(leadershipJson.items);
 
+    // Check AGAIN, now that the fetches have landed. The check at the top of
+    // this function only covers modals that were already open when the sync
+    // started; news.json is half a megabyte, so the usual case is staff
+    // logging in and clicking Edit while it is still downloading — which is
+    // exactly the window in which the lists used to be replaced underneath an
+    // open editor. `dirty` may have flipped in the meantime too, so re-derive
+    // the mode rather than trusting the one decided before the await.
+    if (silent && isEditorModalOpen()) { setTimeout(() => syncFromFiles(true), 30000); return; }
+    if (silent && (dirty || homepageFormDirty)) mode = 'merge';
+
     if (mode === 'merge') {
       // Keep unpublished edits; only recover published items the draft lacks.
       const recovered = [];
@@ -3934,7 +4405,7 @@ async function syncFromFiles(silent) {
       }
       if (!data.homepage) data.homepage = homepageJson; // fill if absent; don't clobber unpublished homepage edits
       if (!data.categories) data.categories = DEFAULT_DATA.categories;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); // dirty stays true — edits remain unpublished
+      writeDraftToStorage(); // dirty stays true — edits remain unpublished
       prunePendingUploads();
       renderAll();
       if (recovered.length) toast('Restored ' + recovered.length + ' live post(s) that were missing from this browser');
@@ -3944,9 +4415,12 @@ async function syncFromFiles(silent) {
       data.leadership = leadershipJson.items || [];
       data.directory = directoryJson.items || [];
       data.homepage = homepageJson;
+      // The user confirmed a full discard (or had nothing unsaved), so the form
+      // must stop guarding its inputs and take the published values.
+      homepageFormDirty = false;
       if (!data.categories) data.categories = DEFAULT_DATA.categories;
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      writeDraftToStorage();
       dirty = false;
       localStorage.setItem(DIRTY_KEY, 'false');
       clearIntentionalDeletes(); // draft now matches disk — reset the delete guard
@@ -4309,6 +4783,10 @@ async function handleHomepageImageUpload(input, fieldId, previewId) {
     localImagePreviews[path] = URL.createObjectURL(file);
     if (fieldEl) fieldEl.value = path;
     if (prevEl) { prevEl.src = previewSrc(path); prevEl.style.display = 'block'; }
+    // Setting .value in code fires no `input` event, so the delegated listener
+    // never sees this — without marking it here, switching tabs would refill
+    // the field from the draft and drop the image that was just uploaded.
+    markHomepageFormDirty();
     markHomepageDirty();
   } catch (e) {
     alert('Upload failed: ' + e.message + (identityUser ? '' : '\n\nIs decap-server running? (npx decap-server)'));
@@ -4608,7 +5086,30 @@ async function handleGalleryImg(input, blockIdx, imgIdx) {
   }
 }
 
+// What a block would take with it if removed — used to decide whether the ×
+// needs to ask, and to say what is about to go.
+function describeBlock(b) {
+  if (!b) return null;
+  if (b.type === 'text') {
+    const text = (stripHtml(b.zh || '') || stripHtml(b.en || '')).replace(/\s+/g, ' ').trim();
+    if (!text) return null;                                   // empty block — nothing to lose
+    return `一段文字（${text.length} 字）：“${text.slice(0, 40)}${text.length > 40 ? '…' : ''}”`;
+  }
+  if (b.type === 'gallery') {
+    const n = (b.images || []).filter(im => im && im.src).length;
+    return n ? `一组图片（${n} 张）` : null;
+  }
+  return b.src ? '一张图片' : null;
+}
+
+// The × sat directly on splice() — one stray click dropped a whole block of
+// body text with no prompt and no undo, while article-level deletes have a
+// Trash to fall back on. Blocks have no such backstop, so ask first. Empty
+// blocks (just added, nothing typed) delete straight away — prompting for
+// those would only train people to dismiss the prompt.
 function removeBlock(i) {
+  const what = describeBlock(currentBlocks[i]);
+  if (what && !confirm(`确定删除这个内容块吗？此操作无法撤销。\n\n将删除：${what}\n\nDelete this content block? This cannot be undone.`)) return;
   currentBlocks.splice(i, 1);
   newsModalDirty = true;
   renderBlocks();
