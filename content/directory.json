@@ -1,52 +1,12 @@
 {
   "items": [
     {
-      "id": "cai-cai-law",
-      "name_en": "Cai & Cai Law Office",
-      "name_zh": "",
-      "category_en": "Legal Services",
-      "category_zh": "法律服务",
-      "logo": "/images/dir-cai.jpg"
-    },
-    {
-      "id": "modern-land-usa",
-      "name_en": "Modern Land USA",
-      "name_zh": "",
-      "category_en": "Real Estate Development",
-      "category_zh": "房地产开发",
-      "logo": "/images/dir-modernland.jpg"
-    },
-    {
-      "id": "isoftstone",
-      "name_en": "iSoftStone",
-      "name_zh": "",
-      "category_en": "Technology & IT Services",
-      "category_zh": "科技与IT服务",
-      "logo": "/images/dir-isoftstone.jpg"
-    },
-    {
-      "id": "sysimmune",
-      "name_en": "SysImmune Inc.",
-      "name_zh": "",
-      "category_en": "Biopharmaceuticals",
-      "category_zh": "生物制药",
-      "logo": "/images/dir-systimmune.jpg"
-    },
-    {
-      "id": "meixin-finance",
-      "name_en": "Meixin Finance",
-      "name_zh": "",
-      "category_en": "Financial Services",
-      "category_zh": "金融服务",
-      "logo": "/images/dir-meixin.jpg"
-    },
-    {
-      "id": "mza-associates",
-      "name_en": "MZA & Associates",
-      "name_zh": "",
-      "category_en": "Consulting",
-      "category_zh": "咨询服务",
-      "logo": "/images/dir-mza.jpg"
+      "id": "工银美国",
+      "name_en": "",
+      "name_zh": "工银美国",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786515285087-ScreenShot_2026-08-12_141308_055.png"
     },
     {
       "id": "create-world",
@@ -65,12 +25,60 @@
       "logo": "/images/dir-sunshine.png"
     },
     {
-      "id": "member1",
-      "name_en": "CCCWA Member",
-      "name_zh": "CCCWA会员",
-      "category_en": "Chamber Member",
-      "category_zh": "商会会员",
-      "logo": "/images/dir-member1.jpg"
+      "id": "isoftstone",
+      "name_en": "iSoftStone",
+      "name_zh": "",
+      "category_en": "Technology & IT Services",
+      "category_zh": "科技与IT服务",
+      "logo": "/images/dir-isoftstone.jpg"
+    },
+    {
+      "id": "meixin-finance",
+      "name_en": "Meixin Finance",
+      "name_zh": "",
+      "category_en": "Financial Services",
+      "category_zh": "金融服务",
+      "logo": "/images/dir-meixin.jpg"
+    },
+    {
+      "id": "kid",
+      "name_en": "",
+      "name_zh": "KID",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786113771163-ScreenShot_2026-08-07_224211_882.png"
+    },
+    {
+      "id": "modern-land-usa",
+      "name_en": "Modern Land USA",
+      "name_zh": "",
+      "category_en": "Real Estate Development",
+      "category_zh": "房地产开发",
+      "logo": "/images/dir-modernland.jpg"
+    },
+    {
+      "id": "sysimmune",
+      "name_en": "SysImmune Inc.",
+      "name_zh": "",
+      "category_en": "Biopharmaceuticals",
+      "category_zh": "生物制药",
+      "logo": "/images/dir-systimmune.jpg"
+    },
+    {
+      "id": "global",
+      "name_en": "",
+      "name_zh": "global",
+      "category_en": "",
+      "category_zh": "",
+      "logo": "/assets/uploads/directory/1786515354645-ScreenShot_2026-08-12_135816_812--.png"
+    },
+    {
+      "id": "mza-associates",
+      "name_en": "MZA & Associates",
+      "name_zh": "",
+      "category_en": "Consulting",
+      "category_zh": "咨询服务",
+      "logo": "/images/dir-mza.jpg"
     },
     {
       "id": "member2",
@@ -81,6 +89,14 @@
       "logo": "/images/dir-member2.jpg"
     },
     {
+      "id": "member1",
+      "name_en": "CCCWA Member",
+      "name_zh": "CCCWA会员",
+      "category_en": "Chamber Member",
+      "category_zh": "商会会员",
+      "logo": "/images/dir-member1.jpg"
+    },
+    {
       "id": "西雅图地产俱乐部",
       "name_en": "",
       "name_zh": "西雅图地产俱乐部",
@@ -89,12 +105,12 @@
       "logo": "/assets/uploads/directory/1786113258510-ScreenShot_2026-08-07_223409_007.png"
     },
     {
-      "id": "kid",
-      "name_en": "",
-      "name_zh": "KID",
-      "category_en": "",
-      "category_zh": "",
-      "logo": "/assets/uploads/directory/1786113771163-ScreenShot_2026-08-07_224211_882.png"
+      "id": "cai-cai-law",
+      "name_en": "Cai & Cai Law Office",
+      "name_zh": "",
+      "category_en": "Legal Services",
+      "category_zh": "法律服务",
+      "logo": "/images/dir-cai.jpg"
     },
     {
       "id": "dil",
@@ -111,14 +127,6 @@
       "category_en": "",
       "category_zh": "",
       "logo": "/assets/uploads/directory/1786114088018-ScreenShot_2026-08-07_224706_512.png"
-    },
-    {
-      "id": "global",
-      "name_en": "",
-      "name_zh": "global",
-      "category_en": "",
-      "category_zh": "",
-      "logo": "/assets/uploads/directory/1786114099021-ScreenShot_2026-08-07_224642_958.png"
     },
     {
       "id": "新居",

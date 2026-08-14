@@ -28,54 +28,9 @@
       "company_zh": ""
     },
     {
-      "id": "global-land",
-      "name_en": "Global Land",
-      "name_zh": "Global Land",
-      "role_en": "Council Member",
-      "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "阳光青少年教育基金会",
+      "id": "isoftstone",
       "name_en": "",
-      "name_zh": "阳光青少年教育基金会",
-      "role_en": "Council Member",
-      "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "软通动力",
-      "name_en": "",
-      "name_zh": "软通动力",
-      "role_en": "",
-      "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "当代绿色置业",
-      "name_en": "",
-      "name_zh": "当代绿色置业",
-      "role_en": "Council Member",
-      "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "百利药业",
-      "name_en": "",
-      "name_zh": "百利药业",
-      "role_en": "Council Member",
-      "role_zh": "理事单位",
-      "company_en": "",
-      "company_zh": ""
-    },
-    {
-      "id": "梅高国际置业",
-      "name_en": "My International",
-      "name_zh": "梅高国际置业",
+      "name_zh": "工银美国",
       "role_en": "Council Member",
       "role_zh": "理事单位",
       "company_en": "",
@@ -100,9 +55,54 @@
       "company_zh": ""
     },
     {
-      "id": "isoftstone",
+      "id": "阳光青少年教育基金会",
       "name_en": "",
-      "name_zh": "工银美国",
+      "name_zh": "阳光青少年教育基金会",
+      "role_en": "Council Member",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "百利药业",
+      "name_en": "",
+      "name_zh": "百利药业",
+      "role_en": "Council Member",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "global-land",
+      "name_en": "Global Land",
+      "name_zh": "Global Land",
+      "role_en": "Council Member",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "软通动力",
+      "name_en": "",
+      "name_zh": "软通动力",
+      "role_en": "",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "当代绿色置业",
+      "name_en": "",
+      "name_zh": "当代绿色置业",
+      "role_en": "Council Member",
+      "role_zh": "理事单位",
+      "company_en": "",
+      "company_zh": ""
+    },
+    {
+      "id": "梅高国际置业",
+      "name_en": "My International",
+      "name_zh": "梅高国际置业",
       "role_en": "Council Member",
       "role_zh": "理事单位",
       "company_en": "",
